@@ -1,16 +1,19 @@
 /**
  * @file src/payload.config.ts
- * @description Master Payload CMS 3.x configuration defining database schemas, admin collections, and auth policies.
+ * @description Master Payload CMS 3.x configuration defining database schemas, PostgreSQL connection, and auth policies.
  * 
  * DESIGN PRINCIPLE:
  * Bundles code-first TypeScript collection definitions:
- * - People (SEC, Faculty Counselors, Operational Leads)
+ * - People (Branch Counsellor, Student Mentors, SEC, Operational Leads, Chapter Executives)
  * - Events (Workshops, Seminars, Competitions)
  * - Achievements (Awards, Hackathon wins)
  * - OrganizationUnits (WIE Affinity Group, EDS Chapter)
  * - Stories (Articles, Post-mortems)
  * - Galleries (Photo Albums)
  * - SiteSettings Global (Announcement Banners & Stats)
+ * 
+ * DATABASE BINDING:
+ * Connects to Neon Serverless PostgreSQL database via `process.env.DATABASE_URI`.
  * 
  * @author IEEE MAIT Webmaster & Open Source Contributors
  * @license MIT
@@ -31,6 +34,9 @@ export const payloadConfig = {
       titleSuffix: '- IEEE MAIT Admin',
     },
   },
+  db: {
+    connectionString: process.env.DATABASE_URI,
+  },
   collections: [
     PeopleCollection,
     EventsCollection,
@@ -42,7 +48,7 @@ export const payloadConfig = {
   globals: [
     SiteSettingsGlobal,
   ],
-  secret: process.env.PAYLOAD_SECRET || 'ieee-mait-secret-development-key',
+  secret: process.env.PAYLOAD_SECRET || 'ieee-mait-secret-development-key-2026',
 };
 
 export default payloadConfig;
