@@ -1,0 +1,64 @@
+import React from 'react';
+import Link from 'next/link';
+
+interface ChapterPanelProps {
+  name: string;
+  slug: string;
+  type: string;
+  description: string;
+  memberCount?: string;
+  eventCount?: string;
+  parentSociety?: string;
+}
+
+export const ChapterPanel: React.FC<ChapterPanelProps> = ({
+  name,
+  slug,
+  type,
+  description,
+  memberCount,
+  eventCount,
+  parentSociety,
+}) => {
+  return (
+    <div className="border border-warm-200 bg-white p-6 sm:p-8 rounded-[2px] flex flex-col justify-between space-y-6">
+      <div>
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <span className="font-mono text-xs uppercase tracking-wider text-ieee-blue font-semibold">
+            {type}
+          </span>
+          {parentSociety && (
+            <span className="font-mono text-[11px] text-warm-300">
+              {parentSociety}
+            </span>
+          )}
+        </div>
+
+        <h3 className="font-serif text-2xl text-ink font-normal mb-3">
+          {name}
+        </h3>
+
+        <p className="text-sm text-warm-400 leading-relaxed line-clamp-3">
+          {description}
+        </p>
+      </div>
+
+      <div className="pt-6 border-t border-warm-200 flex items-center justify-between">
+        <div className="flex items-center gap-4 text-xs font-mono text-warm-400">
+          {memberCount && <span>{memberCount} Members</span>}
+          {eventCount && <span>{eventCount} Events</span>}
+        </div>
+
+        <Link
+          href={`/chapters/${slug}`}
+          className="inline-flex items-center gap-1 text-xs font-semibold text-ieee-blue hover:text-ieee-dark uppercase tracking-wider transition-colors"
+        >
+          <span>Explore Chapter</span>
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </Link>
+      </div>
+    </div>
+  );
+};

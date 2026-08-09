@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ieee-blue: #00629B;
+  --color-ieee-dark: #004975;
+  --color-ieee-light: #007CBD;
+  --color-ieee-subtle: #E8F4F8;
+  
+  --color-ink: #1A1A2E;
+  --color-ink-muted: #2D2D44;
+  
+  --color-mait-warm: #8B2332;
+  --color-mait-subtle: #F9ECEE;
+  
+  --color-warm-100: #F5F5F0;
+  --color-warm-200: #E8E8E3;
+  --color-warm-300: #9B9B8F;
+  --color-warm-400: #6C6C61;
+
+  --font-serif: var(--font-instrument-serif), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), monospace;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #1A1A2E;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .font-serif-heading {
+  font-family: var(--font-instrument-serif), Georgia, serif;
+  letter-spacing: -0.02em;
+}
+
+.bg-grid-pattern {
+  background-image: linear-gradient(rgba(0, 98, 155, 0.04) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 98, 155, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.accent-rule {
+  height: 3px;
+  width: 48px;
+  background-color: #00629B;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
