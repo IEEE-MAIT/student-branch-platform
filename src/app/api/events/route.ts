@@ -1,17 +1,20 @@
 import { NextResponse } from 'next/server';
-import { EVENTS_DATA } from '@/lib/data';
 import { sanitizeText, validateSafeUrl } from '@/lib/security';
 import { recordAuditLog } from '@/lib/auditLog';
-
-let dynamicEventsStore = [...EVENTS_DATA];
+import { prisma } from '@/lib/db';
 
 export async function GET() {
-  return NextResponse.json(dynamicEventsStore, {
-    headers: {
-      'Cache-Control': 'public, max-age=60, s-maxage=120, stale-while-revalidate=300',
-      'X-Content-Type-Options': 'nosniff',
-    },
-  });
+  try {
+    const events = await prisma.event.findMany({ orderBy: { date: 'desc' } });
+    return NextResponse.json(events, {
+      headers: {
+        'Cache-Control': 'public, max-age=60, s-maxage=120, stale-while-revalidate=300',
+        'X-Content-Type-Options': 'nosniff',
+      },
+    });
+  } catch (err) {
+    return NextResponse.json({ error: 'Database error' }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
@@ -31,27 +34,26 @@ export async function POST(request: Request) {
     const sanitizedDate = sanitizeText(body.date || 'OCT 2026', 50);
     const sanitizedVenue = sanitizeText(body.venue || 'MAIT Campus', 100);
     const sanitizedDescription = sanitizeText(body.description || '', 2000);
-    const sanitizedRegistrationLink = body.registrationLink ? validateSafeUrl(body.registrationLink) : undefined;
+    const sanitizedRegistrationLink = body.registrationLink ? validateSafeUrl(body.registrationLink) : null;
     const performedBy = sanitizeText(body.performedBy || 'mait.ieee.sb@gmail.com', 100);
 
-    const newEvent = {
-      id: `evt-${Date.now()}`,
-      title: sanitizedTitle,
-      slug: sanitizedSlug,
-      date: sanitizedDate,
-      venue: sanitizedVenue,
-      unit: sanitizeText(body.unit || 'IEEE MAIT SB', 50) as any,
-      unitSlug: sanitizeText(body.unitSlug || 'sb', 20) as any,
-      category: sanitizeText(body.category || 'Technical Workshop', 50) as any,
-      status: sanitizeText(body.status || 'upcoming', 20) as any,
-      description: sanitizedDescription,
-      registrationLink: sanitizedRegistrationLink || undefined,
-    };
+    const newEvent = await prisma.event.create({
+      data: {
+        title: sanitizedTitle,
+        slug: sanitizedSlug,
+        date: sanitizedDate,
+        venue: sanitizedVenue,
+        unit: sanitizeText(body.unit || 'IEEE MAIT SB', 50),
+        unitSlug: sanitizeText(body.unitSlug || 'sb', 20),
+        category: sanitizeText(body.category || 'Technical Workshop', 50),
+        status: sanitizeText(body.status || 'upcoming', 20),
+        description: sanitizedDescription,
+        registrationLink: sanitizedRegistrationLink,
+      }
+    });
 
-    dynamicEventsStore.unshift(newEvent);
-
-    // Record Audit Log (Who, When, What)
-    recordAuditLog({
+    // Record Audit Log
+    await recordAuditLog({
       performedBy,
       actionType: 'CREATE',
       entityType: 'Event',
@@ -59,8 +61,8 @@ export async function POST(request: Request) {
       changeSummary: `Created event "${sanitizedTitle}" scheduled for ${sanitizedDate} at ${sanitizedVenue}.`,
     });
 
-    return NextResponse.json({ success: true, event: newEvent }, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: 'Malformed request JSON' }, { status: 400 });
+    return NextResponse.json({ success: true, event: { id: newEvent.id, title: newEvent.title } }, { status: 201 });
+  } catch (err) {
+    return NextResponse.json({ error: 'Database mutation failed' }, { status: 500 });
   }
 }

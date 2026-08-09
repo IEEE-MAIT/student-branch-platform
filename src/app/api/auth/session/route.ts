@@ -21,7 +21,7 @@ export async function GET() {
       return NextResponse.json({ authenticated: false, error: 'Token expired or invalid' }, { status: 200 });
     }
 
-    const officersList = payload.role === 'Super Admin' ? getSafeOfficersList() : [];
+    const officersList = payload.role === 'Super Admin' ? await getSafeOfficersList() : [];
 
     return NextResponse.json({
       authenticated: true,

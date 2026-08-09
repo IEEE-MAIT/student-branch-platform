@@ -1,51 +1,78 @@
 import { NextResponse } from 'next/server';
 import { sanitizeText, validateSafeUrl } from '@/lib/security';
+import { prisma } from '@/lib/db';
+import { recordAuditLog } from '@/lib/auditLog';
+import { cookies } from 'next/headers';
+import { verifyJWT } from '@/lib/jwt';
 
-let dynamicSiteSettings = {
-  announcementMessage: 'Membership Drive 2025–26 is officially open! Join 150+ students advancing technology at MAIT.',
-  announcementLinkText: 'Register Now →',
-  announcementLinkHref: '/join',
-  announcementActive: true,
-};
-
-/**
- * GET /api/site-settings
- */
 export async function GET() {
-  return NextResponse.json(dynamicSiteSettings, {
-    headers: {
-      'Cache-Control': 'public, max-age=30, s-maxage=60, stale-while-revalidate=120',
-      'X-Content-Type-Options': 'nosniff',
-    },
-  });
+  try {
+    const settings = await prisma.siteSetting.findUnique({ where: { id: 'global' } });
+    if (settings) {
+      return NextResponse.json(settings, {
+        headers: {
+          'Cache-Control': 'public, max-age=30, s-maxage=60, stale-while-revalidate=120',
+          'X-Content-Type-Options': 'nosniff',
+        },
+      });
+    }
+    return NextResponse.json({}, { status: 404 });
+  } catch (err) {
+    return NextResponse.json({ error: 'Database error' }, { status: 500 });
+  }
 }
 
-/**
- * POST /api/site-settings
- * Hardened REST endpoint for updating site-wide announcement banner text & settings.
- */
 export async function POST(request: Request) {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
+    let performedBy = 'mait.ieee.sb@gmail.com';
+
+    if (token) {
+      const payload = verifyJWT(token);
+      if (payload) performedBy = payload.email;
+    }
+
     const body = await request.json();
+    let updates: any = {};
 
     if (typeof body.announcementMessage === 'string') {
-      dynamicSiteSettings.announcementMessage = sanitizeText(body.announcementMessage, 250);
+      updates.announcementMessage = sanitizeText(body.announcementMessage, 250);
     }
     if (typeof body.announcementLinkText === 'string') {
-      dynamicSiteSettings.announcementLinkText = sanitizeText(body.announcementLinkText, 50);
+      updates.announcementLinkText = sanitizeText(body.announcementLinkText, 50);
     }
     if (typeof body.announcementLinkHref === 'string') {
       const safeUrl = validateSafeUrl(body.announcementLinkHref);
       if (safeUrl) {
-        dynamicSiteSettings.announcementLinkHref = safeUrl;
+        updates.announcementLinkHref = safeUrl;
       }
     }
     if (typeof body.announcementActive === 'boolean') {
-      dynamicSiteSettings.announcementActive = body.announcementActive;
+      updates.announcementActive = body.announcementActive;
     }
 
-    return NextResponse.json({ success: true, settings: dynamicSiteSettings });
-  } catch {
-    return NextResponse.json({ error: 'Malformed request JSON' }, { status: 400 });
+    if (Object.keys(updates).length > 0) {
+      await prisma.siteSetting.upsert({
+        where: { id: 'global' },
+        update: updates,
+        create: {
+          id: 'global',
+          ...updates
+        }
+      });
+
+      await recordAuditLog({
+        performedBy,
+        actionType: 'UPDATE',
+        entityType: 'Site Settings',
+        entityTitle: 'Recruitment Announcement Banner',
+        changeSummary: 'Updated site announcement banner settings via API.',
+      });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    return NextResponse.json({ error: 'Database mutation failed' }, { status: 500 });
   }
 }

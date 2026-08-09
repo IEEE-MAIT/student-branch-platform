@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     const validCategory = Object.values(PersonCategory).includes(category) ? category : PersonCategory.SEC;
     const validRole = ['Executive Officer', 'Webmaster', 'Content Editor'].includes(role) ? role : 'Executive Officer';
 
-    const result = createOfficer(
+    const result = await createOfficer(
       name,
       email,
       password,

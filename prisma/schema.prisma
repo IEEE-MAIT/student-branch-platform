@@ -1,0 +1,74 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URI")
+}
+
+model Event {
+  id               String  @id @default(cuid())
+  title            String
+  slug             String  @unique
+  date             String?
+  time             String?
+  venue            String?
+  unit             String?
+  unitSlug         String?
+  category         String?
+  status           String?
+  description      String?
+  imageSrc         String?
+  registrationLink String?
+
+  @@map("events")
+}
+
+model Achievement {
+  id          String  @id @default(cuid())
+  year        String
+  title       String
+  conferredBy String?
+  unitOrTeam  String?
+  category    String?
+  description String?
+
+  @@map("achievements")
+}
+
+model SiteSetting {
+  id                   String  @id
+  announcementMessage  String?
+  announcementLinkText String?
+  announcementLinkHref String?
+  announcementActive   Boolean @default(true)
+
+  @@map("site_settings")
+}
+
+model Officer {
+  id        String  @id @default(cuid())
+  name      String
+  email     String  @unique
+  password  String
+  role      String?
+  category  String?
+  createdAt String?
+  createdBy String?
+
+  @@map("officers")
+}
+
+model AuditLog {
+  id            String  @id @default(cuid())
+  timestamp     String
+  performedBy   String
+  actionType    String
+  entityType    String
+  entityTitle   String?
+  changeSummary String?
+
+  @@map("audit_logs")
+}

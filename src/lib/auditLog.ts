@@ -1,87 +1,54 @@
 /**
  * @file src/lib/auditLog.ts
- * @description Centralized Audit Log Engine & Change History Ledger for IEEE MAIT.
+ * @description Centralized Audit Log Engine & Change History Ledger using Prisma ORM.
  * 
- * SPECIFICATIONS:
- * Tracks WHO modified WHAT and WHEN for every single content change across the platform:
- * - Events & Workshops
- * - Achievements & Recognitions
- * - Officer Accounts & Role Assignments
- * - Site Announcements & Banner Settings
- * - Stories, Articles, and Photo Galleries
- * 
- * @author IEEE MAIT Webmaster & Security Engineering
+ * @author IEEE MAIT Webmaster
  * @license MIT
  */
+
+import { prisma } from './db';
 
 export interface AuditLogEntry {
   id: string;
   timestamp: string;
   performedBy: string;
-  actionType: 'CREATE' | 'UPDATE' | 'DELETE';
-  entityType: 'Event' | 'Achievement' | 'Person' | 'Chapter' | 'Story' | 'Gallery' | 'Site Settings' | 'Officer User';
-  entityTitle: string;
-  changeSummary: string;
+  actionType: string;
+  entityType: string;
+  entityTitle: string | null;
+  changeSummary: string | null;
 }
 
-// Global in-memory & persistent history store pre-seeded with initial institutional records
-export const AUDIT_LOGS_STORE: AuditLogEntry[] = [
-  {
-    id: 'audit-001',
-    timestamp: '2026-08-09T18:00:00.000Z',
-    performedBy: 'mait.ieee.sb@gmail.com (Super Admin)',
-    actionType: 'CREATE',
-    entityType: 'Event',
-    entityTitle: 'Workshop on Machine Learning Fundamentals',
-    changeSummary: 'Published new technical workshop scheduled for AUG 20, 2026 at Seminar Hall, Block A.',
-  },
-  {
-    id: 'audit-002',
-    timestamp: '2026-08-09T19:30:00.000Z',
-    performedBy: 'mait.ieee.sb@gmail.com (Super Admin)',
-    actionType: 'UPDATE',
-    entityType: 'Site Settings',
-    entityTitle: 'Recruitment Announcement Banner',
-    changeSummary: 'Updated top announcement banner message to: "Membership Drive 2025–26 is officially open!"',
-  },
-  {
-    id: 'audit-003',
-    timestamp: '2026-08-09T20:15:00.000Z',
-    performedBy: 'mait.ieee.sb@gmail.com (Super Admin)',
-    actionType: 'CREATE',
-    entityType: 'Achievement',
-    entityTitle: 'Exemplary Student Branch Award 2025',
-    changeSummary: 'Recorded Exemplary Student Branch award conferred by IEEE Delhi Section.',
-  },
-];
-
-/**
- * Records a new change entry in the site-wide history ledger.
- */
-export function recordAuditLog(entry: {
+export async function recordAuditLog(entry: {
   performedBy: string;
   actionType: 'CREATE' | 'UPDATE' | 'DELETE';
-  entityType: 'Event' | 'Achievement' | 'Person' | 'Chapter' | 'Story' | 'Gallery' | 'Site Settings' | 'Officer User';
+  entityType: string;
   entityTitle: string;
   changeSummary: string;
-}): AuditLogEntry {
-  const newLog: AuditLogEntry = {
-    id: `audit-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-    timestamp: new Date().toISOString(),
-    performedBy: entry.performedBy || 'System Admin',
-    actionType: entry.actionType,
-    entityType: entry.entityType,
-    entityTitle: entry.entityTitle,
-    changeSummary: entry.changeSummary,
-  };
-
-  AUDIT_LOGS_STORE.unshift(newLog); // Prepend so newest changes appear first
-  return newLog;
+}) {
+  const timestamp = new Date().toISOString();
+  
+  try {
+    await prisma.auditLog.create({
+      data: {
+        timestamp,
+        performedBy: entry.performedBy || 'System Admin',
+        actionType: entry.actionType,
+        entityType: entry.entityType,
+        entityTitle: entry.entityTitle,
+        changeSummary: entry.changeSummary,
+      }
+    });
+  } catch (e) {
+    console.error('Failed to write audit log to DB', e);
+  }
 }
 
-/**
- * Returns complete change history logs.
- */
-export function getAuditLogs(): AuditLogEntry[] {
-  return AUDIT_LOGS_STORE;
+export async function getAuditLogs(): Promise<AuditLogEntry[]> {
+  try {
+    const logs = await prisma.auditLog.findMany({ orderBy: { timestamp: 'desc' } });
+    return logs;
+  } catch (e) {
+    console.error('Failed to fetch audit logs from DB', e);
+    return [];
+  }
 }
