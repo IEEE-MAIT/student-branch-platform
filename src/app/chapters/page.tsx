@@ -1,18 +1,28 @@
+/**
+ * @file src/app/chapters/page.tsx
+ * @description Chapters & Affinity Groups (Server Component) fetching dynamic records from Prisma DB.
+ * 
+ * @author IEEE MAIT Webmaster
+ * @license MIT
+ */
+
 import React from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { ChapterPanel } from '@/components/content/ChapterPanel';
-import { CHAPTERS_DATA } from '@/lib/data';
+import { getDynamicChapters } from '@/lib/api';
 
 export const metadata = {
   title: 'Chapters & Affinity Groups | IEEE MAIT Student Branch',
   description: 'Explore active IEEE MAIT chapters including WIE Affinity Group and IEEE EDS Chapter.',
 };
 
-export default function ChaptersPage() {
-  const chaptersList = Object.values(CHAPTERS_DATA);
+export const revalidate = 60; // ISR Cache
+
+export default async function ChaptersPage() {
+  const chaptersList = await getDynamicChapters();
 
   return (
     <>
@@ -32,13 +42,18 @@ export default function ChaptersPage() {
                 key={ch.id}
                 name={ch.name}
                 slug={ch.slug}
-                type={ch.type}
-                parentSociety={ch.parentSociety}
-                description={ch.description}
+                type={ch.type as any}
+                parentSociety={ch.parentSociety || undefined}
+                description={ch.description || undefined}
                 memberCount={ch.memberCount}
                 eventCount={ch.eventCount}
               />
             ))}
+            {chaptersList.length === 0 && (
+              <div className="col-span-full p-8 text-center text-sm font-mono text-warm-400 border border-warm-200 bg-warm-50 rounded-[2px]">
+                No chapters registered yet.
+              </div>
+            )}
           </div>
         </Container>
       </main>

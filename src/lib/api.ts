@@ -58,16 +58,42 @@ export async function getDynamicAchievements(): Promise<any[]> {
   return [];
 }
 
-export async function getDynamicChapterBySlug(slug: string): Promise<ChapterItem | null> {
-  return CHAPTERS_DATA[slug] || null;
+export async function getDynamicChapterBySlug(slug: string) {
+  if (typeof window !== 'undefined') return null;
+  return await prisma.chapter.findUnique({ where: { slug } });
 }
 
-export async function getDynamicStoryBySlug(slug: string): Promise<StoryArticle | null> {
-  return STORIES_DATA[slug] || null;
+export async function getDynamicStoryBySlug(slug: string) {
+  if (typeof window !== 'undefined') return null;
+  return await prisma.story.findUnique({ where: { slug } });
 }
 
-export async function getDynamicGalleryAlbumBySlug(slug: string): Promise<GalleryAlbum | null> {
-  return GALLERY_ALBUMS_DATA[slug] || null;
+export async function getDynamicGalleryAlbumBySlug(slug: string) {
+  if (typeof window !== 'undefined') return null;
+  return await prisma.gallery.findUnique({ 
+    where: { slug },
+    include: { photos: true } 
+  });
+}
+
+export async function getDynamicStories() {
+  if (typeof window !== 'undefined') return [];
+  return await prisma.story.findMany({ orderBy: { date: 'desc' } });
+}
+
+export async function getDynamicGalleries() {
+  if (typeof window !== 'undefined') return [];
+  return await prisma.gallery.findMany({ orderBy: { date: 'desc' } });
+}
+
+export async function getDynamicChapters() {
+  if (typeof window !== 'undefined') return [];
+  return await prisma.chapter.findMany();
+}
+
+export async function getDynamicPeople() {
+  if (typeof window !== 'undefined') return [];
+  return await prisma.person.findMany({ orderBy: { hierarchy: 'asc' } });
 }
 
 export async function getDynamicSiteSettings() {

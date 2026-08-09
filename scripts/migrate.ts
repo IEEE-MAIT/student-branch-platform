@@ -101,6 +101,86 @@ async function migrate() {
       );
     `);
 
+    console.log('Creating chapters table...');
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS chapters (
+        "id" TEXT NOT NULL,
+        "name" TEXT NOT NULL,
+        "slug" TEXT NOT NULL,
+        "type" TEXT NOT NULL,
+        "parentSociety" TEXT,
+        "establishedYear" TEXT,
+        "description" TEXT,
+        "mission" TEXT,
+        "leaderName" TEXT,
+        "leaderRole" TEXT,
+        "memberCount" INTEGER NOT NULL DEFAULT 0,
+        "eventCount" INTEGER NOT NULL DEFAULT 0,
+        CONSTRAINT "chapters_pkey" PRIMARY KEY ("id")
+      );
+    `);
+    await client.query(`CREATE UNIQUE INDEX IF NOT EXISTS "chapters_slug_key" ON chapters("slug");`);
+
+    console.log('Creating stories table...');
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS stories (
+        "id" TEXT NOT NULL,
+        "title" TEXT NOT NULL,
+        "slug" TEXT NOT NULL,
+        "date" TEXT NOT NULL,
+        "author" TEXT NOT NULL,
+        "category" TEXT NOT NULL,
+        "excerpt" TEXT NOT NULL,
+        "contentHtml" TEXT NOT NULL,
+        "imageUrl" TEXT,
+        CONSTRAINT "stories_pkey" PRIMARY KEY ("id")
+      );
+    `);
+    await client.query(`CREATE UNIQUE INDEX IF NOT EXISTS "stories_slug_key" ON stories("slug");`);
+
+    console.log('Creating galleries table...');
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS galleries (
+        "id" TEXT NOT NULL,
+        "title" TEXT NOT NULL,
+        "slug" TEXT NOT NULL,
+        "date" TEXT NOT NULL,
+        "category" TEXT NOT NULL,
+        "coverImage" TEXT NOT NULL,
+        "imageCount" INTEGER NOT NULL DEFAULT 0,
+        "description" TEXT,
+        CONSTRAINT "galleries_pkey" PRIMARY KEY ("id")
+      );
+    `);
+    await client.query(`CREATE UNIQUE INDEX IF NOT EXISTS "galleries_slug_key" ON galleries("slug");`);
+
+    console.log('Creating gallery_photos table...');
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS gallery_photos (
+        "id" TEXT NOT NULL,
+        "galleryId" TEXT NOT NULL,
+        "caption" TEXT NOT NULL,
+        "url" TEXT,
+        CONSTRAINT "gallery_photos_pkey" PRIMARY KEY ("id"),
+        CONSTRAINT "gallery_photos_galleryId_fkey" FOREIGN KEY ("galleryId") REFERENCES galleries("id") ON DELETE CASCADE ON UPDATE CASCADE
+      );
+    `);
+
+    console.log('Creating people table...');
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS people (
+        "id" TEXT NOT NULL,
+        "name" TEXT NOT NULL,
+        "role" TEXT NOT NULL,
+        "department" TEXT,
+        "academicYear" TEXT,
+        "hierarchy" TEXT NOT NULL,
+        "category" TEXT,
+        "imageUrl" TEXT,
+        CONSTRAINT "people_pkey" PRIMARY KEY ("id")
+      );
+    `);
+
     console.log('✅ Tables created successfully!');
   } catch (error) {
     console.error('Error during migration:', error);

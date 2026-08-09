@@ -1,19 +1,29 @@
+/**
+ * @file src/app/stories/[slug]/page.tsx
+ * @description Individual story article page fetching dynamically from DB.
+ * 
+ * @author IEEE MAIT Webmaster
+ * @license MIT
+ */
+
 import React from 'react';
 import { notFound } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { Badge } from '@/components/ui/Badge';
-import { STORIES_DATA } from '@/lib/data';
+import { getDynamicStoryBySlug } from '@/lib/api';
 import Link from 'next/link';
 
 interface StoryPageProps {
   params: Promise<{ slug: string }>;
 }
 
+export const revalidate = 60; // ISR Cache
+
 export async function generateMetadata({ params }: StoryPageProps) {
   const resolvedParams = await params;
-  const story = STORIES_DATA[resolvedParams.slug];
+  const story = await getDynamicStoryBySlug(resolvedParams.slug);
   if (!story) return { title: 'Story Not Found — IEEE MAIT' };
 
   return {
@@ -24,7 +34,7 @@ export async function generateMetadata({ params }: StoryPageProps) {
 
 export default async function StoryDetailPage({ params }: StoryPageProps) {
   const resolvedParams = await params;
-  const story = STORIES_DATA[resolvedParams.slug];
+  const story = await getDynamicStoryBySlug(resolvedParams.slug);
 
   if (!story) {
     notFound();
@@ -44,8 +54,7 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
           </Link>
 
           <div className="flex items-center gap-2 mb-4">
-            <Badge variant="ieee">{story.type}</Badge>
-            <Badge variant="neutral">{story.unit}</Badge>
+            <Badge variant="ieee">{story.category}</Badge>
           </div>
 
           <h1 className="font-serif text-3xl sm:text-5xl text-ink font-normal leading-tight mb-4">
@@ -54,19 +63,15 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
 
           <div className="flex items-center justify-between border-y border-warm-200 py-3 mb-8 text-xs font-mono text-warm-400">
             <div>
-              By <span className="text-ink font-semibold">{story.author}</span> ({story.authorRole})
+              By <span className="text-ink font-semibold">{story.author}</span>
             </div>
             <div>
-              {story.publishedDate} · {story.readingTime}
+              {story.date}
             </div>
           </div>
 
           {/* Article Body Content */}
-          <div className="space-y-6 text-base text-ink-muted leading-relaxed font-sans">
-            {story.content.map((paragraph, idx) => (
-              <p key={idx}>{paragraph}</p>
-            ))}
-          </div>
+          <div className="space-y-6 text-base text-ink-muted leading-relaxed font-sans" dangerouslySetInnerHTML={{ __html: story.contentHtml }} />
 
           {/* Back Footer */}
           <div className="mt-12 pt-8 border-t border-warm-200 flex justify-between items-center">

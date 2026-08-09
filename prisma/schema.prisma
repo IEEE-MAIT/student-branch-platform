@@ -72,3 +72,71 @@ model AuditLog {
 
   @@map("audit_logs")
 }
+
+model Chapter {
+  id              String  @id @default(cuid())
+  name            String
+  slug            String  @unique
+  type            String
+  parentSociety   String?
+  establishedYear String?
+  description     String?
+  mission         String?
+  leaderName      String?
+  leaderRole      String?
+  memberCount     Int     @default(0)
+  eventCount      Int     @default(0)
+
+  @@map("chapters")
+}
+
+model Story {
+  id          String  @id @default(cuid())
+  title       String
+  slug        String  @unique
+  date        String
+  author      String
+  category    String
+  excerpt     String
+  contentHtml String
+  imageUrl    String?
+
+  @@map("stories")
+}
+
+model Gallery {
+  id          String  @id @default(cuid())
+  title       String
+  slug        String  @unique
+  date        String
+  category    String
+  coverImage  String
+  imageCount  Int     @default(0)
+  description String?
+  photos      GalleryPhoto[]
+
+  @@map("galleries")
+}
+
+model GalleryPhoto {
+  id        String  @id @default(cuid())
+  galleryId String
+  caption   String
+  url       String?
+  gallery   Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+
+  @@map("gallery_photos")
+}
+
+model Person {
+  id           String  @id @default(cuid())
+  name         String
+  role         String
+  department   String?
+  academicYear String?
+  hierarchy    String
+  category     String?
+  imageUrl     String?
+
+  @@map("people")
+}

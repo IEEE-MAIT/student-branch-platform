@@ -6,32 +6,39 @@ import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Button } from '@/components/ui/Button';
 import { EventPreview } from '@/components/content/EventPreview';
-import { CHAPTERS_DATA, EVENTS_DATA } from '@/lib/data';
+import { getDynamicChapterBySlug } from '@/lib/api';
 
 interface ChapterPageProps {
   params: Promise<{ slug: string }>;
 }
 
+export const revalidate = 60; // ISR Cache
+
 export async function generateMetadata({ params }: ChapterPageProps) {
   const resolvedParams = await params;
-  const chapter = CHAPTERS_DATA[resolvedParams.slug];
+  const chapter = await getDynamicChapterBySlug(resolvedParams.slug);
   if (!chapter) return { title: 'Chapter Not Found — IEEE MAIT' };
 
   return {
     title: `${chapter.name} | IEEE MAIT Student Branch`,
-    description: chapter.description,
+    description: chapter.description || `IEEE MAIT ${chapter.name}`,
   };
 }
 
 export default async function ChapterDetailPage({ params }: ChapterPageProps) {
   const resolvedParams = await params;
-  const chapter = CHAPTERS_DATA[resolvedParams.slug];
+  const chapter = await getDynamicChapterBySlug(resolvedParams.slug);
 
   if (!chapter) {
     notFound();
   }
 
-  const chapterEvents = EVENTS_DATA.filter(e => e.unitSlug === chapter.slug);
+  // To fetch chapter specific events dynamically we would need an API call.
+  // For now we'll just fetch all events and filter them on the server.
+  // Wait, I can just use getDynamicEvents. I need to import it.
+  const { getDynamicEvents } = await import('@/lib/api');
+  const allEvents = await getDynamicEvents();
+  const chapterEvents = allEvents.filter((e: any) => e.unitSlug === chapter.slug);
 
   return (
     <>

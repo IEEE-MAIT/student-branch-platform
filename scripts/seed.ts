@@ -19,7 +19,7 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URI });
 const adapter = new PrismaNeon(pool);
 const prisma = new PrismaClient({ adapter });
 
-import { EVENTS_DATA, ACHIEVEMENTS_DATA } from '../src/lib/data';
+import { EVENTS_DATA, ACHIEVEMENTS_DATA, CHAPTERS_DATA, STORIES_DATA, GALLERY_ALBUMS_DATA } from '../src/lib/data';
 import { OFFICERS_STORE } from '../src/lib/officers';
 
 async function seed() {
@@ -100,6 +100,97 @@ async function seed() {
         announcementActive: true,
       }
     });
+
+    console.log('Seeding Chapters...');
+    const chaptersArray = Object.values(CHAPTERS_DATA);
+    for (const chap of chaptersArray) {
+      await prisma.chapter.upsert({
+        where: { slug: chap.slug },
+        update: {},
+        create: {
+          id: chap.id,
+          name: chap.name,
+          slug: chap.slug,
+          type: chap.type,
+          parentSociety: chap.parentSociety,
+          establishedYear: chap.establishedYear,
+          description: chap.description,
+          mission: (chap as any).mission || null,
+          leaderName: (chap as any).leaderName || null,
+          leaderRole: (chap as any).leaderRole || null,
+          memberCount: parseInt(String(chap.memberCount).replace(/\D/g, ''), 10) || 0,
+          eventCount: parseInt(String(chap.eventCount).replace(/\D/g, ''), 10) || 0
+        }
+      });
+    }
+
+    console.log('Seeding Stories...');
+    const storiesArray = Object.values(STORIES_DATA);
+    for (const story of storiesArray) {
+      await prisma.story.upsert({
+        where: { slug: story.slug },
+        update: {},
+        create: {
+          id: story.id,
+          title: story.title,
+          slug: story.slug,
+          date: story.publishedDate,
+          author: story.author,
+          category: story.type,
+          excerpt: story.excerpt,
+          contentHtml: story.content.map((p: string) => `<p>${p}</p>`).join(''),
+          imageUrl: null
+        }
+      });
+    }
+
+    console.log('Seeding Galleries & Photos...');
+    const galleriesArray = Object.values(GALLERY_ALBUMS_DATA);
+    for (const gal of galleriesArray) {
+      await prisma.gallery.upsert({
+        where: { slug: gal.slug },
+        update: {},
+        create: {
+          id: gal.id,
+          title: gal.title,
+          slug: gal.slug,
+          date: gal.date,
+          category: gal.unit,
+          coverImage: gal.coverUrl || (gal.photos && gal.photos.length > 0 ? gal.photos[0].url : ''),
+          imageCount: gal.photoCount,
+          description: gal.description
+        }
+      });
+      // Seed photos for this gallery
+      for (const photo of gal.photos) {
+        await prisma.galleryPhoto.upsert({
+          where: { id: photo.id },
+          update: {},
+          create: {
+            id: photo.id,
+            galleryId: gal.id,
+            caption: photo.caption,
+            url: photo.url || null
+          }
+        });
+      }
+    }
+
+    console.log('Seeding People...');
+    // The previous people data was completely hardcoded in the HTML! 
+    // We will seed the basic structure here based on the HTML.
+    const peopleSeed = [
+      { id: '1', name: 'Dr. Faculty Counselor', role: 'Branch Counsellor', department: 'Department of Electronics & Communication Engineering', academicYear: '2025–26', hierarchy: 'mentor', category: 'Counsellor' },
+      { id: '2', name: 'Chairperson Name', role: 'Chairperson', department: '3rd Year, CSE', academicYear: '2025–26', hierarchy: 'featured', category: 'SEC' },
+      { id: '3', name: 'Webmaster Lead', role: 'Webmaster', department: '3rd Year, CSE', academicYear: '2025–26', hierarchy: 'compact', category: 'Web' }
+    ];
+    for (const person of peopleSeed) {
+      await prisma.person.upsert({
+        where: { id: person.id },
+        update: {},
+        create: person
+      });
+    }
 
     console.log('✅ Database successfully seeded with Prisma!');
   } catch (error) {
