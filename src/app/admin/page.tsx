@@ -2,59 +2,160 @@
 
 /**
  * @file src/app/admin/page.tsx
- * @description Interactive Officer Authentication & Administrative Portal for IEEE MAIT.
+ * @description Secure JWT-Authenticated Officer Portal & Super Admin Management Dashboard for IEEE MAIT.
  * 
- * FEATURES:
- * - Admin authentication form (Email & Password login).
- * - Protected governance cards (only visible after officer authentication).
- * - Session token state management with instant Logout controls.
- * - Dynamic collection tools and Neon PostgreSQL connection telemetry.
+ * SECURITY SPECIFICATIONS:
+ * - JWT Cookie Session Verification via `/api/auth/session`.
+ * - Default Super Admin Account: `mait.ieee.sb@gmail.com` / `Admin@2026`.
+ * - Super Admin Officer Creation Form & Officer Directory Table (`/api/auth/create-officer`).
  * 
- * @author IEEE MAIT Webmaster & Open Source Contributors
+ * @author IEEE MAIT Webmaster & Security Engineering
  * @license MIT
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { BRANCH_STATS } from '@/lib/data';
+import { PersonCategory } from '@/lib/data';
+
+interface OfficerInfo {
+  userId?: string;
+  id?: string;
+  name: string;
+  email: string;
+  role: string;
+  category: string;
+  createdAt?: string;
+  createdBy?: string;
+}
 
 export default function AdminDashboardPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [currentOfficer, setCurrentOfficer] = useState<OfficerInfo | null>(null);
+  const [officersList, setOfficersList] = useState<OfficerInfo[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  // Login Form State
   const [email, setEmail] = useState<string>('mait.ieee.sb@gmail.com');
   const [password, setPassword] = useState<string>('');
   const [loginError, setLoginError] = useState<string>('');
-  const [activeOfficer, setActiveOfficer] = useState<string>('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  // Officer Creation Form State (Super Admin Only)
+  const [newOfficerName, setNewOfficerName] = useState<string>('');
+  const [newOfficerEmail, setNewOfficerEmail] = useState<string>('');
+  const [newOfficerPassword, setNewOfficerPassword] = useState<string>('Officer@2026');
+  const [newOfficerRole, setNewOfficerRole] = useState<'Executive Officer' | 'Webmaster' | 'Content Editor'>('Executive Officer');
+  const [newOfficerCategory, setNewOfficerCategory] = useState<PersonCategory>(PersonCategory.SEC);
+  const [createMsg, setCreateMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Check active JWT session on mount
+  useEffect(() => {
+    fetch('/api/auth/session')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.officer) {
+          setIsAuthenticated(true);
+          setCurrentOfficer(data.officer);
+          if (data.officersList) setOfficersList(data.officersList);
+        } else {
+          setIsAuthenticated(false);
+          setCurrentOfficer(null);
+        }
+      })
+      .catch(() => {
+        setIsAuthenticated(false);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
 
-    if (!email || !password) {
-      setLoginError('Please enter both admin email and password.');
-      return;
-    }
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (password.length < 6) {
-      setLoginError('Password must be at least 6 characters.');
-      return;
-    }
+      const data = await res.json();
+      if (!res.ok) {
+        setLoginError(data.error || 'Authentication failed.');
+        return;
+      }
 
-    // Authenticate Officer Session
-    setIsAuthenticated(true);
-    setActiveOfficer(email);
-    setPassword('');
+      setIsAuthenticated(true);
+      setCurrentOfficer(data.officer);
+      setPassword('');
+
+      // Refresh session data
+      const sessionRes = await fetch('/api/auth/session');
+      const sessionData = await sessionRes.json();
+      if (sessionData.officersList) setOfficersList(sessionData.officersList);
+    } catch {
+      setLoginError('Server network connection error.');
+    }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
     setIsAuthenticated(false);
-    setActiveOfficer('');
+    setCurrentOfficer(null);
+    setOfficersList([]);
     setPassword('');
   };
+
+  const handleCreateOfficer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreateMsg(null);
+
+    try {
+      const res = await fetch('/api/auth/create-officer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newOfficerName,
+          email: newOfficerEmail,
+          password: newOfficerPassword,
+          role: newOfficerRole,
+          category: newOfficerCategory,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setCreateMsg({ type: 'error', text: data.error || 'Failed to create officer.' });
+        return;
+      }
+
+      setCreateMsg({ type: 'success', text: `Officer "${data.officer.name}" created successfully!` });
+      setNewOfficerName('');
+      setNewOfficerEmail('');
+
+      // Refresh officers list
+      const sessionRes = await fetch('/api/auth/session');
+      const sessionData = await sessionRes.json();
+      if (sessionData.officersList) setOfficersList(sessionData.officersList);
+    } catch {
+      setCreateMsg({ type: 'error', text: 'Server network error creating officer.' });
+    }
+  };
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <main className="py-24 text-center font-mono text-sm text-warm-400">
+          Loading JWT Authentication Session...
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
@@ -66,35 +167,35 @@ export default function AdminDashboardPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-warm-200 pb-6 mb-12">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <Badge variant="ieee">IEEE MAIT Admin</Badge>
+                <Badge variant="ieee">IEEE MAIT Security</Badge>
                 <Badge variant={isAuthenticated ? 'ieee' : 'neutral'}>
-                  {isAuthenticated ? 'Authenticated Session' : 'Locked Portal'}
+                  {isAuthenticated ? `JWT Session: ${currentOfficer?.role}` : 'JWT Protected'}
                 </Badge>
               </div>
               <h1 className="font-serif text-3xl sm:text-4xl text-ink font-normal">
-                Officer Authentication & Governance Portal
+                Officer Authentication & Role Management
               </h1>
             </div>
 
             <div className="bg-warm-100/80 border border-warm-200 px-4 py-2 rounded-[2px] font-mono text-xs flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="text-ink font-semibold">Neon PostgreSQL:</span>
-              <span className="text-emerald-700 font-bold">Connected ✓</span>
+              <span className="text-ink font-semibold">HMAC-SHA256 JWT:</span>
+              <span className="text-emerald-700 font-bold">Active ✓</span>
             </div>
           </div>
 
-          {/* Conditional View: Login Form vs Authenticated Dashboard */}
+          {/* Conditional View: Login vs Authenticated Portal */}
           {!isAuthenticated ? (
             <div className="max-w-md mx-auto my-8 border border-warm-200 bg-white p-8 rounded-[2px] shadow-sm space-y-6">
               <div className="space-y-2 border-b border-warm-200 pb-4">
                 <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-wider block">
-                  Officer Authentication
+                  JWT Security Authentication
                 </span>
                 <h3 className="font-serif text-2xl text-ink font-normal">
                   Log In to Admin Portal
                 </h3>
                 <p className="text-xs text-warm-400 font-sans">
-                  Enter your branch officer credentials to access collection editing and audit management tools.
+                  Enter your officer credentials to issue a secure HttpOnly JWT session token.
                 </p>
               </div>
 
@@ -114,7 +215,7 @@ export default function AdminDashboardPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="mait.ieee.sb@gmail.com"
-                    className="w-full px-3 py-2 border border-warm-300 rounded-[2px] focus:outline-none focus:border-ieee-blue text-sm"
+                    className="w-full px-3 py-2 border border-warm-300 rounded-[2px] focus:outline-none focus:border-ieee-blue text-sm font-mono"
                     required
                   />
                 </div>
@@ -127,8 +228,8 @@ export default function AdminDashboardPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••••••"
-                    className="w-full px-3 py-2 border border-warm-300 rounded-[2px] focus:outline-none focus:border-ieee-blue text-sm"
+                    placeholder="Admin@2026"
+                    className="w-full px-3 py-2 border border-warm-300 rounded-[2px] focus:outline-none focus:border-ieee-blue text-sm font-mono"
                     required
                   />
                 </div>
@@ -138,24 +239,24 @@ export default function AdminDashboardPage() {
                     type="submit"
                     className="w-full py-3 bg-ieee-blue text-white font-mono text-xs font-bold rounded-[2px] hover:bg-ieee-dark transition-colors uppercase tracking-wider"
                   >
-                    Authenticate Session →
+                    Authenticate JWT Session →
                   </button>
                 </div>
               </form>
 
               <div className="pt-4 border-t border-warm-200 text-center font-mono text-[11px] text-warm-400">
-                Authorized Executive Officers & Webmasters Only
+                Default Super Admin: <code className="text-ieee-blue">mait.ieee.sb@gmail.com</code> / <code className="text-ieee-blue">Admin@2026</code>
               </div>
             </div>
           ) : (
             <div className="space-y-12">
-              {/* Authenticated Officer Session Bar */}
+              {/* Authenticated Session Header */}
               <div className="bg-ieee-subtle border border-ieee-blue/30 p-4 rounded-[2px] flex flex-wrap items-center justify-between gap-4 font-mono text-xs">
                 <div className="flex items-center gap-2 text-ieee-blue">
-                  <span className="font-bold">Active Officer Session:</span>
-                  <span className="underline font-semibold">{activeOfficer}</span>
+                  <span className="font-bold">Logged In Officer:</span>
+                  <span className="underline font-semibold">{currentOfficer?.email}</span>
                   <span className="bg-ieee-blue text-white px-2 py-0.5 text-[10px] uppercase font-bold rounded-[2px]">
-                    Super Admin
+                    {currentOfficer?.role}
                   </span>
                 </div>
 
@@ -163,9 +264,150 @@ export default function AdminDashboardPage() {
                   onClick={handleLogout}
                   className="px-3 py-1 bg-white border border-warm-300 text-ink hover:text-red-700 hover:border-red-300 transition-colors rounded-[2px]"
                 >
-                  🔒 Terminate Session (Logout)
+                  🔒 Clear JWT Cookie (Logout)
                 </button>
               </div>
+
+              {/* SUPER ADMIN OFFICER REGISTRATION FORM */}
+              {currentOfficer?.role === 'Super Admin' && (
+                <div className="border border-warm-200 bg-warm-100/40 p-6 rounded-[2px] space-y-6">
+                  <div className="border-b border-warm-200 pb-3">
+                    <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-wider block">
+                      Super Admin Authority
+                    </span>
+                    <h3 className="font-serif text-2xl text-ink font-normal">
+                      Register New Branch Officer
+                    </h3>
+                    <p className="text-xs text-warm-400 font-sans mt-1">
+                      Super Admin permission granted to add executive committee officers, webmasters, and content editors to the database.
+                    </p>
+                  </div>
+
+                  {createMsg && (
+                    <div
+                      className={`p-3 text-xs font-mono rounded-[2px] ${
+                        createMsg.type === 'success'
+                          ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+                          : 'bg-red-50 border border-red-200 text-red-700'
+                      }`}
+                    >
+                      {createMsg.type === 'success' ? '✓ ' : '⚠️ '}
+                      {createMsg.text}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleCreateOfficer} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 font-sans text-xs">
+                    <div className="space-y-1">
+                      <label className="font-mono text-ink font-semibold block uppercase">Officer Full Name</label>
+                      <input
+                        type="text"
+                        value={newOfficerName}
+                        onChange={(e) => setNewOfficerName(e.target.value)}
+                        placeholder="e.g. Rahul Sharma"
+                        className="w-full px-3 py-2 bg-white border border-warm-300 rounded-[2px] focus:outline-none focus:border-ieee-blue"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-mono text-ink font-semibold block uppercase">Officer Email</label>
+                      <input
+                        type="email"
+                        value={newOfficerEmail}
+                        onChange={(e) => setNewOfficerEmail(e.target.value)}
+                        placeholder="officer@mait.ac.in"
+                        className="w-full px-3 py-2 bg-white border border-warm-300 rounded-[2px] focus:outline-none focus:border-ieee-blue font-mono"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-mono text-ink font-semibold block uppercase">Temporary Password</label>
+                      <input
+                        type="text"
+                        value={newOfficerPassword}
+                        onChange={(e) => setNewOfficerPassword(e.target.value)}
+                        className="w-full px-3 py-2 bg-white border border-warm-300 rounded-[2px] focus:outline-none focus:border-ieee-blue font-mono"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-mono text-ink font-semibold block uppercase">Assigned Role</label>
+                      <select
+                        value={newOfficerRole}
+                        onChange={(e) => setNewOfficerRole(e.target.value as any)}
+                        className="w-full px-3 py-2 bg-white border border-warm-300 rounded-[2px] focus:outline-none focus:border-ieee-blue font-mono"
+                      >
+                        <option value="Executive Officer">Executive Officer</option>
+                        <option value="Webmaster">Webmaster</option>
+                        <option value="Content Editor">Content Editor</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1 sm:col-span-2">
+                      <label className="font-mono text-ink font-semibold block uppercase">Official Category</label>
+                      <select
+                        value={newOfficerCategory}
+                        onChange={(e) => setNewOfficerCategory(e.target.value as any)}
+                        className="w-full px-3 py-2 bg-white border border-warm-300 rounded-[2px] focus:outline-none focus:border-ieee-blue font-mono"
+                      >
+                        {Object.values(PersonCategory).map((cat) => (
+                          <option key={cat} value={cat}>
+                            {cat}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="sm:col-span-2 lg:col-span-3 pt-2">
+                      <button
+                        type="submit"
+                        className="px-6 py-2.5 bg-ieee-blue text-white font-mono text-xs font-bold rounded-[2px] hover:bg-ieee-dark transition-colors uppercase tracking-wider"
+                      >
+                        + Register Officer in Database
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              {/* ACTIVE OFFICERS DIRECTORY TABLE */}
+              {officersList.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="font-serif text-2xl text-ink font-normal border-b border-warm-200 pb-2">
+                    Registered Branch Officers Directory ({officersList.length})
+                  </h3>
+                  <div className="border border-warm-200 rounded-[2px] bg-white overflow-x-auto">
+                    <table className="w-full text-left font-sans text-xs">
+                      <thead className="bg-warm-100/70 border-b border-warm-200 font-mono text-warm-400 uppercase text-[11px]">
+                        <tr>
+                          <th className="p-3">Name</th>
+                          <th className="p-3">Email</th>
+                          <th className="p-3">Role</th>
+                          <th className="p-3">Category</th>
+                          <th className="p-3">Registered By</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-warm-200">
+                        {officersList.map((off, idx) => (
+                          <tr key={off.id || idx} className="hover:bg-warm-100/30">
+                            <td className="p-3 font-semibold text-ink">{off.name}</td>
+                            <td className="p-3 font-mono text-ieee-blue">{off.email}</td>
+                            <td className="p-3 font-mono">
+                              <span className="bg-ieee-subtle border border-ieee-blue/20 px-2 py-0.5 rounded-[2px]">
+                                {off.role}
+                              </span>
+                            </td>
+                            <td className="p-3 text-warm-400">{off.category}</td>
+                            <td className="p-3 font-mono text-warm-400">{off.createdBy || 'Super Admin'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
 
               <SectionHeading
                 category="Content & Governance"
@@ -182,9 +424,7 @@ export default function AdminDashboardPage() {
                       <span className="text-ieee-blue font-semibold uppercase">Collection</span>
                       <span className="text-warm-400">6 Official Categories</span>
                     </div>
-                    <h3 className="font-serif text-2xl text-ink font-normal">
-                      People & Leadership
-                    </h3>
+                    <h3 className="font-serif text-2xl text-ink font-normal">People & Leadership</h3>
                     <p className="text-xs text-warm-400 font-sans leading-relaxed">
                       Manage Branch Counsellor, Student Mentors, SEC, Operational Leads, and Chapter Executives.
                     </p>
@@ -202,9 +442,7 @@ export default function AdminDashboardPage() {
                       <span className="text-ieee-blue font-semibold uppercase">Collection</span>
                       <span className="text-warm-400">Upcoming & Past</span>
                     </div>
-                    <h3 className="font-serif text-2xl text-ink font-normal">
-                      Events & Workshops
-                    </h3>
+                    <h3 className="font-serif text-2xl text-ink font-normal">Events & Workshops</h3>
                     <p className="text-xs text-warm-400 font-sans leading-relaxed">
                       Post technical workshops, panel discussions, registration links, schedules, and speakers.
                     </p>
@@ -222,9 +460,7 @@ export default function AdminDashboardPage() {
                       <span className="text-ieee-blue font-semibold uppercase">Collection</span>
                       <span className="text-warm-400">Awards & Wins</span>
                     </div>
-                    <h3 className="font-serif text-2xl text-ink font-normal">
-                      Achievements Ledger
-                    </h3>
+                    <h3 className="font-serif text-2xl text-ink font-normal">Achievements Ledger</h3>
                     <p className="text-xs text-warm-400 font-sans leading-relaxed">
                       Record section awards, national hackathon wins, and institutional recognitions.
                     </p>
@@ -242,9 +478,7 @@ export default function AdminDashboardPage() {
                       <span className="text-ieee-blue font-semibold uppercase">Collection</span>
                       <span className="text-warm-400">WIE & EDS</span>
                     </div>
-                    <h3 className="font-serif text-2xl text-ink font-normal">
-                      Organization Units
-                    </h3>
+                    <h3 className="font-serif text-2xl text-ink font-normal">Organization Units</h3>
                     <p className="text-xs text-warm-400 font-sans leading-relaxed">
                       Update mission statements, leadership details, and statistics for chapters & AGs.
                     </p>
@@ -262,9 +496,7 @@ export default function AdminDashboardPage() {
                       <span className="text-ieee-blue font-semibold uppercase">Collection</span>
                       <span className="text-warm-400">Publications</span>
                     </div>
-                    <h3 className="font-serif text-2xl text-ink font-normal">
-                      Stories & Reports
-                    </h3>
+                    <h3 className="font-serif text-2xl text-ink font-normal">Stories & Reports</h3>
                     <p className="text-xs text-warm-400 font-sans leading-relaxed">
                       Publish technical event reports, student writing, and workshop series post-mortems.
                     </p>
@@ -282,9 +514,7 @@ export default function AdminDashboardPage() {
                       <span className="text-ieee-blue font-semibold uppercase">Collection</span>
                       <span className="text-warm-400">Photo Albums</span>
                     </div>
-                    <h3 className="font-serif text-2xl text-ink font-normal">
-                      Photo Galleries
-                    </h3>
+                    <h3 className="font-serif text-2xl text-ink font-normal">Photo Galleries</h3>
                     <p className="text-xs text-warm-400 font-sans leading-relaxed">
                       Upload documentary photography albums and captions for event photo galleries.
                     </p>
@@ -292,31 +522,6 @@ export default function AdminDashboardPage() {
                   <div className="pt-4 border-t border-warm-200 flex items-center justify-between text-xs font-mono">
                     <span className="text-warm-400">Schema: Galleries</span>
                     <span className="text-ieee-blue font-semibold">Lightbox Active ✓</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Audit & System Overview */}
-              <div className="border border-warm-200 bg-warm-100/40 p-6 rounded-[2px] space-y-4">
-                <h3 className="font-serif text-xl text-ink font-normal">
-                  System Audit & Operational Configuration
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
-                  <div>
-                    <span className="text-warm-400 block uppercase">Official Email</span>
-                    <span className="text-ink font-semibold">{BRANCH_STATS.email}</span>
-                  </div>
-                  <div>
-                    <span className="text-warm-400 block uppercase">Est. Year</span>
-                    <span className="text-ink font-semibold">{BRANCH_STATS.establishedYear}</span>
-                  </div>
-                  <div>
-                    <span className="text-warm-400 block uppercase">Active Members</span>
-                    <span className="text-ink font-semibold">{BRANCH_STATS.activeMembers}</span>
-                  </div>
-                  <div>
-                    <span className="text-warm-400 block uppercase">Audit Logging</span>
-                    <span className="text-emerald-700 font-semibold">Enabled (createdAt/updatedBy)</span>
                   </div>
                 </div>
               </div>
