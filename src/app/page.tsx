@@ -8,23 +8,26 @@ import { StatMetric } from '@/components/content/StatMetric';
 import { EventPreview } from '@/components/content/EventPreview';
 import { AchievementRow } from '@/components/content/AchievementRow';
 import { ChapterPanel } from '@/components/content/ChapterPanel';
+import { PersonCard } from '@/components/content/PersonCard';
 import { BRANCH_STATS } from '@/lib/data';
-import { getDynamicEvents, getDynamicAchievements, getDynamicChapters } from '@/lib/api';
+import { getDynamicEvents, getDynamicAchievements, getDynamicChapters, getDynamicPeople } from '@/lib/api';
 import Link from 'next/link';
 
 export const revalidate = 60; // ISR: revalidate every 60 seconds
 
 export default async function HomePage() {
-  const [eventsList, achievementsList, chaptersList] = await Promise.all([
+  const [eventsList, achievementsList, chaptersList, peopleList] = await Promise.all([
     getDynamicEvents(),
     getDynamicAchievements(),
     getDynamicChapters(),
+    getDynamicPeople(),
   ]);
 
   const upcomingEvents = eventsList.filter((e: any) => e.status === 'upcoming');
   const featuredEvent = upcomingEvents[0];
   const remainingUpcoming = upcomingEvents.slice(1);
   const featuredAchievements = achievementsList.slice(0, 3);
+  const topLeadership = peopleList.slice(0, 4);
 
   return (
     <>
@@ -62,7 +65,7 @@ export default async function HomePage() {
           </Container>
         </section>
 
-        {/* 2. BRANCH AT A GLANCE (Horizontal Monospaced Bar) */}
+        {/* 2. BRANCH AT A GLANCE */}
         <section className="border-b border-warm-200 bg-warm-100/60 py-2">
           <Container size="default">
             <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-warm-200 py-4">
@@ -100,7 +103,7 @@ export default async function HomePage() {
 
               {remainingUpcoming.length > 0 && (
                 <div className="border border-warm-200 bg-white rounded-[2px] divide-y divide-warm-200">
-                  {remainingUpcoming.map((event) => (
+                  {remainingUpcoming.map((event: any) => (
                     <EventPreview
                       key={event.id}
                       title={event.title}
@@ -114,13 +117,17 @@ export default async function HomePage() {
                 </div>
               )}
 
+              {!featuredEvent && upcomingEvents.length === 0 && (
+                <p className="font-mono text-sm text-warm-300 py-8 text-center border border-warm-200 rounded-[2px]">
+                  No upcoming events scheduled. Check back soon or view past events below.
+                </p>
+              )}
+
               <div className="pt-4 flex justify-between items-center border-t border-warm-200">
                 <Link href="/events" className="text-xs font-mono text-ieee-blue font-semibold hover:underline">
                   View Full Events Archive →
                 </Link>
-                <span className="font-mono text-xs text-warm-300">
-                  Updated Dynamic REST Feed
-                </span>
+                <span className="font-mono text-xs text-warm-300">Updated Live from Database</span>
               </div>
             </div>
           </Container>
@@ -148,8 +155,42 @@ export default async function HomePage() {
           </Container>
         </section>
 
-        {/* 5. CHAPTERS & AFFINITY GROUPS */}
-        <section className="py-16 sm:py-24 bg-white border-b border-warm-200">
+        {/* 5. PEOPLE PREVIEW — Meet the Leadership */}
+        {topLeadership.length > 0 && (
+          <section className="py-16 sm:py-24 bg-white border-b border-warm-200">
+            <Container size="default">
+              <SectionHeading
+                category="Leadership"
+                title="Meet the Executive Committee"
+                subtitle="The student leaders steering IEEE MAIT's technical initiatives, chapter operations, and community outreach."
+              />
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8">
+                {topLeadership.map((person: any) => (
+                  <PersonCard
+                    key={person.id}
+                    name={person.name}
+                    role={person.role}
+                    department={person.department}
+                    imageSrc={person.imageUrl}
+                    category={person.category}
+                    size="standard"
+                  />
+                ))}
+              </div>
+
+              <div className="pt-8 flex justify-between items-center border-t border-warm-200 mt-8">
+                <Link href="/people" className="text-xs font-mono text-ieee-blue font-semibold hover:underline">
+                  View Full Leadership Roster →
+                </Link>
+                <span className="font-mono text-xs text-warm-300">{BRANCH_STATS.activeMembers}+ Active Members</span>
+              </div>
+            </Container>
+          </section>
+        )}
+
+        {/* 6. CHAPTERS & AFFINITY GROUPS */}
+        <section className="py-16 sm:py-24 bg-warm-100/30 border-b border-warm-200">
           <Container size="default">
             <SectionHeading
               category="Specialized Units"
@@ -158,7 +199,7 @@ export default async function HomePage() {
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
-              {chaptersList.map((chapter) => (
+              {chaptersList.map((chapter: any) => (
                 <ChapterPanel
                   key={chapter.id}
                   name={chapter.name}
@@ -175,7 +216,7 @@ export default async function HomePage() {
           </Container>
         </section>
 
-        {/* 6. ACHIEVEMENTS & RECOGNITIONS LEDGER */}
+        {/* 7. ACHIEVEMENTS & RECOGNITIONS LEDGER */}
         <section className="py-16 sm:py-24 bg-white border-b border-warm-200">
           <Container size="default">
             <SectionHeading
@@ -185,7 +226,7 @@ export default async function HomePage() {
             />
 
             <div className="border-t border-warm-200 pt-4">
-              {featuredAchievements.map((item) => (
+              {featuredAchievements.map((item: any) => (
                 <AchievementRow
                   key={item.id}
                   year={item.year}
@@ -200,9 +241,72 @@ export default async function HomePage() {
                 <Link href="/achievements" className="text-xs font-mono text-ieee-blue font-semibold hover:underline">
                   View Full Achievements Ledger →
                 </Link>
-                <span className="font-mono text-xs text-warm-300">
-                  Delhi Section Record
+                <span className="font-mono text-xs text-warm-300">Delhi Section Record</span>
+              </div>
+            </div>
+          </Container>
+        </section>
+
+        {/* 8. REAL MOMENTS — Photography Band */}
+        <section className="py-16 sm:py-24 bg-ink border-b border-white/5">
+          <Container size="default">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+              <div>
+                <span className="font-mono text-xs font-semibold text-ieee-light uppercase tracking-widest block mb-2">
+                  Documentary Record
                 </span>
+                <h2 className="font-serif text-3xl sm:text-4xl text-white font-normal leading-tight">
+                  Real Moments, Real Work
+                </h2>
+              </div>
+              <Link href="/gallery" className="text-xs font-mono text-ieee-light hover:underline font-semibold shrink-0">
+                View Full Gallery →
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { label: 'IEEE Day 2025 — Opening Ceremony' },
+                { label: 'PCB Design Workshop — EDS Chapter' },
+                { label: 'WIE Leadership Summit 2025' },
+                { label: 'Hardware Hackathon Finals' },
+              ].map((photo, idx) => (
+                <div
+                  key={idx}
+                  className="aspect-square bg-white/5 border border-white/10 flex items-end p-3 group hover:border-ieee-blue/40 transition-colors cursor-pointer"
+                >
+                  <span className="font-mono text-[10px] text-warm-300/50 group-hover:text-warm-300 transition-colors leading-tight">
+                    {photo.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <p className="font-mono text-[11px] text-white/20 mt-4 text-center">
+              Photo placeholders — upload real event photography via the Admin Gallery panel
+            </p>
+          </Container>
+        </section>
+
+        {/* 9. JOIN CTA BAND */}
+        <section className="py-20 sm:py-28 bg-ieee-blue">
+          <Container size="narrow">
+            <div className="text-center space-y-6">
+              <span className="font-mono text-xs font-semibold text-white/60 uppercase tracking-widest block">
+                Become a Member
+              </span>
+              <h2 className="font-serif text-3xl sm:text-5xl text-white font-normal leading-tight">
+                Join IEEE MAIT Student Branch
+              </h2>
+              <p className="text-base sm:text-lg text-white/80 font-sans leading-relaxed max-w-xl mx-auto">
+                Connect with {BRANCH_STATS.activeMembers}+ engineers, access IEEE&apos;s global network of 460,000+ technologists, and build the skills that matter.
+              </p>
+              <div className="flex flex-wrap justify-center gap-4 pt-2">
+                <Button href="/join" variant="primary" size="lg" className="!bg-white !text-ieee-blue hover:!bg-warm-100">
+                  Start Your Membership →
+                </Button>
+                <Button href="/contact" variant="secondary" size="lg" className="!border-white/40 !text-white hover:!bg-white/10">
+                  Ask a Question
+                </Button>
               </div>
             </div>
           </Container>

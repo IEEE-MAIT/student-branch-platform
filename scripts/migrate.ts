@@ -188,7 +188,35 @@ async function migrate() {
       );
     `);
 
+    console.log('Creating milestones table...');
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS milestones (
+        "id" TEXT NOT NULL,
+        "year" TEXT NOT NULL,
+        "title" TEXT NOT NULL,
+        "description" TEXT,
+        "category" TEXT,
+        "sortOrder" INTEGER NOT NULL DEFAULT 0,
+        CONSTRAINT "milestones_pkey" PRIMARY KEY ("id")
+      );
+    `);
+
+    console.log('Creating resources table...');
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS resources (
+        "id" TEXT NOT NULL,
+        "title" TEXT NOT NULL,
+        "type" TEXT NOT NULL,
+        "fileUrl" TEXT,
+        "publishedDate" TEXT NOT NULL,
+        "description" TEXT,
+        "status" TEXT NOT NULL DEFAULT 'published',
+        CONSTRAINT "resources_pkey" PRIMARY KEY ("id")
+      );
+    `);
+
     console.log('✅ Tables created successfully!');
+
   } catch (error) {
     console.error('Error during migration:', error);
   } finally {

@@ -11,6 +11,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { getDynamicStories } from '@/lib/api';
 import Link from 'next/link';
 
@@ -30,6 +31,13 @@ export default async function StoriesPage() {
 
       <main className="flex-1 py-16 sm:py-24 bg-white">
         <Container size="default">
+          <Breadcrumb
+            items={[
+              { label: 'Home', href: '/' },
+              { label: 'Stories & Reports' },
+            ]}
+          />
+
           <SectionHeading
             category="Publications & Writings"
             title="Stories & Technical Reports"

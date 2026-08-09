@@ -120,3 +120,27 @@ export async function getDynamicSiteSettings() {
   } catch (err) {}
   return defaultSettings;
 }
+
+export async function getDynamicMilestones() {
+  if (typeof window !== 'undefined') return [];
+  try {
+    return await prisma.milestone.findMany({ orderBy: { sortOrder: 'desc' } });
+  } catch (e) {
+    console.warn('Failed to fetch milestones from DB', e);
+    return [];
+  }
+}
+
+export async function getDynamicResources() {
+  if (typeof window !== 'undefined') return [];
+  try {
+    return await prisma.resource.findMany({
+      where: { status: 'published' },
+      orderBy: { publishedDate: 'desc' },
+    });
+  } catch (e) {
+    console.warn('Failed to fetch resources from DB', e);
+    return [];
+  }
+}
+

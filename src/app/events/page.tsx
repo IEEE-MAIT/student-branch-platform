@@ -11,6 +11,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { EventsFilter } from '@/components/content/EventsFilter';
 import { getDynamicEvents } from '@/lib/api';
 
@@ -27,6 +28,13 @@ export default async function EventsPage() {
 
       <main className="flex-1 py-16 sm:py-24 bg-white">
         <Container size="default">
+          <Breadcrumb
+            items={[
+              { label: 'Home', href: '/' },
+              { label: 'Events' },
+            ]}
+          />
+
           <SectionHeading
             category="Activities & Workshops"
             title="Events Archive & Calendar"

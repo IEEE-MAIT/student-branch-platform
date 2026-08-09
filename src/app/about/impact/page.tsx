@@ -3,6 +3,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { StatMetric } from '@/components/content/StatMetric';
 
 export default function ImpactPage() {
@@ -12,6 +13,14 @@ export default function ImpactPage() {
 
       <main className="flex-1 py-16 sm:py-24 bg-white">
         <Container size="default">
+          <Breadcrumb
+            items={[
+              { label: 'Home', href: '/' },
+              { label: 'About', href: '/about' },
+              { label: 'Branch Impact' },
+            ]}
+          />
+
           <SectionHeading
             category="Evidence of Excellence"
             title="Branch Impact & Outcomes"

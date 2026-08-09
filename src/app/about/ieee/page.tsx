@@ -3,6 +3,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Button } from '@/components/ui/Button';
 
 export default function AboutGlobalIEEEPage() {
@@ -12,6 +13,14 @@ export default function AboutGlobalIEEEPage() {
 
       <main className="flex-1 py-16 sm:py-24 bg-white">
         <Container size="default">
+          <Breadcrumb
+            items={[
+              { label: 'Home', href: '/' },
+              { label: 'About', href: '/about' },
+              { label: 'Global IEEE' },
+            ]}
+          />
+
           <SectionHeading
             category="Global Organization"
             title="About IEEE (Institute of Electrical and Electronics Engineers)"

@@ -11,6 +11,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { AchievementsFilter } from '@/components/content/AchievementsFilter';
 import { getDynamicAchievements } from '@/lib/api';
 
@@ -26,6 +27,13 @@ export default async function AchievementsPage() {
 
       <main className="flex-1 py-16 sm:py-24 bg-white">
         <Container size="default">
+          <Breadcrumb
+            items={[
+              { label: 'Home', href: '/' },
+              { label: 'Achievements' },
+            ]}
+          />
+
           <SectionHeading
             category="Historical Record"
             title="Achievements Ledger"

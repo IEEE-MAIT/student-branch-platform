@@ -3,6 +3,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Button } from '@/components/ui/Button';
 
 export default function JoinPage() {
@@ -12,6 +13,13 @@ export default function JoinPage() {
 
       <main className="flex-1 py-16 sm:py-24 bg-white">
         <Container size="default">
+          <Breadcrumb
+            items={[
+              { label: 'Home', href: '/' },
+              { label: 'Join IEEE MAIT' },
+            ]}
+          />
+
           <SectionHeading
             category="Membership"
             title="Join IEEE MAIT Student Branch"

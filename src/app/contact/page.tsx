@@ -15,6 +15,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Button } from '@/components/ui/Button';
 
 export default function ContactPage() {
@@ -58,6 +59,13 @@ export default function ContactPage() {
 
       <main className="flex-1 py-16 sm:py-24 bg-white">
         <Container size="default">
+          <Breadcrumb
+            items={[
+              { label: 'Home', href: '/' },
+              { label: 'Contact' },
+            ]}
+          />
+
           <SectionHeading
             category="Outreach"
             title="Contact IEEE MAIT"

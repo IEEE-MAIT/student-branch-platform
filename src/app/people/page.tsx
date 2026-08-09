@@ -11,6 +11,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { PersonCard } from '@/components/content/PersonCard';
 import { getDynamicPeople } from '@/lib/api';
 
@@ -34,6 +35,13 @@ export default async function PeoplePage() {
 
       <main className="flex-1 py-16 sm:py-24 bg-white">
         <Container size="default">
+          <Breadcrumb
+            items={[
+              { label: 'Home', href: '/' },
+              { label: 'People' },
+            ]}
+          />
+
           <SectionHeading
             category="Organization Map"
             title="People & Leadership"
