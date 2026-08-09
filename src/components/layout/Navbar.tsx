@@ -124,6 +124,10 @@ export const Navbar: React.FC = () => {
             <Link href="/gallery" className={linkClasses('/gallery')}>
               Gallery
             </Link>
+
+            <Link href="/search" className={`${linkClasses('/search')} flex items-center gap-1 font-mono text-xs text-ieee-blue bg-ieee-subtle px-2 py-1 rounded-[2px]`}>
+              🔍 Search
+            </Link>
           </nav>
 
           {/* Primary Call To Action */}

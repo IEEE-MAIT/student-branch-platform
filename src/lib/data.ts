@@ -5,7 +5,7 @@
  * DESIGN PRINCIPLE:
  * This data store acts as the baseline content for the open-source platform.
  * Data structures map 1-to-1 with Payload CMS collection schemas (Person, Event, Achievement,
- * OrganizationUnit, Milestone) to enable seamless CMS ingestion in Phase 3.
+ * OrganizationUnit, Milestone, Gallery, Story) to enable seamless CMS ingestion.
  *
  * @author IEEE MAIT Webmaster & Open Source Contributors
  * @license MIT
@@ -13,127 +13,121 @@
 
 /**
  * Represents a member of the branch, faculty counselor, executive officer, or lead.
- * Corresponds to the `Person` collection schema in Payload CMS.
  */
 export interface Person {
-  /** Unique identifier */
   id: string;
-  /** Full name of the person */
   name: string;
-  /** Organizational title or designation (e.g. 'Branch Counselor', 'Chairperson', 'Webmaster') */
   role: string;
-  /** Role hierarchy category for visual scaling on the People page */
   category: 'mentor' | 'sec' | 'lead' | 'chapter';
-  /** Academic branch/department (e.g. 'Department of ECE', '3rd Year, CSE') */
   department: string;
-  /** Academic term year (e.g. '2025–26') */
   academicYear: string;
-  /** Cloudinary or relative URL for portrait photo */
   imageSrc?: string;
-  /** Professional LinkedIn profile link */
   linkedIn?: string;
-  /** Short bio or summary */
   bio?: string;
 }
 
 /**
  * Represents an upcoming or historical event organized by the branch or chapters.
- * Corresponds to the `Event` collection schema in Payload CMS.
  */
 export interface EventItem {
-  /** Unique identifier */
   id: string;
-  /** Event title */
   title: string;
-  /** URL-friendly slug */
   slug: string;
-  /** Formatted date string (e.g. 'AUG 20, 2026') */
   date: string;
-  /** Time range (e.g. '2:00 PM – 5:00 PM') */
   time?: string;
-  /** Physical campus location or online platform link */
   venue: string;
-  /** Full name of the organizing unit */
   unit: 'IEEE MAIT SB' | 'WIE Affinity Group' | 'IEEE EDS Chapter';
-  /** Short identifier matching chapter slug */
   unitSlug: 'sb' | 'wie' | 'eds';
-  /** Category classification */
   category: 'Technical Workshop' | 'Panel Discussion' | 'Branch Event' | 'Flagship Event' | 'Competition';
-  /** Lifecycle status of event */
   status: 'upcoming' | 'past';
-  /** Rich text description or summary */
   description: string;
-  /** Cover image or poster URL */
   imageSrc?: string;
-  /** Guest speakers or workshop facilitators */
   speakers?: Array<{ name: string; title: string; organization: string }>;
-  /** Timeline breakdown of event agenda */
   schedule?: Array<{ time: string; activity: string }>;
 }
 
 /**
  * Represents an award, hackathon win, or institutional recognition earned by the branch.
- * Corresponds to the `Achievement` collection schema in Payload CMS.
  */
 export interface AchievementItem {
-  /** Unique identifier */
   id: string;
-  /** Year conferred */
   year: string;
-  /** Official title of award or achievement */
   title: string;
-  /** Awarding organization (e.g. 'IEEE Delhi Section', 'National Tech Summit') */
   conferredBy: string;
-  /** Associated branch unit or student team */
   unitOrTeam: string;
-  /** Category classification */
   category: 'IEEE Recognition' | 'Competition' | 'Award' | 'Research';
-  /** Extended details or description */
   description?: string;
 }
 
 /**
  * Represents an autonomous chapter or affinity group (e.g. WIE, EDS).
- * Corresponds to the `OrganizationUnit` collection schema in Payload CMS.
  */
 export interface ChapterItem {
-  /** Unique identifier */
   id: string;
-  /** Display name of unit */
   name: string;
-  /** URL-friendly slug matching `/chapters/[slug]` */
   slug: string;
-  /** Classification type */
   type: 'Affinity Group' | 'Technical Chapter';
-  /** Global IEEE parent society */
   parentSociety: string;
-  /** Year established at MAIT */
   establishedYear: string;
-  /** Overview summary */
   description: string;
-  /** Detailed mission statement */
   mission: string;
-  /** Current member count */
   memberCount: string;
-  /** Total events organized */
   eventCount: string;
-  /** Current student lead name */
   leaderName: string;
-  /** Current student lead role title */
   leaderRole: string;
 }
 
 /**
  * Represents a historical milestone entry in the institutional timeline.
- * Corresponds to the `Milestone` collection schema in Payload CMS.
  */
 export interface MilestoneItem {
-  /** Milestone year */
   year: string;
-  /** Title of milestone */
   title: string;
-  /** Detailed description */
   description: string;
+}
+
+/**
+ * Represents an individual photograph entry within a gallery album.
+ */
+export interface GalleryPhoto {
+  id: string;
+  url: string;
+  caption: string;
+  width?: number;
+  height?: number;
+}
+
+/**
+ * Represents a photo album event gallery.
+ */
+export interface GalleryAlbum {
+  id: string;
+  title: string;
+  slug: string;
+  date: string;
+  photoCount: number;
+  coverUrl?: string;
+  associatedEvent?: string;
+  unit: string;
+  description: string;
+  photos: GalleryPhoto[];
+}
+
+/**
+ * Represents a technical article, event post-mortem report, or student essay.
+ */
+export interface StoryArticle {
+  id: string;
+  title: string;
+  slug: string;
+  type: 'Article' | 'Event Report' | 'Announcement';
+  author: string;
+  authorRole: string;
+  publishedDate: string;
+  readingTime: string;
+  unit: string;
+  excerpt: string;
+  content: string[];
 }
 
 /**
@@ -333,3 +327,97 @@ export const MILESTONES_DATA: MilestoneItem[] = [
     description: 'Chartered at Maharaja Agrasen Institute of Technology under IEEE Delhi Section.',
   },
 ];
+
+/**
+ * Photo Gallery Albums Store.
+ */
+export const GALLERY_ALBUMS_DATA: Record<string, GalleryAlbum> = {
+  'ieee-day-2025-celebration': {
+    id: 'g1',
+    title: 'IEEE Day 2025 Flagship Technical Exhibition',
+    slug: 'ieee-day-2025-celebration',
+    date: 'OCT 07, 2025',
+    photoCount: 6,
+    unit: 'IEEE MAIT SB',
+    description: 'Official documentary photos from IEEE Day celebration, hardware project demonstrations, and student award ceremonies.',
+    photos: [
+      { id: 'p1', url: '/images/gallery/ieee-day-1.jpg', caption: 'Student branch leadership opening ceremony at MAIT Courtyard' },
+      { id: 'p2', url: '/images/gallery/ieee-day-2.jpg', caption: 'Hardware project demonstration by 3rd year ECE team' },
+      { id: 'p3', url: '/images/gallery/ieee-day-3.jpg', caption: 'Keynote lecture by IEEE Delhi Section executive representative' },
+      { id: 'p4', url: '/images/gallery/ieee-day-4.jpg', caption: 'Technical poster evaluation and student Q&A' },
+      { id: 'p5', url: '/images/gallery/ieee-day-5.jpg', caption: 'Award ceremony for best innovation showcase' },
+      { id: 'p6', url: '/images/gallery/ieee-day-6.jpg', caption: 'Executive committee group photograph' },
+    ],
+  },
+  'pcb-design-workshop': {
+    id: 'g2',
+    title: 'Hands-on Workshop on PCB Design & Soldering',
+    slug: 'pcb-design-workshop',
+    date: 'AUG 12, 2025',
+    photoCount: 4,
+    unit: 'IEEE EDS Chapter',
+    description: 'Photographs capturing student members learning KiCad schematic layout, circuit printing, and soldering technique.',
+    photos: [
+      { id: 'p7', url: '/images/gallery/pcb-1.jpg', caption: 'KiCad schematic layout tutorial session in ECE Lab' },
+      { id: 'p8', url: '/images/gallery/pcb-2.jpg', caption: 'Student member practicing SMD component soldering' },
+      { id: 'p9', url: '/images/gallery/pcb-3.jpg', caption: 'Oscilloscope testing of assembled circuit board' },
+      { id: 'p10', url: '/images/gallery/pcb-4.jpg', caption: 'Completed microcontroller breakout board' },
+    ],
+  },
+  'wie-leadership-panel': {
+    id: 'g3',
+    title: 'WIE Leadership Orientation & Team Session',
+    slug: 'wie-leadership-panel',
+    date: 'SEP 05, 2025',
+    photoCount: 4,
+    unit: 'WIE Affinity Group',
+    description: 'Mentorship roundtable and orientation session hosted by WIE MAIT leadership.',
+    photos: [
+      { id: 'p11', url: '/images/gallery/wie-1.jpg', caption: 'WIE Student Chair introducing year roadmap' },
+      { id: 'p12', url: '/images/gallery/wie-2.jpg', caption: 'Roundtable discussion on women in STEM careers' },
+      { id: 'p13', url: '/images/gallery/wie-3.jpg', caption: 'Mentorship pairing activity with 1st-year students' },
+      { id: 'p14', url: '/images/gallery/wie-4.jpg', caption: 'Group photo of WIE executive team' },
+    ],
+  },
+};
+
+/**
+ * Catalog of Articles & Technical Reports.
+ */
+export const STORIES_DATA: Record<string, StoryArticle> = {
+  'applied-neural-networks-workshop-series': {
+    id: 's1',
+    title: 'Reflections on Our Applied Neural Networks Workshop Series',
+    slug: 'applied-neural-networks-workshop-series',
+    type: 'Event Report',
+    author: 'EDS Technical Lead',
+    authorRole: 'IEEE EDS Chapter Lead',
+    publishedDate: 'AUG 08, 2026',
+    readingTime: '5 min read',
+    unit: 'IEEE EDS Chapter',
+    excerpt: 'A technical summary of key concepts covered during the 3-day deep learning session, student project highlights, and resources for further learning.',
+    content: [
+      'In August 2026, the IEEE EDS Chapter at MAIT conducted a three-day intensive workshop titled "Applied Neural Networks with PyTorch". Designed for second and third-year undergraduates, the workshop aimed to bridge mathematical theory with practical deep learning deployment.',
+      'Over 60 students participated in hands-on coding sessions covering tensor operations, autograd engines, convolutional neural networks (CNNs), and transfer learning models.',
+      'Student projects included an autonomous license plate recognition model trained on local traffic datasets and an edge-computing anomaly detector for manufacturing hardware.',
+      'The event concluded with a code review and project presentation session evaluated by industry researchers from tech labs in Delhi NCR.'
+    ],
+  },
+  'empowering-women-in-engineering-roadmap': {
+    id: 's2',
+    title: 'Empowering Women in Engineering: WIE MAIT 2026 Roadmap',
+    slug: 'empowering-women-in-engineering-roadmap',
+    type: 'Article',
+    author: 'WIE Student Chair',
+    authorRole: 'WIE Affinity Group Chair',
+    publishedDate: 'JUL 25, 2026',
+    readingTime: '4 min read',
+    unit: 'WIE Affinity Group',
+    excerpt: 'An overview of upcoming mentorship programs, scholarship opportunities, and community outreach initiatives planned for the current academic year.',
+    content: [
+      'The IEEE Women in Engineering (WIE) Affinity Group at MAIT is proud to release its operational roadmap for the 2026-27 academic term.',
+      'Key initiatives include the "STEM-Forward Mentorship Program" pairing senior engineering students with first-year female undergraduates, along with technical resume reviews and hackathon preparation bootcamps.',
+      'We invite all interested students to join our community channels and participate in our upcoming panel discussions and technical workshops.'
+    ],
+  },
+};

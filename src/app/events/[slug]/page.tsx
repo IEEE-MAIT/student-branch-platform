@@ -21,6 +21,12 @@ export async function generateMetadata({ params }: EventPageProps) {
   return {
     title: `${event.title} | IEEE MAIT Events`,
     description: event.description,
+    openGraph: {
+      title: event.title,
+      description: event.description,
+      type: 'article',
+      siteName: 'IEEE MAIT Student Branch',
+    },
   };
 }
 
@@ -31,6 +37,19 @@ export default async function EventDetailPage({ params }: EventPageProps) {
   if (!event) {
     notFound();
   }
+
+  // Encodes .ics data URL for instant iCal calendar file download
+  const icsData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//IEEE MAIT Student Branch//Events//EN
+BEGIN:VEVENT
+SUMMARY:${event.title}
+DESCRIPTION:${event.description}
+LOCATION:${event.venue}
+END:VEVENT
+END:VCALENDAR`;
+
+  const icsDownloadUrl = `data:text/calendar;charset=utf8,${encodeURIComponent(icsData)}`;
 
   return (
     <>
@@ -103,11 +122,18 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                 </div>
               )}
 
-              {/* Registration CTA */}
-              <div className="pt-4">
+              {/* Registration & Calendar CTAs */}
+              <div className="pt-4 flex flex-wrap items-center gap-4">
                 <Button href="/join" variant="primary" size="lg">
                   Register for Event →
                 </Button>
+                <a
+                  href={icsDownloadUrl}
+                  download={`${event.slug}.ics`}
+                  className="px-5 py-3 text-sm font-medium border border-warm-200 hover:border-ieee-blue text-ink hover:text-ieee-blue rounded-[2px] transition-colors font-mono"
+                >
+                  📅 Add to Calendar (.ics)
+                </a>
               </div>
             </div>
 

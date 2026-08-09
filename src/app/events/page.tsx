@@ -1,4 +1,14 @@
-import React from 'react';
+'use client';
+
+/**
+ * @file src/app/events/page.tsx
+ * @description Events landing page with upcoming and past events, category filtering, and chapter filtering.
+ * 
+ * @author IEEE MAIT Webmaster & Open Source Contributors
+ * @license MIT
+ */
+
+import React, { useState, useMemo } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
@@ -6,14 +16,20 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { EventPreview } from '@/components/content/EventPreview';
 import { EVENTS_DATA } from '@/lib/data';
 
-export const metadata = {
-  title: 'Events & Workshops | IEEE MAIT Student Branch',
-  description: 'Upcoming technical workshops, seminars, panel discussions, and historical event archives at MAIT Delhi.',
-};
-
 export default function EventsPage() {
-  const upcomingEvents = EVENTS_DATA.filter(e => e.status === 'upcoming');
-  const pastEvents = EVENTS_DATA.filter(e => e.status === 'past');
+  const [selectedUnit, setSelectedUnit] = useState<string>('ALL');
+  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+
+  const filteredEvents = useMemo(() => {
+    return EVENTS_DATA.filter(event => {
+      const matchUnit = selectedUnit === 'ALL' || event.unitSlug === selectedUnit;
+      const matchCategory = selectedCategory === 'ALL' || event.category === selectedCategory;
+      return matchUnit && matchCategory;
+    });
+  }, [selectedUnit, selectedCategory]);
+
+  const upcomingEvents = filteredEvents.filter(e => e.status === 'upcoming');
+  const pastEvents = filteredEvents.filter(e => e.status === 'past');
   const featuredUpcoming = upcomingEvents[0];
   const remainingUpcoming = upcomingEvents.slice(1);
 
@@ -29,10 +45,52 @@ export default function EventsPage() {
             subtitle="Browse upcoming technical sessions, workshops, and historical activity records."
           />
 
-          {/* Upcoming Section */}
+          {/* Interactive Filter Bar */}
+          <div className="bg-warm-100/60 border border-warm-200 p-4 rounded-[2px] mb-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 font-mono text-xs">
+            {/* Unit Filter */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-warm-400 font-semibold uppercase tracking-wider">Unit:</span>
+              {[
+                { label: 'All Units', value: 'ALL' },
+                { label: 'Branch (SB)', value: 'sb' },
+                { label: 'WIE AG', value: 'wie' },
+                { label: 'EDS Chapter', value: 'eds' },
+              ].map(item => (
+                <button
+                  key={item.value}
+                  onClick={() => setSelectedUnit(item.value)}
+                  className={`px-3 py-1.5 rounded-[2px] transition-colors ${
+                    selectedUnit === item.value
+                      ? 'bg-ieee-blue text-white font-bold'
+                      : 'bg-white border border-warm-200 text-ink hover:border-ieee-blue'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Category Filter Dropdown */}
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <span className="text-warm-400 font-semibold uppercase tracking-wider whitespace-nowrap">Category:</span>
+              <select
+                value={selectedCategory}
+                onChange={e => setSelectedCategory(e.target.value)}
+                className="px-3 py-1.5 bg-white border border-warm-200 rounded-[2px] text-ink font-mono focus:outline-none focus:border-ieee-blue w-full sm:w-auto"
+              >
+                <option value="ALL">All Categories</option>
+                <option value="Technical Workshop">Technical Workshop</option>
+                <option value="Panel Discussion">Panel Discussion</option>
+                <option value="Branch Event">Branch Event</option>
+                <option value="Flagship Event">Flagship Event</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Upcoming Events Section */}
           <div className="mb-16 space-y-6">
             <h3 className="font-mono text-xs font-semibold uppercase tracking-widest text-ieee-blue border-b border-warm-200 pb-2">
-              Upcoming Events
+              Upcoming Events ({upcomingEvents.length})
             </h3>
 
             {featuredUpcoming && (
@@ -64,27 +122,39 @@ export default function EventsPage() {
                 ))}
               </div>
             )}
+
+            {upcomingEvents.length === 0 && (
+              <div className="p-8 border border-warm-200 bg-warm-100/30 rounded-[2px] text-center text-warm-400 font-sans text-sm">
+                No upcoming events match your selected filters. Try clearing the filter options above.
+              </div>
+            )}
           </div>
 
           {/* Past Events Section */}
           <div className="space-y-6">
             <h3 className="font-mono text-xs font-semibold uppercase tracking-widest text-ink-muted border-b border-warm-200 pb-2">
-              Past Events (Historical Archive)
+              Past Events Archive ({pastEvents.length})
             </h3>
 
-            <div className="border border-warm-200 bg-white rounded-[2px] divide-y divide-warm-200">
-              {pastEvents.map(event => (
-                <EventPreview
-                  key={event.id}
-                  title={event.title}
-                  slug={event.slug}
-                  date={event.date}
-                  venue={event.venue}
-                  unit={event.unit}
-                  category={event.category}
-                />
-              ))}
-            </div>
+            {pastEvents.length > 0 ? (
+              <div className="border border-warm-200 bg-white rounded-[2px] divide-y divide-warm-200">
+                {pastEvents.map(event => (
+                  <EventPreview
+                    key={event.id}
+                    title={event.title}
+                    slug={event.slug}
+                    date={event.date}
+                    venue={event.venue}
+                    unit={event.unit}
+                    category={event.category}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 border border-warm-200 bg-warm-100/30 rounded-[2px] text-center text-warm-400 font-sans text-sm">
+                No past events match your selected filters.
+              </div>
+            )}
           </div>
         </Container>
       </main>

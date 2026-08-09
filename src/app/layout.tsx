@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Inter, JetBrains_Mono } from "next/font/google";
+import { AnnouncementBanner } from "@/components/layout/AnnouncementBanner";
 import "./globals.css";
 
 const instrumentSerif = Instrument_Serif({
@@ -59,9 +60,9 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
       <body className="font-sans bg-white text-ink antialiased min-h-screen flex flex-col">
+        <AnnouncementBanner />
         {children}
       </body>
     </html>
   );
 }
-

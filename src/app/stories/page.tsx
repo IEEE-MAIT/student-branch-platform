@@ -3,9 +3,17 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { STORIES_DATA } from '@/lib/data';
 import Link from 'next/link';
 
+export const metadata = {
+  title: 'Stories & Reports | IEEE MAIT Student Branch',
+  description: 'Technical articles, event post-mortems, and student writing published by IEEE MAIT.',
+};
+
 export default function StoriesPage() {
+  const stories = Object.values(STORIES_DATA);
+
   return (
     <>
       <Navbar />
@@ -19,45 +27,35 @@ export default function StoriesPage() {
           />
 
           <div className="space-y-6 pt-4">
-            <div className="p-6 border border-warm-200 bg-white rounded-[2px] space-y-3">
-              <div className="flex items-center gap-3 font-mono text-xs text-ieee-blue">
-                <span>AUG 08, 2026</span>
-                <span>·</span>
-                <span>IEEE EDS Chapter</span>
-                <span>·</span>
-                <span>5 min read</span>
+            {stories.map(story => (
+              <div key={story.id} className="p-6 border border-warm-200 bg-white rounded-[2px] space-y-3 hover:border-ieee-blue transition-colors">
+                <div className="flex flex-wrap items-center gap-3 font-mono text-xs text-ieee-blue">
+                  <span>{story.publishedDate}</span>
+                  <span>·</span>
+                  <span>{story.unit}</span>
+                  <span>·</span>
+                  <span>{story.readingTime}</span>
+                  <span className="bg-ieee-subtle border border-ieee-blue/20 px-2 py-0.5 rounded-[2px] uppercase text-[10px]">
+                    {story.type}
+                  </span>
+                </div>
+                <h3 className="font-serif text-2xl text-ink font-normal">
+                  <Link href={`/stories/${story.slug}`} className="hover:text-ieee-blue transition-colors">
+                    {story.title}
+                  </Link>
+                </h3>
+                <p className="text-sm text-warm-400 leading-relaxed font-sans">
+                  {story.excerpt}
+                </p>
+                <Link
+                  href={`/stories/${story.slug}`}
+                  className="inline-flex items-center gap-1 text-xs font-mono font-semibold text-ieee-blue hover:underline pt-2"
+                >
+                  <span>Read Full Article</span>
+                  <span>→</span>
+                </Link>
               </div>
-              <h3 className="font-serif text-2xl text-ink font-normal">
-                Reflections on Our Applied Neural Networks Workshop Series
-              </h3>
-              <p className="text-sm text-warm-400 leading-relaxed">
-                A technical summary of key concepts covered during the 3-day deep learning session, student project highlights, and resources for further learning.
-              </p>
-              <Link href="#" className="inline-flex items-center gap-1 text-xs font-mono font-semibold text-ieee-blue hover:underline pt-2">
-                <span>Read Full Article</span>
-                <span>→</span>
-              </Link>
-            </div>
-
-            <div className="p-6 border border-warm-200 bg-white rounded-[2px] space-y-3">
-              <div className="flex items-center gap-3 font-mono text-xs text-ieee-blue">
-                <span>JUL 25, 2026</span>
-                <span>·</span>
-                <span>WIE Affinity Group</span>
-                <span>·</span>
-                <span>4 min read</span>
-              </div>
-              <h3 className="font-serif text-2xl text-ink font-normal">
-                Empowering Women in Engineering: WIE MAIT 2026 Roadmap
-              </h3>
-              <p className="text-sm text-warm-400 leading-relaxed">
-                An overview of upcoming mentorship programs, scholarship opportunities, and community outreach initiatives planned for the current academic year.
-              </p>
-              <Link href="#" className="inline-flex items-center gap-1 text-xs font-mono font-semibold text-ieee-blue hover:underline pt-2">
-                <span>Read Full Article</span>
-                <span>→</span>
-              </Link>
-            </div>
+            ))}
           </div>
         </Container>
       </main>
