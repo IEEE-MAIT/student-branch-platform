@@ -4,6 +4,12 @@ import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { AchievementRow } from '@/components/content/AchievementRow';
+import { ACHIEVEMENTS_DATA } from '@/lib/data';
+
+export const metadata = {
+  title: 'Achievements Ledger | IEEE MAIT Student Branch',
+  description: 'Documented institutional awards, hackathon recognitions, and IEEE Delhi Section achievements.',
+};
 
 export default function AchievementsPage() {
   return (
@@ -19,34 +25,16 @@ export default function AchievementsPage() {
           />
 
           <div className="border-t border-warm-200 pt-4">
-            <AchievementRow
-              year="2025"
-              title="Exemplary Student Branch Award"
-              conferredBy="IEEE Delhi Section"
-              unitOrTeam="IEEE MAIT SB"
-              category="IEEE Recognition"
-            />
-            <AchievementRow
-              year="2025"
-              title="First Place — National Robotics & Hardware Hackathon"
-              conferredBy="National Tech Summit"
-              unitOrTeam="EDS Student Team"
-              category="Competition"
-            />
-            <AchievementRow
-              year="2024"
-              title="Best Technical Event Organization Award"
-              conferredBy="IEEE Delhi Section Student Activities"
-              unitOrTeam="WIE Affinity Group"
-              category="Award"
-            />
-            <AchievementRow
-              year="2023"
-              title="Outstanding Student Branch Counselor Recognition"
-              conferredBy="IEEE Region 10"
-              unitOrTeam="Faculty Mentors"
-              category="Award"
-            />
+            {ACHIEVEMENTS_DATA.map(item => (
+              <AchievementRow
+                key={item.id}
+                year={item.year}
+                title={item.title}
+                conferredBy={item.conferredBy}
+                unitOrTeam={item.unitOrTeam}
+                category={item.category}
+              />
+            ))}
           </div>
         </Container>
       </main>

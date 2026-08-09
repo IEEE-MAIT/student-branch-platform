@@ -2,12 +2,24 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Container } from './Container';
 import { Button } from '../ui/Button';
 
 export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
+  const pathname = usePathname();
+
+  const isActive = (path: string) => {
+    if (path === '/') return pathname === '/';
+    return pathname.startsWith(path);
+  };
+
+  const linkClasses = (path: string) =>
+    `transition-colors ${
+      isActive(path) ? 'text-ieee-blue font-semibold border-b-2 border-ieee-blue pb-1' : 'text-ink hover:text-ieee-blue'
+    }`;
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-warm-200">
@@ -31,14 +43,14 @@ export const Navbar: React.FC = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-7 text-sm font-medium text-ink">
+          <nav className="hidden lg:flex items-center gap-7 text-sm font-medium">
             {/* About Dropdown */}
             <div 
               className="relative py-2"
               onMouseEnter={() => setAboutDropdownOpen(true)}
               onMouseLeave={() => setAboutDropdownOpen(false)}
             >
-              <Link href="/about" className="hover:text-ieee-blue flex items-center gap-1 transition-colors">
+              <Link href="/about" className={`${linkClasses('/about')} flex items-center gap-1`}>
                 About
                 <svg className="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -62,27 +74,27 @@ export const Navbar: React.FC = () => {
               )}
             </div>
 
-            <Link href="/people" className="hover:text-ieee-blue transition-colors">
+            <Link href="/people" className={linkClasses('/people')}>
               People
             </Link>
 
-            <Link href="/chapters" className="hover:text-ieee-blue transition-colors">
+            <Link href="/chapters" className={linkClasses('/chapters')}>
               Chapters
             </Link>
 
-            <Link href="/events" className="hover:text-ieee-blue transition-colors">
+            <Link href="/events" className={linkClasses('/events')}>
               Events
             </Link>
 
-            <Link href="/achievements" className="hover:text-ieee-blue transition-colors">
+            <Link href="/achievements" className={linkClasses('/achievements')}>
               Achievements
             </Link>
 
-            <Link href="/stories" className="hover:text-ieee-blue transition-colors">
+            <Link href="/stories" className={linkClasses('/stories')}>
               Stories
             </Link>
 
-            <Link href="/gallery" className="hover:text-ieee-blue transition-colors">
+            <Link href="/gallery" className={linkClasses('/gallery')}>
               Gallery
             </Link>
           </nav>

@@ -4,8 +4,16 @@ import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { ChapterPanel } from '@/components/content/ChapterPanel';
+import { CHAPTERS_DATA } from '@/lib/data';
+
+export const metadata = {
+  title: 'Chapters & Affinity Groups | IEEE MAIT Student Branch',
+  description: 'Explore active IEEE MAIT chapters including WIE Affinity Group and IEEE EDS Chapter.',
+};
 
 export default function ChaptersPage() {
+  const chaptersList = Object.values(CHAPTERS_DATA);
+
   return (
     <>
       <Navbar />
@@ -19,25 +27,18 @@ export default function ChaptersPage() {
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
-            <ChapterPanel
-              name="WIE Affinity Group"
-              slug="wie"
-              type="Affinity Group"
-              parentSociety="IEEE Women in Engineering"
-              description="IEEE WIE is a global network of IEEE members and volunteers dedicated to promoting women engineers and scientists, and inspiring girls around the world to follow their academic interests in STEM."
-              memberCount="60+"
-              eventCount="15+"
-            />
-
-            <ChapterPanel
-              name="IEEE EDS Chapter"
-              slug="eds"
-              type="Technical Chapter"
-              parentSociety="Electron Devices Society"
-              description="Focusing on field of electron devices, semiconductor physics, microelectronics, integrated circuits, and hardware engineering workshops."
-              memberCount="45+"
-              eventCount="12+"
-            />
+            {chaptersList.map(ch => (
+              <ChapterPanel
+                key={ch.id}
+                name={ch.name}
+                slug={ch.slug}
+                type={ch.type}
+                parentSociety={ch.parentSociety}
+                description={ch.description}
+                memberCount={ch.memberCount}
+                eventCount={ch.eventCount}
+              />
+            ))}
           </div>
         </Container>
       </main>

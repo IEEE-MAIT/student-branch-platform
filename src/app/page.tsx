@@ -9,9 +9,16 @@ import { EventPreview } from '@/components/content/EventPreview';
 import { PersonCard } from '@/components/content/PersonCard';
 import { AchievementRow } from '@/components/content/AchievementRow';
 import { ChapterPanel } from '@/components/content/ChapterPanel';
+import { EVENTS_DATA, ACHIEVEMENTS_DATA, CHAPTERS_DATA, BRANCH_STATS } from '@/lib/data';
 import Link from 'next/link';
 
 export default function HomePage() {
+  const upcomingEvents = EVENTS_DATA.filter(e => e.status === 'upcoming');
+  const featuredEvent = upcomingEvents[0];
+  const remainingUpcoming = upcomingEvents.slice(1);
+  const chaptersList = Object.values(CHAPTERS_DATA);
+  const featuredAchievements = ACHIEVEMENTS_DATA.slice(0, 3);
+
   return (
     <>
       <Navbar />
@@ -23,7 +30,7 @@ export default function HomePage() {
             <div className="max-w-3xl space-y-6">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-ieee-subtle border border-ieee-blue/20 rounded-[2px]">
                 <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-wider">
-                  IEEE Region 10 · Delhi Section
+                  {BRANCH_STATS.region} · {BRANCH_STATS.section}
                 </span>
               </div>
 
@@ -33,7 +40,7 @@ export default function HomePage() {
               </h1>
 
               <p className="text-lg sm:text-xl text-warm-400 font-sans leading-relaxed max-w-2xl">
-                Advancing technology, building community, and fostering technical excellence at Maharaja Agrasen Institute of Technology, Delhi. Established in 2005.
+                Advancing technology, building community, and fostering technical excellence at {BRANCH_STATS.institution}. Established in {BRANCH_STATS.establishedYear}.
               </p>
 
               <div className="pt-4 flex flex-wrap items-center gap-4">
@@ -52,10 +59,10 @@ export default function HomePage() {
         <section className="border-b border-warm-200 bg-warm-100/60 py-2">
           <Container size="default">
             <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 divide-warm-200">
-              <StatMetric label="Active Members" value="150+" subtext="Students across all years" />
-              <StatMetric label="Events Organized" value="50+" subtext="Workshops & seminars" />
-              <StatMetric label="Active Units" value="2+" subtext="WIE AG & EDS Chapter" />
-              <StatMetric label="Years Active" value="Since 2005" subtext="20+ years of continuity" />
+              <StatMetric label="Active Members" value={BRANCH_STATS.activeMembers} subtext="Students across all years" />
+              <StatMetric label="Events Organized" value={BRANCH_STATS.eventsOrganized} subtext="Workshops & seminars" />
+              <StatMetric label="Active Units" value={BRANCH_STATS.activeUnits} subtext="WIE AG & EDS Chapter" />
+              <StatMetric label="Years Active" value={`Since ${BRANCH_STATS.establishedYear}`} subtext="20+ years of continuity" />
             </div>
           </Container>
         </section>
@@ -80,38 +87,35 @@ export default function HomePage() {
             </div>
 
             <div className="space-y-8">
-              {/* Featured Next Event */}
-              <EventPreview
-                isFeatured
-                title="Workshop on Machine Learning Fundamentals & Applied Neural Networks"
-                slug="workshop-machine-learning-fundamentals"
-                date="AUG 20, 2026"
-                time="2:00 PM – 5:00 PM"
-                venue="Seminar Hall, Block A"
-                unit="IEEE EDS Chapter"
-                category="Technical Workshop"
-                description="Join us for an intensive hands-on session exploring deep learning architectures, practical model evaluation, and deployment strategies using Python."
-              />
+              {featuredEvent && (
+                <EventPreview
+                  isFeatured
+                  title={featuredEvent.title}
+                  slug={featuredEvent.slug}
+                  date={featuredEvent.date}
+                  time={featuredEvent.time}
+                  venue={featuredEvent.venue}
+                  unit={featuredEvent.unit}
+                  category={featuredEvent.category}
+                  description={featuredEvent.description}
+                />
+              )}
 
-              {/* Compact List Rows */}
-              <div className="border border-warm-200 bg-white rounded-[2px] divide-y divide-warm-200">
-                <EventPreview
-                  title="WIE Women in Tech Leadership Panel 2026"
-                  slug="wie-women-in-tech-leadership-panel"
-                  date="SEP 05, 2026"
-                  venue="Auditorium, Block IX"
-                  unit="WIE Affinity Group"
-                  category="Panel Discussion"
-                />
-                <EventPreview
-                  title="Annual Branch Orientation & Membership Drive"
-                  slug="branch-orientation-2026"
-                  date="SEP 15, 2026"
-                  venue="Main Auditorium"
-                  unit="IEEE MAIT SB"
-                  category="Branch Event"
-                />
-              </div>
+              {remainingUpcoming.length > 0 && (
+                <div className="border border-warm-200 bg-white rounded-[2px] divide-y divide-warm-200">
+                  {remainingUpcoming.map(event => (
+                    <EventPreview
+                      key={event.id}
+                      title={event.title}
+                      slug={event.slug}
+                      date={event.date}
+                      venue={event.venue}
+                      unit={event.unit}
+                      category={event.category}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </Container>
         </section>
@@ -127,7 +131,7 @@ export default function HomePage() {
                   className="mb-4"
                 />
                 <p className="text-base text-ink-muted leading-relaxed">
-                  Established in 2005, the IEEE MAIT Student Branch serves as the primary professional and technical student body at Maharaja Agrasen Institute of Technology, Rohini, Delhi.
+                  Established in {BRANCH_STATS.establishedYear}, the IEEE MAIT Student Branch serves as the primary professional and technical student body at Maharaja Agrasen Institute of Technology, Rohini, Delhi.
                 </p>
                 <p className="text-base text-warm-400 leading-relaxed">
                   We empower engineering students by providing access to IEEE&apos;s worldwide technical network, practical hands-on workshops, research opportunities, and leadership experience.
@@ -148,8 +152,8 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="text-xs text-warm-400 font-mono flex items-center justify-between pt-2">
-                  <span>Affiliation: IEEE Delhi Section</span>
-                  <span>Est. 2005</span>
+                  <span>Affiliation: {BRANCH_STATS.section}</span>
+                  <span>Est. {BRANCH_STATS.establishedYear}</span>
                 </div>
               </div>
             </div>
@@ -228,27 +232,16 @@ export default function HomePage() {
             </div>
 
             <div className="border-t border-warm-200">
-              <AchievementRow
-                year="2025"
-                title="Exemplary Student Branch Award"
-                conferredBy="IEEE Delhi Section"
-                unitOrTeam="IEEE MAIT SB"
-                category="IEEE Recognition"
-              />
-              <AchievementRow
-                year="2025"
-                title="First Place — National Robotics & Hardware Hackathon"
-                conferredBy="National Tech Summit"
-                unitOrTeam="EDS Student Team"
-                category="Competition"
-              />
-              <AchievementRow
-                year="2024"
-                title="Best Technical Event Organization Award"
-                conferredBy="IEEE Delhi Section Student Activities"
-                unitOrTeam="WIE Affinity Group"
-                category="Award"
-              />
+              {featuredAchievements.map(item => (
+                <AchievementRow
+                  key={item.id}
+                  year={item.year}
+                  title={item.title}
+                  conferredBy={item.conferredBy}
+                  unitOrTeam={item.unitOrTeam}
+                  category={item.category}
+                />
+              ))}
             </div>
           </Container>
         </section>
@@ -263,25 +256,18 @@ export default function HomePage() {
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <ChapterPanel
-                name="WIE Affinity Group"
-                slug="wie"
-                type="Affinity Group"
-                parentSociety="IEEE Women in Engineering"
-                description="Dedicated to promoting women engineers and scientists, and inspiring girls around the world to follow their academic interests in STEM."
-                memberCount="60+"
-                eventCount="15+"
-              />
-
-              <ChapterPanel
-                name="IEEE EDS Chapter"
-                slug="eds"
-                type="Technical Chapter"
-                parentSociety="Electron Devices Society"
-                description="Focusing on field of electron devices, semiconductor technologies, solid-state physics, and integrated circuit design workshops."
-                memberCount="45+"
-                eventCount="12+"
-              />
+              {chaptersList.map(ch => (
+                <ChapterPanel
+                  key={ch.id}
+                  name={ch.name}
+                  slug={ch.slug}
+                  type={ch.type}
+                  parentSociety={ch.parentSociety}
+                  description={ch.description}
+                  memberCount={ch.memberCount}
+                  eventCount={ch.eventCount}
+                />
+              ))}
             </div>
           </Container>
         </section>
@@ -298,7 +284,7 @@ export default function HomePage() {
                   Ready to be part of IEEE MAIT?
                 </h2>
                 <p className="text-ieee-subtle text-base font-sans">
-                  Connect with 150+ active students, gain access to IEEE&apos;s global technical resources of 460,000+ members, and build real leadership experience.
+                  Connect with {BRANCH_STATS.activeMembers} active students, gain access to IEEE&apos;s global technical resources of 460,000+ members, and build real leadership experience.
                 </p>
               </div>
 
