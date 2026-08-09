@@ -1,31 +1,57 @@
 'use client';
 
+/**
+ * @file src/components/layout/Navbar.tsx
+ * @description Main sticky global navigation bar for IEEE MAIT Student Branch website.
+ * 
+ * BRAND COMPLIANCE & CLEAR SPACE RULES:
+ * - Displays the official IEEE MAIT identifier with strict clear space rules.
+ * - Divider line separates the IEEE identifier from MAIT institutional context.
+ * - Enforces active route highlighting in IEEE Blue (#00629B).
+ * - Provides accessible mobile drawer navigation and desktop dropdowns.
+ * 
+ * @author IEEE MAIT Webmaster & Open Source Contributors
+ */
+
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Container } from './Container';
 import { Button } from '../ui/Button';
 
+/**
+ * Global Navigation Header Component.
+ */
 export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const pathname = usePathname();
 
+  /**
+   * Helper to check if a route path is currently active.
+   * @param path Target route URL
+   */
   const isActive = (path: string) => {
     if (path === '/') return pathname === '/';
     return pathname.startsWith(path);
   };
 
+  /**
+   * Generates active navigation link styling.
+   * @param path Target route URL
+   */
   const linkClasses = (path: string) =>
     `transition-colors ${
-      isActive(path) ? 'text-ieee-blue font-semibold border-b-2 border-ieee-blue pb-1' : 'text-ink hover:text-ieee-blue'
+      isActive(path)
+        ? 'text-ieee-blue font-semibold border-b-2 border-ieee-blue pb-1'
+        : 'text-ink hover:text-ieee-blue'
     }`;
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-warm-200">
       <Container size="wide">
         <div className="flex items-center justify-between h-20">
-          {/* Logo & Co-Branding */}
+          {/* IEEE + MAIT Co-Branding Header */}
           <Link href="/" className="flex items-center gap-4 group">
             <div className="flex flex-col">
               <span className="font-sans font-bold text-xl tracking-tight text-ieee-blue group-hover:text-ieee-dark transition-colors">
@@ -42,10 +68,10 @@ export const Navbar: React.FC = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation Link Menu */}
           <nav className="hidden lg:flex items-center gap-7 text-sm font-medium">
-            {/* About Dropdown */}
-            <div 
+            {/* About Sub-menu Dropdown */}
+            <div
               className="relative py-2"
               onMouseEnter={() => setAboutDropdownOpen(true)}
               onMouseLeave={() => setAboutDropdownOpen(false)}
@@ -56,6 +82,7 @@ export const Navbar: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </Link>
+
               {aboutDropdownOpen && (
                 <div className="absolute top-full left-0 w-56 bg-white border border-warm-200 shadow-lg py-2 rounded-[2px] z-50">
                   <Link href="/about" className="block px-4 py-2 text-xs hover:bg-ieee-subtle hover:text-ieee-blue transition-colors">
@@ -99,18 +126,19 @@ export const Navbar: React.FC = () => {
             </Link>
           </nav>
 
-          {/* Action CTAs */}
+          {/* Primary Call To Action */}
           <div className="hidden sm:flex items-center gap-4">
             <Button href="/join" variant="primary" size="md">
               Join IEEE MAIT
             </Button>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Toggle Toggle Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="lg:hidden p-2 text-ink hover:text-ieee-blue focus:outline-none"
             aria-label="Toggle Navigation Menu"
+            aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? (
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,54 +153,54 @@ export const Navbar: React.FC = () => {
         </div>
       </Container>
 
-      {/* Mobile Menu Drawer */}
+      {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-warm-200 bg-white px-4 pt-3 pb-6 space-y-3">
           <div className="font-mono text-[11px] text-warm-300 uppercase tracking-widest px-2 pt-2">Navigation</div>
-          <Link 
-            href="/about" 
+          <Link
+            href="/about"
             className="block px-2 py-1.5 text-base font-medium hover:text-ieee-blue"
             onClick={() => setMobileMenuOpen(false)}
           >
             About IEEE MAIT
           </Link>
-          <Link 
-            href="/people" 
+          <Link
+            href="/people"
             className="block px-2 py-1.5 text-base font-medium hover:text-ieee-blue"
             onClick={() => setMobileMenuOpen(false)}
           >
             People & Leadership
           </Link>
-          <Link 
-            href="/chapters" 
+          <Link
+            href="/chapters"
             className="block px-2 py-1.5 text-base font-medium hover:text-ieee-blue"
             onClick={() => setMobileMenuOpen(false)}
           >
             Chapters & AGs
           </Link>
-          <Link 
-            href="/events" 
+          <Link
+            href="/events"
             className="block px-2 py-1.5 text-base font-medium hover:text-ieee-blue"
             onClick={() => setMobileMenuOpen(false)}
           >
             Events & Workshops
           </Link>
-          <Link 
-            href="/achievements" 
+          <Link
+            href="/achievements"
             className="block px-2 py-1.5 text-base font-medium hover:text-ieee-blue"
             onClick={() => setMobileMenuOpen(false)}
           >
             Achievements
           </Link>
-          <Link 
-            href="/stories" 
+          <Link
+            href="/stories"
             className="block px-2 py-1.5 text-base font-medium hover:text-ieee-blue"
             onClick={() => setMobileMenuOpen(false)}
           >
             Stories & Reports
           </Link>
-          <Link 
-            href="/gallery" 
+          <Link
+            href="/gallery"
             className="block px-2 py-1.5 text-base font-medium hover:text-ieee-blue"
             onClick={() => setMobileMenuOpen(false)}
           >

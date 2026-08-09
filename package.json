@@ -1,6 +1,6 @@
 {
-  "name": "empty-shadow-2a43",
-  "version": "0.1.0",
+  "name": "student-branch",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",

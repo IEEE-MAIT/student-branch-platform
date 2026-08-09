@@ -1,12 +1,23 @@
 import React from 'react';
 
+/**
+ * Props for StatMetric component.
+ */
 interface StatMetricProps {
+  /** Metric label (e.g. 'Active Members', 'Years Active') */
   label: string;
+  /** Monospaced statistical value (e.g. '150+', 'Since 2005') */
   value: string;
+  /** Explanatory subtext */
   subtext?: string;
+  /** Custom CSS classes */
   className?: string;
 }
 
+/**
+ * Monospaced Statistical Metric Counter Component.
+ * Used inside horizontal ruled bars for at-a-glance branch statistics.
+ */
 export const StatMetric: React.FC<StatMetricProps> = ({
   label,
   value,
@@ -22,7 +33,7 @@ export const StatMetric: React.FC<StatMetricProps> = ({
         {label}
       </span>
       {subtext && (
-        <span className="text-[11px] text-warm-400 mt-0.5">
+        <span className="text-[11px] text-warm-400 mt-0.5 font-sans">
           {subtext}
         </span>
       )}

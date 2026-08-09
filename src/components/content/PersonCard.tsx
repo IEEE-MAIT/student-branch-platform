@@ -2,16 +2,30 @@ import React from 'react';
 import Image from 'next/image';
 import { Badge } from '../ui/Badge';
 
+/**
+ * Props for PersonCard component.
+ */
 interface PersonCardProps {
+  /** Full name of the person */
   name: string;
+  /** Designation or role (e.g. 'Branch Counselor', 'Chairperson') */
   role: string;
+  /** Academic department or branch */
   department?: string;
+  /** Academic year term */
   academicYear?: string;
+  /** Portrait photo image URL */
   imageSrc?: string;
+  /** LinkedIn profile URL */
   linkedIn?: string;
+  /** Organizational hierarchy scale: mentor, featured, standard, compact */
   hierarchy?: 'mentor' | 'featured' | 'standard' | 'compact';
 }
 
+/**
+ * Hierarchical Person & Leadership Card Component.
+ * Encodes organizational hierarchy into visual portrait scale. Uses sharp 2px rectangular frames (never circular avatars).
+ */
 export const PersonCard: React.FC<PersonCardProps> = ({
   name,
   role,

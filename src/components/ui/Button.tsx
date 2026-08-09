@@ -1,15 +1,28 @@
 import React from 'react';
 import Link from 'next/link';
 
+/**
+ * Props for the Button UI component.
+ */
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  /** Visual variant: primary (IEEE Blue), secondary (outline), accent (MAIT Warm), ghost (text-only) */
   variant?: 'primary' | 'secondary' | 'accent' | 'ghost';
+  /** Button scale size */
   size?: 'sm' | 'md' | 'lg';
+  /** Optional link target URL */
   href?: string;
+  /** Whether link opens in a new tab */
   external?: boolean;
+  /** Button content */
   children: React.ReactNode;
+  /** Custom CSS classes */
   className?: string;
 }
 
+/**
+ * Structured Button & Link CTA Component.
+ * Implements 2px border radius, sharp focus rings, and explicit IEEE brand variants.
+ */
 export const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
   size = 'md',

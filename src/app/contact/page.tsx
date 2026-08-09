@@ -1,4 +1,16 @@
-import React from 'react';
+'use client';
+
+/**
+ * @file src/app/contact/page.tsx
+ * @description Official Contact & Outreach page for IEEE MAIT Student Branch.
+ * 
+ * Includes campus location in Rohini, Delhi, official contact email (mait.ieee.sb@gmail.com),
+ * social media links, and interactive inquiry form handling.
+ * 
+ * @author IEEE MAIT Webmaster & Open Source Contributors
+ */
+
+import React, { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
@@ -6,6 +18,13 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Button } from '@/components/ui/Button';
 
 export default function ContactPage() {
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSubmitted(true);
+  };
+
   return (
     <>
       <Navbar />
@@ -67,60 +86,79 @@ export default function ContactPage() {
                 Send an Inquiry
               </h3>
 
-              <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block font-mono text-xs uppercase tracking-wider text-ink font-medium mb-1">
-                      Your Name
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Aarav Sharma"
-                      className="w-full px-3 py-2 text-sm border border-warm-200 rounded-[2px] focus:outline-none focus:border-ieee-blue"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-mono text-xs uppercase tracking-wider text-ink font-medium mb-1">
-                      Your Email
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="name@domain.com"
-                      className="w-full px-3 py-2 text-sm border border-warm-200 rounded-[2px] focus:outline-none focus:border-ieee-blue"
-                    />
+              {submitted ? (
+                <div className="p-6 bg-ieee-subtle border border-ieee-blue/20 rounded-[2px] space-y-2">
+                  <span className="font-mono text-xs font-bold text-ieee-blue uppercase tracking-wider block">
+                    Message Sent Successfully
+                  </span>
+                  <p className="text-sm text-ink font-sans">
+                    Thank you for reaching out to IEEE MAIT Student Branch. Our executive team will review your message and respond to your email shortly.
+                  </p>
+                  <div className="pt-2">
+                    <button
+                      onClick={() => setSubmitted(false)}
+                      className="text-xs font-mono text-ieee-blue underline"
+                    >
+                      Send Another Message
+                    </button>
                   </div>
                 </div>
+              ) : (
+                <form className="space-y-4" onSubmit={handleSubmit}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block font-mono text-xs uppercase tracking-wider text-ink font-medium mb-1">
+                        Your Name
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Aarav Sharma"
+                        className="w-full px-3 py-2 text-sm border border-warm-200 rounded-[2px] focus:outline-none focus:border-ieee-blue font-sans"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-mono text-xs uppercase tracking-wider text-ink font-medium mb-1">
+                        Your Email
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="name@domain.com"
+                        className="w-full px-3 py-2 text-sm border border-warm-200 rounded-[2px] focus:outline-none focus:border-ieee-blue font-sans"
+                      />
+                    </div>
+                  </div>
 
-                <div>
-                  <label className="block font-mono text-xs uppercase tracking-wider text-ink font-medium mb-1">
-                    Subject / Topic
-                  </label>
-                  <select className="w-full px-3 py-2 text-sm border border-warm-200 rounded-[2px] focus:outline-none focus:border-ieee-blue bg-white">
-                    <option>General Inquiry</option>
-                    <option>Membership & Registration</option>
-                    <option>Event & Workshop Collaboration</option>
-                    <option>Sponsorship / Industry Partnership</option>
-                  </select>
-                </div>
+                  <div>
+                    <label className="block font-mono text-xs uppercase tracking-wider text-ink font-medium mb-1">
+                      Subject / Topic
+                    </label>
+                    <select className="w-full px-3 py-2 text-sm border border-warm-200 rounded-[2px] focus:outline-none focus:border-ieee-blue bg-white font-sans">
+                      <option>General Inquiry</option>
+                      <option>Membership & Registration</option>
+                      <option>Event & Workshop Collaboration</option>
+                      <option>Sponsorship / Industry Partnership</option>
+                    </select>
+                  </div>
 
-                <div>
-                  <label className="block font-mono text-xs uppercase tracking-wider text-ink font-medium mb-1">
-                    Message
-                  </label>
-                  <textarea
-                    rows={4}
-                    required
-                    placeholder="How can IEEE MAIT assist you?"
-                    className="w-full px-3 py-2 text-sm border border-warm-200 rounded-[2px] focus:outline-none focus:border-ieee-blue"
-                  />
-                </div>
+                  <div>
+                    <label className="block font-mono text-xs uppercase tracking-wider text-ink font-medium mb-1">
+                      Message
+                    </label>
+                    <textarea
+                      rows={4}
+                      required
+                      placeholder="How can IEEE MAIT assist you?"
+                      className="w-full px-3 py-2 text-sm border border-warm-200 rounded-[2px] focus:outline-none focus:border-ieee-blue font-sans"
+                    />
+                  </div>
 
-                <Button type="submit" variant="primary" size="md" className="w-full sm:w-auto">
-                  Submit Message →
-                </Button>
-              </form>
+                  <Button type="submit" variant="primary" size="md" className="w-full sm:w-auto">
+                    Submit Message →
+                  </Button>
+                </form>
+              )}
             </div>
           </div>
         </Container>

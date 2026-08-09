@@ -1,16 +1,30 @@
 import React from 'react';
 import Link from 'next/link';
 
+/**
+ * Props for ChapterPanel component.
+ */
 interface ChapterPanelProps {
+  /** Name of the chapter or affinity group */
   name: string;
+  /** URL slug matching `/chapters/[slug]` */
   slug: string;
+  /** Unit classification type (e.g. 'Affinity Group', 'Technical Chapter') */
   type: string;
+  /** Overview summary description */
   description: string;
+  /** Current active member count string */
   memberCount?: string;
+  /** Total events organized count string */
   eventCount?: string;
+  /** Global IEEE parent society (e.g. 'IEEE Women in Engineering') */
   parentSociety?: string;
 }
 
+/**
+ * Reusable OrganizationUnit Chapter Panel Component.
+ * Displays chapter summary, statistics, parent society affiliation, and direct link to chapter detail route.
+ */
 export const ChapterPanel: React.FC<ChapterPanelProps> = ({
   name,
   slug,
@@ -38,7 +52,7 @@ export const ChapterPanel: React.FC<ChapterPanelProps> = ({
           {name}
         </h3>
 
-        <p className="text-sm text-warm-400 leading-relaxed line-clamp-3">
+        <p className="text-sm text-warm-400 leading-relaxed line-clamp-3 font-sans">
           {description}
         </p>
       </div>

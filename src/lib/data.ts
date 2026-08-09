@@ -1,63 +1,144 @@
+/**
+ * @file src/lib/data.ts
+ * @description Central strongly-typed data store and data entity definitions for IEEE MAIT Student Branch.
+ * 
+ * DESIGN PRINCIPLE:
+ * This data store acts as the baseline content for the open-source platform.
+ * Data structures map 1-to-1 with Payload CMS collection schemas (Person, Event, Achievement,
+ * OrganizationUnit, Milestone) to enable seamless CMS ingestion in Phase 3.
+ *
+ * @author IEEE MAIT Webmaster & Open Source Contributors
+ * @license MIT
+ */
+
+/**
+ * Represents a member of the branch, faculty counselor, executive officer, or lead.
+ * Corresponds to the `Person` collection schema in Payload CMS.
+ */
 export interface Person {
+  /** Unique identifier */
   id: string;
+  /** Full name of the person */
   name: string;
+  /** Organizational title or designation (e.g. 'Branch Counselor', 'Chairperson', 'Webmaster') */
   role: string;
+  /** Role hierarchy category for visual scaling on the People page */
   category: 'mentor' | 'sec' | 'lead' | 'chapter';
+  /** Academic branch/department (e.g. 'Department of ECE', '3rd Year, CSE') */
   department: string;
+  /** Academic term year (e.g. '2025–26') */
   academicYear: string;
+  /** Cloudinary or relative URL for portrait photo */
   imageSrc?: string;
+  /** Professional LinkedIn profile link */
   linkedIn?: string;
+  /** Short bio or summary */
   bio?: string;
 }
 
+/**
+ * Represents an upcoming or historical event organized by the branch or chapters.
+ * Corresponds to the `Event` collection schema in Payload CMS.
+ */
 export interface EventItem {
+  /** Unique identifier */
   id: string;
+  /** Event title */
   title: string;
+  /** URL-friendly slug */
   slug: string;
+  /** Formatted date string (e.g. 'AUG 20, 2026') */
   date: string;
+  /** Time range (e.g. '2:00 PM – 5:00 PM') */
   time?: string;
+  /** Physical campus location or online platform link */
   venue: string;
+  /** Full name of the organizing unit */
   unit: 'IEEE MAIT SB' | 'WIE Affinity Group' | 'IEEE EDS Chapter';
+  /** Short identifier matching chapter slug */
   unitSlug: 'sb' | 'wie' | 'eds';
+  /** Category classification */
   category: 'Technical Workshop' | 'Panel Discussion' | 'Branch Event' | 'Flagship Event' | 'Competition';
+  /** Lifecycle status of event */
   status: 'upcoming' | 'past';
+  /** Rich text description or summary */
   description: string;
+  /** Cover image or poster URL */
   imageSrc?: string;
+  /** Guest speakers or workshop facilitators */
   speakers?: Array<{ name: string; title: string; organization: string }>;
+  /** Timeline breakdown of event agenda */
   schedule?: Array<{ time: string; activity: string }>;
 }
 
+/**
+ * Represents an award, hackathon win, or institutional recognition earned by the branch.
+ * Corresponds to the `Achievement` collection schema in Payload CMS.
+ */
 export interface AchievementItem {
+  /** Unique identifier */
   id: string;
+  /** Year conferred */
   year: string;
+  /** Official title of award or achievement */
   title: string;
+  /** Awarding organization (e.g. 'IEEE Delhi Section', 'National Tech Summit') */
   conferredBy: string;
+  /** Associated branch unit or student team */
   unitOrTeam: string;
+  /** Category classification */
   category: 'IEEE Recognition' | 'Competition' | 'Award' | 'Research';
+  /** Extended details or description */
   description?: string;
 }
 
+/**
+ * Represents an autonomous chapter or affinity group (e.g. WIE, EDS).
+ * Corresponds to the `OrganizationUnit` collection schema in Payload CMS.
+ */
 export interface ChapterItem {
+  /** Unique identifier */
   id: string;
+  /** Display name of unit */
   name: string;
+  /** URL-friendly slug matching `/chapters/[slug]` */
   slug: string;
+  /** Classification type */
   type: 'Affinity Group' | 'Technical Chapter';
+  /** Global IEEE parent society */
   parentSociety: string;
+  /** Year established at MAIT */
   establishedYear: string;
+  /** Overview summary */
   description: string;
+  /** Detailed mission statement */
   mission: string;
+  /** Current member count */
   memberCount: string;
+  /** Total events organized */
   eventCount: string;
+  /** Current student lead name */
   leaderName: string;
+  /** Current student lead role title */
   leaderRole: string;
 }
 
+/**
+ * Represents a historical milestone entry in the institutional timeline.
+ * Corresponds to the `Milestone` collection schema in Payload CMS.
+ */
 export interface MilestoneItem {
+  /** Milestone year */
   year: string;
+  /** Title of milestone */
   title: string;
+  /** Detailed description */
   description: string;
 }
 
+/**
+ * Global institutional constants and statistics for IEEE MAIT Student Branch.
+ */
 export const BRANCH_STATS = {
   activeMembers: '150+',
   eventsOrganized: '50+',
@@ -69,6 +150,9 @@ export const BRANCH_STATS = {
   email: 'mait.ieee.sb@gmail.com',
 };
 
+/**
+ * Master catalog of active chapters and affinity groups.
+ */
 export const CHAPTERS_DATA: Record<string, ChapterItem> = {
   wie: {
     id: 'wie',
@@ -100,6 +184,9 @@ export const CHAPTERS_DATA: Record<string, ChapterItem> = {
   },
 };
 
+/**
+ * Catalog of branch events and workshops.
+ */
 export const EVENTS_DATA: EventItem[] = [
   {
     id: '1',
@@ -174,6 +261,9 @@ export const EVENTS_DATA: EventItem[] = [
   },
 ];
 
+/**
+ * Historical achievements and awards ledger.
+ */
 export const ACHIEVEMENTS_DATA: AchievementItem[] = [
   {
     id: 'a1',
@@ -213,6 +303,9 @@ export const ACHIEVEMENTS_DATA: AchievementItem[] = [
   },
 ];
 
+/**
+ * Institutional milestones catalog since branch establishment in 2005.
+ */
 export const MILESTONES_DATA: MilestoneItem[] = [
   {
     year: '2025',

@@ -2,6 +2,18 @@ import React from 'react';
 import Link from 'next/link';
 import { Container } from './Container';
 
+/**
+ * @file src/components/layout/Footer.tsx
+ * @description Global institutional footer component for IEEE MAIT Student Branch.
+ * 
+ * LEGAL COMPLIANCE & BRAND SPECIFICATIONS:
+ * - 4 Structured columns: About, Quick Links, Connect, and Institutional Context.
+ * - Displays official contact email (mait.ieee.sb@gmail.com) and campus location in Rohini, Sector-22, Delhi.
+ * - Dynamic copyright year evaluation (`new Date().getFullYear()`).
+ * - Enforces required IEEE trademark disclaimer text.
+ * 
+ * @author IEEE MAIT Webmaster & Open Source Contributors
+ */
 export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
@@ -9,7 +21,7 @@ export const Footer: React.FC = () => {
     <footer className="bg-ink text-white pt-16 pb-12 border-t border-warm-300/20">
       <Container size="wide">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-white/10">
-          {/* Column 1: About */}
+          {/* Column 1: About IEEE MAIT */}
           <div className="space-y-4">
             <h3 className="font-serif text-xl font-normal text-white">About</h3>
             <div className="accent-rule bg-ieee-blue my-2" />
@@ -70,7 +82,7 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Column 3: Connect */}
+          {/* Column 3: Connect & Social Handles */}
           <div className="space-y-4">
             <h3 className="font-serif text-xl font-normal text-white">Connect</h3>
             <div className="accent-rule bg-ieee-blue my-2" />
@@ -99,7 +111,7 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Column 4: Institutional Context */}
+          {/* Column 4: Institutional Summary */}
           <div className="space-y-4">
             <h3 className="font-serif text-xl font-normal text-white">IEEE MAIT</h3>
             <div className="accent-rule bg-ieee-blue my-2" />
@@ -114,7 +126,7 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom Bar & Legal Trademarks */}
+        {/* Legal Disclaimers & Copyright */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-warm-300/80 gap-4">
           <div>
             <p>

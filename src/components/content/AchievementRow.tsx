@@ -1,14 +1,27 @@
 import React from 'react';
 
+/**
+ * Props for AchievementRow component.
+ */
 interface AchievementRowProps {
+  /** Year award or recognition was conferred */
   year: string;
+  /** Title of achievement */
   title: string;
+  /** Conferring organization */
   conferredBy: string;
+  /** Associated branch unit or student team */
   unitOrTeam?: string;
+  /** Category classification tag */
   category?: string;
+  /** Custom CSS classes */
   className?: string;
 }
 
+/**
+ * Chronological Ledger Row Component for Achievements.
+ * Formatted as a ruled table entry with year marker column, title, and conferred entity.
+ */
 export const AchievementRow: React.FC<AchievementRowProps> = ({
   year,
   title,

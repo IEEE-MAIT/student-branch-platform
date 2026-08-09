@@ -1,13 +1,25 @@
 import React from 'react';
 
+/**
+ * Props for the SectionHeading component.
+ */
 interface SectionHeadingProps {
+  /** Main section title rendered in Instrument Serif */
   title: string;
+  /** Subtitle or explanatory narrative text */
   subtitle?: string;
+  /** Monospaced category prefix label */
   category?: string;
+  /** Text alignment */
   align?: 'left' | 'center';
+  /** Custom CSS classes */
   className?: string;
 }
 
+/**
+ * Editorial Section Heading Component.
+ * Pairs Instrument Serif display typography with uppercase monospaced category tags and an accent line.
+ */
 export const SectionHeading: React.FC<SectionHeadingProps> = ({
   title,
   subtitle,
@@ -29,7 +41,7 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
       </h2>
       <div className="accent-rule my-3" />
       {subtitle && (
-        <p className="text-base sm:text-lg text-warm-400 max-w-2xl mt-1 leading-relaxed">
+        <p className="text-base sm:text-lg text-warm-400 max-w-2xl mt-1 leading-relaxed font-sans">
           {subtitle}
         </p>
       )}

@@ -3,20 +3,38 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Badge } from '../ui/Badge';
 
+/**
+ * Props for EventPreview component.
+ */
 interface EventPreviewProps {
+  /** Event title */
   title: string;
+  /** URL slug */
   slug: string;
+  /** Formatted date string */
   date: string;
+  /** Time range */
   time?: string;
+  /** Venue location */
   venue: string;
+  /** Organizing unit name */
   unit: string;
+  /** Event category tag */
   category: string;
+  /** Short description */
   description?: string;
+  /** Poster image URL */
   imageSrc?: string;
+  /** Whether to render as featured next event hero card */
   isFeatured?: boolean;
+  /** Registration URL */
   registrationLink?: string;
 }
 
+/**
+ * Event Preview List Item & Featured Hero Component.
+ * Supports both large featured event card layout and compact ruled list rows.
+ */
 export const EventPreview: React.FC<EventPreviewProps> = ({
   title,
   slug,
@@ -50,7 +68,7 @@ export const EventPreview: React.FC<EventPreviewProps> = ({
             </h3>
 
             {description && (
-              <p className="text-sm text-warm-400 leading-relaxed line-clamp-3 mb-4">
+              <p className="text-sm text-warm-400 leading-relaxed line-clamp-3 mb-4 font-sans">
                 {description}
               </p>
             )}
@@ -94,7 +112,7 @@ export const EventPreview: React.FC<EventPreviewProps> = ({
               {title}
             </Link>
           </h4>
-          <div className="flex items-center gap-2 text-xs text-warm-400 mt-0.5">
+          <div className="flex items-center gap-2 text-xs text-warm-400 mt-0.5 font-sans">
             <span>{unit}</span>
             <span>·</span>
             <span>{venue}</span>
