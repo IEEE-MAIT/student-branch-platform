@@ -2,12 +2,12 @@
 
 /**
  * @file src/app/admin/page.tsx
- * @description Secure JWT-Authenticated Officer Portal & Super Admin Management Dashboard for IEEE MAIT.
+ * @description Secure JWT-Authenticated Officer Portal & Site-Wide Audit History Ledger for IEEE MAIT.
  * 
- * SECURITY SPECIFICATIONS:
- * - JWT Cookie Session Verification via `/api/auth/session`.
- * - Default Super Admin Account: `mait.ieee.sb@gmail.com` / `Admin@2026`.
- * - Super Admin Officer Creation Form & Officer Directory Table (`/api/auth/create-officer`).
+ * AUDIT & CHANGE HISTORY SPECIFICATIONS:
+ * - Fetches `/api/audit-logs` history ledger displaying Who modified What and When.
+ * - Displays timestamp, officer email, action badge (`CREATE`, `UPDATE`, `DELETE`), and change description.
+ * - Super Admin Officer Creation Panel & Collections Overview.
  * 
  * @author IEEE MAIT Webmaster & Security Engineering
  * @license MIT
@@ -32,10 +32,21 @@ interface OfficerInfo {
   createdBy?: string;
 }
 
+interface AuditLogItem {
+  id: string;
+  timestamp: string;
+  performedBy: string;
+  actionType: 'CREATE' | 'UPDATE' | 'DELETE';
+  entityType: string;
+  entityTitle: string;
+  changeSummary: string;
+}
+
 export default function AdminDashboardPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [currentOfficer, setCurrentOfficer] = useState<OfficerInfo | null>(null);
   const [officersList, setOfficersList] = useState<OfficerInfo[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLogItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   // Login Form State
@@ -51,7 +62,7 @@ export default function AdminDashboardPage() {
   const [newOfficerCategory, setNewOfficerCategory] = useState<PersonCategory>(PersonCategory.SEC);
   const [createMsg, setCreateMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Check active JWT session on mount
+  // Check active JWT session & fetch audit logs on mount
   useEffect(() => {
     fetch('/api/auth/session')
       .then((res) => res.json())
@@ -65,11 +76,25 @@ export default function AdminDashboardPage() {
           setCurrentOfficer(null);
         }
       })
-      .catch(() => {
-        setIsAuthenticated(false);
-      })
+      .catch(() => setIsAuthenticated(false))
       .finally(() => setLoading(false));
+
+    // Fetch Audit Logs
+    fetch('/api/audit-logs')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setAuditLogs(data);
+      })
+      .catch((err) => console.warn('[Audit Logs] Fetch failed:', err));
   }, []);
+
+  const refreshAuditLogs = () => {
+    fetch('/api/audit-logs')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setAuditLogs(data);
+      });
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,10 +117,10 @@ export default function AdminDashboardPage() {
       setCurrentOfficer(data.officer);
       setPassword('');
 
-      // Refresh session data
       const sessionRes = await fetch('/api/auth/session');
       const sessionData = await sessionRes.json();
       if (sessionData.officersList) setOfficersList(sessionData.officersList);
+      refreshAuditLogs();
     } catch {
       setLoginError('Server network connection error.');
     }
@@ -136,10 +161,10 @@ export default function AdminDashboardPage() {
       setNewOfficerName('');
       setNewOfficerEmail('');
 
-      // Refresh officers list
       const sessionRes = await fetch('/api/auth/session');
       const sessionData = await sessionRes.json();
       if (sessionData.officersList) setOfficersList(sessionData.officersList);
+      refreshAuditLogs();
     } catch {
       setCreateMsg({ type: 'error', text: 'Server network error creating officer.' });
     }
@@ -150,7 +175,7 @@ export default function AdminDashboardPage() {
       <>
         <Navbar />
         <main className="py-24 text-center font-mono text-sm text-warm-400">
-          Loading JWT Authentication Session...
+          Loading JWT Session & Audit History...
         </main>
         <Footer />
       </>
@@ -167,24 +192,24 @@ export default function AdminDashboardPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-warm-200 pb-6 mb-12">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <Badge variant="ieee">IEEE MAIT Security</Badge>
+                <Badge variant="ieee">IEEE MAIT Audit Engine</Badge>
                 <Badge variant={isAuthenticated ? 'ieee' : 'neutral'}>
                   {isAuthenticated ? `JWT Session: ${currentOfficer?.role}` : 'JWT Protected'}
                 </Badge>
               </div>
               <h1 className="font-serif text-3xl sm:text-4xl text-ink font-normal">
-                Officer Authentication & Role Management
+                Site-Wide Change History & Governance Ledger
               </h1>
             </div>
 
             <div className="bg-warm-100/80 border border-warm-200 px-4 py-2 rounded-[2px] font-mono text-xs flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="text-ink font-semibold">HMAC-SHA256 JWT:</span>
+              <span className="text-ink font-semibold">Audit Logging:</span>
               <span className="text-emerald-700 font-bold">Active ✓</span>
             </div>
           </div>
 
-          {/* Conditional View: Login vs Authenticated Portal */}
+          {/* Conditional View: Login Form vs Authenticated Portal */}
           {!isAuthenticated ? (
             <div className="max-w-md mx-auto my-8 border border-warm-200 bg-white p-8 rounded-[2px] shadow-sm space-y-6">
               <div className="space-y-2 border-b border-warm-200 pb-4">
@@ -195,7 +220,7 @@ export default function AdminDashboardPage() {
                   Log In to Admin Portal
                 </h3>
                 <p className="text-xs text-warm-400 font-sans">
-                  Enter your officer credentials to issue a secure HttpOnly JWT session token.
+                  Enter your officer credentials to access change history logs and management tools.
                 </p>
               </div>
 
@@ -239,7 +264,7 @@ export default function AdminDashboardPage() {
                     type="submit"
                     className="w-full py-3 bg-ieee-blue text-white font-mono text-xs font-bold rounded-[2px] hover:bg-ieee-dark transition-colors uppercase tracking-wider"
                   >
-                    Authenticate JWT Session →
+                    Authenticate Session →
                   </button>
                 </div>
               </form>
@@ -250,7 +275,7 @@ export default function AdminDashboardPage() {
             </div>
           ) : (
             <div className="space-y-12">
-              {/* Authenticated Session Header */}
+              {/* Authenticated Session Bar */}
               <div className="bg-ieee-subtle border border-ieee-blue/30 p-4 rounded-[2px] flex flex-wrap items-center justify-between gap-4 font-mono text-xs">
                 <div className="flex items-center gap-2 text-ieee-blue">
                   <span className="font-bold">Logged In Officer:</span>
@@ -266,6 +291,77 @@ export default function AdminDashboardPage() {
                 >
                   🔒 Clear JWT Cookie (Logout)
                 </button>
+              </div>
+
+              {/* SITE-WIDE CHANGE HISTORY LEDGER TABLE (Who, When, What) */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b border-warm-200 pb-2">
+                  <div>
+                    <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-wider block">
+                      Audit Governance
+                    </span>
+                    <h3 className="font-serif text-2xl text-ink font-normal">
+                      Site-Wide Change History Ledger ({auditLogs.length})
+                    </h3>
+                  </div>
+                  <button
+                    onClick={refreshAuditLogs}
+                    className="px-3 py-1 bg-warm-100 border border-warm-200 hover:border-ieee-blue font-mono text-xs rounded-[2px] transition-colors"
+                  >
+                    🔄 Refresh Logs
+                  </button>
+                </div>
+
+                <div className="border border-warm-200 rounded-[2px] bg-white overflow-x-auto">
+                  <table className="w-full text-left font-sans text-xs">
+                    <thead className="bg-warm-100/70 border-b border-warm-200 font-mono text-warm-400 uppercase text-[11px]">
+                      <tr>
+                        <th className="p-3">Timestamp (When)</th>
+                        <th className="p-3">Officer (Who)</th>
+                        <th className="p-3">Action</th>
+                        <th className="p-3">Target Entity</th>
+                        <th className="p-3">Change Summary (What Changed)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-warm-200">
+                      {auditLogs.map((log) => (
+                        <tr key={log.id} className="hover:bg-warm-100/30">
+                          <td className="p-3 font-mono text-warm-400 whitespace-nowrap">
+                            {new Date(log.timestamp).toLocaleString('en-US', {
+                              month: 'short',
+                              day: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </td>
+                          <td className="p-3 font-mono text-ieee-blue font-semibold whitespace-nowrap">
+                            {log.performedBy}
+                          </td>
+                          <td className="p-3 font-mono whitespace-nowrap">
+                            <span
+                              className={`px-2 py-0.5 rounded-[2px] text-[10px] font-bold uppercase ${
+                                log.actionType === 'CREATE'
+                                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                  : log.actionType === 'UPDATE'
+                                  ? 'bg-blue-100 text-blue-800 border border-blue-300'
+                                  : 'bg-red-100 text-red-800 border border-red-300'
+                              }`}
+                            >
+                              {log.actionType}
+                            </span>
+                          </td>
+                          <td className="p-3 font-semibold text-ink whitespace-nowrap">
+                            [{log.entityType}] {log.entityTitle}
+                          </td>
+                          <td className="p-3 text-ink-muted leading-relaxed max-w-md">
+                            {log.changeSummary}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
               {/* SUPER ADMIN OFFICER REGISTRATION FORM */}
@@ -372,7 +468,7 @@ export default function AdminDashboardPage() {
                 </div>
               )}
 
-              {/* ACTIVE OFFICERS DIRECTORY TABLE */}
+              {/* REGISTERED OFFICERS DIRECTORY TABLE */}
               {officersList.length > 0 && (
                 <div className="space-y-4">
                   <h3 className="font-serif text-2xl text-ink font-normal border-b border-warm-200 pb-2">
@@ -408,123 +504,6 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
               )}
-
-              <SectionHeading
-                category="Content & Governance"
-                title="Management Dashboards"
-                subtitle="Select a management collection to create, edit, or audit institutional records."
-              />
-
-              {/* CMS Collections Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
-                {/* 1. People Collection */}
-                <div className="p-6 border border-warm-200 bg-white rounded-[2px] space-y-4 hover:border-ieee-blue transition-colors flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between font-mono text-xs">
-                      <span className="text-ieee-blue font-semibold uppercase">Collection</span>
-                      <span className="text-warm-400">6 Official Categories</span>
-                    </div>
-                    <h3 className="font-serif text-2xl text-ink font-normal">People & Leadership</h3>
-                    <p className="text-xs text-warm-400 font-sans leading-relaxed">
-                      Manage Branch Counsellor, Student Mentors, SEC, Operational Leads, and Chapter Executives.
-                    </p>
-                  </div>
-                  <div className="pt-4 border-t border-warm-200 flex items-center justify-between text-xs font-mono">
-                    <span className="text-warm-400">Schema: PeopleCollection</span>
-                    <span className="text-ieee-blue font-semibold">Audit Active ✓</span>
-                  </div>
-                </div>
-
-                {/* 2. Events Collection */}
-                <div className="p-6 border border-warm-200 bg-white rounded-[2px] space-y-4 hover:border-ieee-blue transition-colors flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between font-mono text-xs">
-                      <span className="text-ieee-blue font-semibold uppercase">Collection</span>
-                      <span className="text-warm-400">Upcoming & Past</span>
-                    </div>
-                    <h3 className="font-serif text-2xl text-ink font-normal">Events & Workshops</h3>
-                    <p className="text-xs text-warm-400 font-sans leading-relaxed">
-                      Post technical workshops, panel discussions, registration links, schedules, and speakers.
-                    </p>
-                  </div>
-                  <div className="pt-4 border-t border-warm-200 flex items-center justify-between text-xs font-mono">
-                    <span className="text-warm-400">Schema: EventsCollection</span>
-                    <span className="text-ieee-blue font-semibold">iCal Sync Active ✓</span>
-                  </div>
-                </div>
-
-                {/* 3. Achievements Collection */}
-                <div className="p-6 border border-warm-200 bg-white rounded-[2px] space-y-4 hover:border-ieee-blue transition-colors flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between font-mono text-xs">
-                      <span className="text-ieee-blue font-semibold uppercase">Collection</span>
-                      <span className="text-warm-400">Awards & Wins</span>
-                    </div>
-                    <h3 className="font-serif text-2xl text-ink font-normal">Achievements Ledger</h3>
-                    <p className="text-xs text-warm-400 font-sans leading-relaxed">
-                      Record section awards, national hackathon wins, and institutional recognitions.
-                    </p>
-                  </div>
-                  <div className="pt-4 border-t border-warm-200 flex items-center justify-between text-xs font-mono">
-                    <span className="text-warm-400">Schema: Achievements</span>
-                    <span className="text-ieee-blue font-semibold">Ledger Active ✓</span>
-                  </div>
-                </div>
-
-                {/* 4. Organization Units */}
-                <div className="p-6 border border-warm-200 bg-white rounded-[2px] space-y-4 hover:border-ieee-blue transition-colors flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between font-mono text-xs">
-                      <span className="text-ieee-blue font-semibold uppercase">Collection</span>
-                      <span className="text-warm-400">WIE & EDS</span>
-                    </div>
-                    <h3 className="font-serif text-2xl text-ink font-normal">Organization Units</h3>
-                    <p className="text-xs text-warm-400 font-sans leading-relaxed">
-                      Update mission statements, leadership details, and statistics for chapters & AGs.
-                    </p>
-                  </div>
-                  <div className="pt-4 border-t border-warm-200 flex items-center justify-between text-xs font-mono">
-                    <span className="text-warm-400">Schema: OrgUnits</span>
-                    <span className="text-ieee-blue font-semibold">Active ✓</span>
-                  </div>
-                </div>
-
-                {/* 5. Stories & Articles */}
-                <div className="p-6 border border-warm-200 bg-white rounded-[2px] space-y-4 hover:border-ieee-blue transition-colors flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between font-mono text-xs">
-                      <span className="text-ieee-blue font-semibold uppercase">Collection</span>
-                      <span className="text-warm-400">Publications</span>
-                    </div>
-                    <h3 className="font-serif text-2xl text-ink font-normal">Stories & Reports</h3>
-                    <p className="text-xs text-warm-400 font-sans leading-relaxed">
-                      Publish technical event reports, student writing, and workshop series post-mortems.
-                    </p>
-                  </div>
-                  <div className="pt-4 border-t border-warm-200 flex items-center justify-between text-xs font-mono">
-                    <span className="text-warm-400">Schema: Stories</span>
-                    <span className="text-ieee-blue font-semibold">Active ✓</span>
-                  </div>
-                </div>
-
-                {/* 6. Photo Galleries */}
-                <div className="p-6 border border-warm-200 bg-white rounded-[2px] space-y-4 hover:border-ieee-blue transition-colors flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between font-mono text-xs">
-                      <span className="text-ieee-blue font-semibold uppercase">Collection</span>
-                      <span className="text-warm-400">Photo Albums</span>
-                    </div>
-                    <h3 className="font-serif text-2xl text-ink font-normal">Photo Galleries</h3>
-                    <p className="text-xs text-warm-400 font-sans leading-relaxed">
-                      Upload documentary photography albums and captions for event photo galleries.
-                    </p>
-                  </div>
-                  <div className="pt-4 border-t border-warm-200 flex items-center justify-between text-xs font-mono">
-                    <span className="text-warm-400">Schema: Galleries</span>
-                    <span className="text-ieee-blue font-semibold">Lightbox Active ✓</span>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
         </Container>

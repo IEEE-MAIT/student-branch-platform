@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
 import { ACHIEVEMENTS_DATA } from '@/lib/data';
 import { sanitizeText } from '@/lib/security';
+import { recordAuditLog } from '@/lib/auditLog';
 
 let dynamicAchievementsStore = [...ACHIEVEMENTS_DATA];
 
-/**
- * GET /api/achievements
- */
 export async function GET() {
   return NextResponse.json(dynamicAchievementsStore, {
     headers: {
@@ -16,10 +14,6 @@ export async function GET() {
   });
 }
 
-/**
- * POST /api/achievements
- * Hardened REST endpoint for adding achievement records.
- */
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -32,17 +26,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing or invalid title or year' }, { status: 400 });
     }
 
+    const sanitizedTitle = sanitizeText(body.title, 200);
+    const sanitizedYear = sanitizeText(body.year, 10);
+    const sanitizedConferredBy = sanitizeText(body.conferredBy || 'IEEE', 150);
+    const performedBy = sanitizeText(body.performedBy || 'mait.ieee.sb@gmail.com', 100);
+
     const newItem = {
       id: `ach-${Date.now()}`,
-      year: sanitizeText(body.year, 10),
-      title: sanitizeText(body.title, 200),
-      conferredBy: sanitizeText(body.conferredBy || 'IEEE', 150),
+      year: sanitizedYear,
+      title: sanitizedTitle,
+      conferredBy: sanitizedConferredBy,
       unitOrTeam: sanitizeText(body.unitOrTeam || 'IEEE MAIT SB', 100),
       category: sanitizeText(body.category || 'IEEE Recognition', 50) as any,
       description: sanitizeText(body.description || '', 1000),
     };
 
     dynamicAchievementsStore.unshift(newItem);
+
+    // Record Audit Log (Who, When, What)
+    recordAuditLog({
+      performedBy,
+      actionType: 'CREATE',
+      entityType: 'Achievement',
+      entityTitle: sanitizedTitle,
+      changeSummary: `Recorded achievement "${sanitizedTitle}" (${sanitizedYear}) conferred by ${sanitizedConferredBy}.`,
+    });
+
     return NextResponse.json({ success: true, achievement: newItem }, { status: 201 });
   } catch {
     return NextResponse.json({ error: 'Malformed request JSON' }, { status: 400 });

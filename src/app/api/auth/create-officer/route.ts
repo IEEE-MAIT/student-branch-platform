@@ -3,11 +3,8 @@ import { cookies } from 'next/headers';
 import { verifyJWT } from '@/lib/jwt';
 import { createOfficer } from '@/lib/officers';
 import { PersonCategory } from '@/lib/data';
+import { recordAuditLog } from '@/lib/auditLog';
 
-/**
- * POST /api/auth/create-officer
- * Allows authenticated Super Admin (`mait.ieee.sb@gmail.com`) to register new branch officers.
- */
 export async function POST(request: Request) {
   try {
     const cookieStore = await cookies();
@@ -40,6 +37,15 @@ export async function POST(request: Request) {
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
+
+    // Record Audit Log (Who, When, What)
+    recordAuditLog({
+      performedBy: payload.email,
+      actionType: 'CREATE',
+      entityType: 'Officer User',
+      entityTitle: `${result.officer!.name} (${result.officer!.role})`,
+      changeSummary: `Registered new branch officer account "${result.officer!.name}" (${result.officer!.email}) with role ${result.officer!.role}.`,
+    });
 
     return NextResponse.json({
       success: true,

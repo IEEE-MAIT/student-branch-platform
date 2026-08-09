@@ -1,13 +1,10 @@
 import { NextResponse } from 'next/server';
 import { EVENTS_DATA } from '@/lib/data';
 import { sanitizeText, validateSafeUrl } from '@/lib/security';
+import { recordAuditLog } from '@/lib/auditLog';
 
 let dynamicEventsStore = [...EVENTS_DATA];
 
-/**
- * GET /api/events
- * Public endpoint to fetch event list with HTTP caching headers.
- */
 export async function GET() {
   return NextResponse.json(dynamicEventsStore, {
     headers: {
@@ -17,11 +14,6 @@ export async function GET() {
   });
 }
 
-/**
- * POST /api/events
- * Hardened REST endpoint to create or update an event.
- * Performs strict type checking, length constraints, and XSS sanitization.
- */
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -34,13 +26,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing or invalid title or slug' }, { status: 400 });
     }
 
-    // Sanitize user-provided fields to prevent XSS & Injection attacks
     const sanitizedTitle = sanitizeText(body.title, 200);
     const sanitizedSlug = sanitizeText(body.slug, 100).toLowerCase().replace(/[^a-z0-9-]/g, '-');
     const sanitizedDate = sanitizeText(body.date || 'OCT 2026', 50);
     const sanitizedVenue = sanitizeText(body.venue || 'MAIT Campus', 100);
     const sanitizedDescription = sanitizeText(body.description || '', 2000);
     const sanitizedRegistrationLink = body.registrationLink ? validateSafeUrl(body.registrationLink) : undefined;
+    const performedBy = sanitizeText(body.performedBy || 'mait.ieee.sb@gmail.com', 100);
 
     const newEvent = {
       id: `evt-${Date.now()}`,
@@ -57,6 +49,16 @@ export async function POST(request: Request) {
     };
 
     dynamicEventsStore.unshift(newEvent);
+
+    // Record Audit Log (Who, When, What)
+    recordAuditLog({
+      performedBy,
+      actionType: 'CREATE',
+      entityType: 'Event',
+      entityTitle: sanitizedTitle,
+      changeSummary: `Created event "${sanitizedTitle}" scheduled for ${sanitizedDate} at ${sanitizedVenue}.`,
+    });
+
     return NextResponse.json({ success: true, event: newEvent }, { status: 201 });
   } catch {
     return NextResponse.json({ error: 'Malformed request JSON' }, { status: 400 });
