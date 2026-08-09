@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { EventPreview } from './EventPreview';
+import { Pagination } from '../ui/Pagination';
 
 interface EventItem {
   id: string;
@@ -20,6 +21,8 @@ interface EventItem {
 export function EventsFilter({ initialEvents }: { initialEvents: EventItem[] }) {
   const [selectedUnit, setSelectedUnit] = useState<string>('ALL');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const ITEMS_PER_PAGE = 5;
 
   const filteredEvents = useMemo(() => {
     return initialEvents.filter(event => {
@@ -33,6 +36,12 @@ export function EventsFilter({ initialEvents }: { initialEvents: EventItem[] }) 
   const pastEvents = filteredEvents.filter(e => e.status === 'past');
   const featuredUpcoming = upcomingEvents[0];
   const remainingUpcoming = upcomingEvents.slice(1);
+
+  const totalPages = Math.ceil(pastEvents.length / ITEMS_PER_PAGE);
+  const paginatedPastEvents = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return pastEvents.slice(start, start + ITEMS_PER_PAGE);
+  }, [pastEvents, currentPage]);
 
   return (
     <div>
@@ -128,19 +137,27 @@ export function EventsFilter({ initialEvents }: { initialEvents: EventItem[] }) 
         </h3>
 
         {pastEvents.length > 0 ? (
-          <div className="border border-warm-200 bg-white rounded-[2px] divide-y divide-warm-200">
-            {pastEvents.map(event => (
-              <EventPreview
-                key={event.id}
-                title={event.title}
-                slug={event.slug}
-                date={event.date}
-                venue={event.venue || undefined}
-                unit={event.unit || undefined}
-                category={event.category || undefined}
-              />
-            ))}
-          </div>
+          <>
+            <div className="border border-warm-200 bg-white rounded-[2px] divide-y divide-warm-200">
+              {paginatedPastEvents.map(event => (
+                <EventPreview
+                  key={event.id}
+                  title={event.title}
+                  slug={event.slug}
+                  date={event.date}
+                  venue={event.venue || undefined}
+                  unit={event.unit || undefined}
+                  category={event.category || undefined}
+                />
+              ))}
+            </div>
+
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => setCurrentPage(page)}
+            />
+          </>
         ) : (
           <div className="p-8 border border-warm-200 bg-warm-100/30 rounded-[2px] text-center text-warm-400 font-sans text-sm">
             No past events match your selected filters.

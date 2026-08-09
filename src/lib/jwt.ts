@@ -12,6 +12,7 @@
  */
 
 import crypto from 'crypto';
+import type { Role } from './auth';
 
 const JWT_SECRET = process.env.PAYLOAD_SECRET || 'ieee-mait-jwt-super-secret-key-2026';
 
@@ -19,7 +20,7 @@ export interface JWTPayload {
   userId: string;
   email: string;
   name: string;
-  role: 'Super Admin' | 'Executive Officer' | 'Webmaster' | 'Content Editor';
+  role: Role | string;
   category: string;
   iat: number;
   exp: number;
