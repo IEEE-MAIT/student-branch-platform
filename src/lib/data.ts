@@ -1,15 +1,93 @@
 /**
  * @file src/lib/data.ts
- * @description Central strongly-typed data store and data entity definitions for IEEE MAIT Student Branch.
+ * @description Central strongly-typed data store and strict Enum definitions for IEEE MAIT Student Branch.
  * 
- * DESIGN PRINCIPLE:
- * This data store acts as the baseline content for the open-source platform.
- * Data structures map 1-to-1 with Payload CMS collection schemas (Person, Event, Achievement,
- * OrganizationUnit, Milestone, Gallery, Story) to enable seamless CMS ingestion.
+ * STRICT TYPE DESIGN:
+ * Employs explicit TypeScript Enums for all categorical fields (PersonCategory, EventCategory,
+ * EventStatus, OrganizingUnit, AchievementCategory, ChapterType, PublicationType) to eliminate
+ * string typos and ensure 100% type safety across frontend pages and Payload CMS schemas.
  *
  * @author IEEE MAIT Webmaster & Open Source Contributors
  * @license MIT
  */
+
+/**
+ * Role hierarchy categories for IEEE MAIT People & Leadership structure.
+ */
+export enum PersonCategory {
+  BRANCH_COUNSELLOR = 'Branch Counsellor',
+  STUDENT_MENTOR = 'Student Mentor of student branch',
+  SEC = 'Senior Executive Committee',
+  OPERATIONAL_LEAD = 'Operational Lead',
+  EDS_EXECUTIVE = 'EDS Executive Committee member',
+  WIE_EXECUTIVE = 'WIE AAG Executive Committee member',
+}
+
+/**
+ * Event taxonomy categories.
+ */
+export enum EventCategory {
+  WORKSHOP = 'Technical Workshop',
+  PANEL = 'Panel Discussion',
+  BRANCH_EVENT = 'Branch Event',
+  FLAGSHIP = 'Flagship Event',
+  COMPETITION = 'Competition',
+}
+
+/**
+ * Event lifecycle status.
+ */
+export enum EventStatus {
+  UPCOMING = 'upcoming',
+  PAST = 'past',
+  DRAFT = 'draft',
+  CANCELLED = 'cancelled',
+}
+
+/**
+ * Officially chartered organizational units.
+ */
+export enum OrganizingUnit {
+  SB = 'IEEE MAIT SB',
+  WIE = 'WIE Affinity Group',
+  EDS = 'IEEE EDS Chapter',
+}
+
+/**
+ * Unit URL slugs.
+ */
+export enum OrganizingUnitSlug {
+  SB = 'sb',
+  WIE = 'wie',
+  EDS = 'eds',
+}
+
+/**
+ * Achievement classification taxonomy.
+ */
+export enum AchievementCategory {
+  IEEE_RECOGNITION = 'IEEE Recognition',
+  COMPETITION = 'Competition',
+  AWARD = 'Award',
+  RESEARCH = 'Research',
+}
+
+/**
+ * Organizational unit types.
+ */
+export enum ChapterType {
+  AFFINITY_GROUP = 'Affinity Group',
+  TECHNICAL_CHAPTER = 'Technical Chapter',
+}
+
+/**
+ * Publication types for stories and articles.
+ */
+export enum PublicationType {
+  ARTICLE = 'Article',
+  EVENT_REPORT = 'Event Report',
+  ANNOUNCEMENT = 'Announcement',
+}
 
 /**
  * Represents a member of the branch, faculty counselor, executive officer, or lead.
@@ -18,7 +96,7 @@ export interface Person {
   id: string;
   name: string;
   role: string;
-  category: 'mentor' | 'sec' | 'lead' | 'chapter';
+  category: PersonCategory;
   department: string;
   academicYear: string;
   imageSrc?: string;
@@ -36,10 +114,12 @@ export interface EventItem {
   date: string;
   time?: string;
   venue: string;
-  unit: 'IEEE MAIT SB' | 'WIE Affinity Group' | 'IEEE EDS Chapter';
-  unitSlug: 'sb' | 'wie' | 'eds';
-  category: 'Technical Workshop' | 'Panel Discussion' | 'Branch Event' | 'Flagship Event' | 'Competition';
-  status: 'upcoming' | 'past';
+  academicYear?: string;
+  unit: OrganizingUnit;
+  unitSlug: OrganizingUnitSlug;
+  category: EventCategory;
+  status: EventStatus;
+  registrationLink?: string;
   description: string;
   imageSrc?: string;
   speakers?: Array<{ name: string; title: string; organization: string }>;
@@ -55,7 +135,7 @@ export interface AchievementItem {
   title: string;
   conferredBy: string;
   unitOrTeam: string;
-  category: 'IEEE Recognition' | 'Competition' | 'Award' | 'Research';
+  category: AchievementCategory;
   description?: string;
 }
 
@@ -66,7 +146,7 @@ export interface ChapterItem {
   id: string;
   name: string;
   slug: string;
-  type: 'Affinity Group' | 'Technical Chapter';
+  type: ChapterType;
   parentSociety: string;
   establishedYear: string;
   description: string;
@@ -120,7 +200,7 @@ export interface StoryArticle {
   id: string;
   title: string;
   slug: string;
-  type: 'Article' | 'Event Report' | 'Announcement';
+  type: PublicationType;
   author: string;
   authorRole: string;
   publishedDate: string;
@@ -142,7 +222,7 @@ export const BRANCH_STATS = {
   region: 'Region 10 (Asia-Pacific)',
   institution: 'Maharaja Agrasen Institute of Technology',
   email: 'mait.ieee.sb@gmail.com',
-};
+} as const;
 
 /**
  * Master catalog of active chapters and affinity groups.
@@ -152,7 +232,7 @@ export const CHAPTERS_DATA: Record<string, ChapterItem> = {
     id: 'wie',
     name: 'WIE Affinity Group',
     slug: 'wie',
-    type: 'Affinity Group',
+    type: ChapterType.AFFINITY_GROUP,
     parentSociety: 'IEEE Women in Engineering',
     establishedYear: '2015',
     description: 'IEEE WIE is a global network of IEEE members and volunteers dedicated to promoting women engineers and scientists, and inspiring girls around the world to follow their academic interests in STEM.',
@@ -166,7 +246,7 @@ export const CHAPTERS_DATA: Record<string, ChapterItem> = {
     id: 'eds',
     name: 'IEEE EDS Chapter',
     slug: 'eds',
-    type: 'Technical Chapter',
+    type: ChapterType.TECHNICAL_CHAPTER,
     parentSociety: 'Electron Devices Society',
     establishedYear: '2018',
     description: 'Focusing on electron devices, semiconductor physics, microelectronics, integrated circuits, and hardware engineering workshops.',
@@ -189,10 +269,10 @@ export const EVENTS_DATA: EventItem[] = [
     date: 'AUG 20, 2026',
     time: '2:00 PM – 5:00 PM',
     venue: 'Seminar Hall, Block A',
-    unit: 'IEEE EDS Chapter',
-    unitSlug: 'eds',
-    category: 'Technical Workshop',
-    status: 'upcoming',
+    unit: OrganizingUnit.EDS,
+    unitSlug: OrganizingUnitSlug.EDS,
+    category: EventCategory.WORKSHOP,
+    status: EventStatus.UPCOMING,
     description: 'Join us for an intensive hands-on session exploring deep learning architectures, practical model evaluation, and deployment strategies using Python and PyTorch.',
     speakers: [
       { name: 'Dr. Expert Speaker', title: 'Senior AI Researcher', organization: 'Tech Research Lab' },
@@ -210,10 +290,10 @@ export const EVENTS_DATA: EventItem[] = [
     date: 'SEP 05, 2026',
     time: '3:00 PM – 5:00 PM',
     venue: 'Auditorium, Block IX',
-    unit: 'WIE Affinity Group',
-    unitSlug: 'wie',
-    category: 'Panel Discussion',
-    status: 'upcoming',
+    unit: OrganizingUnit.WIE,
+    unitSlug: OrganizingUnitSlug.WIE,
+    category: EventCategory.PANEL,
+    status: EventStatus.UPCOMING,
     description: 'An inspiring panel discussion featuring female engineering leaders, researchers, and alumni discussing career navigation, technical leadership, and mentorship.',
   },
   {
@@ -223,10 +303,10 @@ export const EVENTS_DATA: EventItem[] = [
     date: 'SEP 15, 2026',
     time: '11:00 AM – 1:00 PM',
     venue: 'Main Auditorium',
-    unit: 'IEEE MAIT SB',
-    unitSlug: 'sb',
-    category: 'Branch Event',
-    status: 'upcoming',
+    unit: OrganizingUnit.SB,
+    unitSlug: OrganizingUnitSlug.SB,
+    category: EventCategory.BRANCH_EVENT,
+    status: EventStatus.UPCOMING,
     description: 'Orientation session for 1st & 2nd year students introducing IEEE benefits, student branch project teams, upcoming workshops, and executive committee onboarding.',
   },
   {
@@ -235,10 +315,10 @@ export const EVENTS_DATA: EventItem[] = [
     slug: 'ieee-day-2025-celebration',
     date: 'OCT 07, 2025',
     venue: 'MAIT Campus Courtyard',
-    unit: 'IEEE MAIT SB',
-    unitSlug: 'sb',
-    category: 'Flagship Event',
-    status: 'past',
+    unit: OrganizingUnit.SB,
+    unitSlug: OrganizingUnitSlug.SB,
+    category: EventCategory.FLAGSHIP,
+    status: EventStatus.PAST,
     description: 'Annual IEEE Day celebration featuring hardware project showcases, technical poster competitions, alumni networking, and keynotes.',
   },
   {
@@ -247,10 +327,10 @@ export const EVENTS_DATA: EventItem[] = [
     slug: 'pcb-design-workshop',
     date: 'AUG 12, 2025',
     venue: 'ECE Hardware Lab',
-    unit: 'IEEE EDS Chapter',
-    unitSlug: 'eds',
-    category: 'Technical Workshop',
-    status: 'past',
+    unit: OrganizingUnit.EDS,
+    unitSlug: OrganizingUnitSlug.EDS,
+    category: EventCategory.WORKSHOP,
+    status: EventStatus.PAST,
     description: 'Comprehensive hardware design session covering schematic capture, PCB layout in KiCad, component sourcing, and hands-on soldering practice.',
   },
 ];
@@ -265,7 +345,7 @@ export const ACHIEVEMENTS_DATA: AchievementItem[] = [
     title: 'Exemplary Student Branch Award',
     conferredBy: 'IEEE Delhi Section',
     unitOrTeam: 'IEEE MAIT SB',
-    category: 'IEEE Recognition',
+    category: AchievementCategory.IEEE_RECOGNITION,
     description: 'Recognized for outstanding event organization, student retention, and institutional continuity across the Delhi Section.',
   },
   {
@@ -274,7 +354,7 @@ export const ACHIEVEMENTS_DATA: AchievementItem[] = [
     title: 'First Place — National Robotics & Hardware Hackathon',
     conferredBy: 'National Tech Summit',
     unitOrTeam: 'EDS Student Team',
-    category: 'Competition',
+    category: AchievementCategory.COMPETITION,
     description: 'Awarded 1st place among 120+ teams for autonomous obstacle-avoidance rover prototype built using custom embedded systems.',
   },
   {
@@ -283,7 +363,7 @@ export const ACHIEVEMENTS_DATA: AchievementItem[] = [
     title: 'Best Technical Event Organization Award',
     conferredBy: 'IEEE Delhi Section Student Activities',
     unitOrTeam: 'WIE Affinity Group',
-    category: 'Award',
+    category: AchievementCategory.AWARD,
     description: 'Conferred for organizing impactful technical workshops and mentorship sessions for women in engineering.',
   },
   {
@@ -292,7 +372,7 @@ export const ACHIEVEMENTS_DATA: AchievementItem[] = [
     title: 'Outstanding Student Branch Counselor Recognition',
     conferredBy: 'IEEE Region 10',
     unitOrTeam: 'Faculty Mentors',
-    category: 'Award',
+    category: AchievementCategory.AWARD,
     description: 'Honoring exemplary guidance and long-term commitment of MAIT faculty advisors.',
   },
 ];
@@ -364,21 +444,6 @@ export const GALLERY_ALBUMS_DATA: Record<string, GalleryAlbum> = {
       { id: 'p10', url: '/images/gallery/pcb-4.jpg', caption: 'Completed microcontroller breakout board' },
     ],
   },
-  'wie-leadership-panel': {
-    id: 'g3',
-    title: 'WIE Leadership Orientation & Team Session',
-    slug: 'wie-leadership-panel',
-    date: 'SEP 05, 2025',
-    photoCount: 4,
-    unit: 'WIE Affinity Group',
-    description: 'Mentorship roundtable and orientation session hosted by WIE MAIT leadership.',
-    photos: [
-      { id: 'p11', url: '/images/gallery/wie-1.jpg', caption: 'WIE Student Chair introducing year roadmap' },
-      { id: 'p12', url: '/images/gallery/wie-2.jpg', caption: 'Roundtable discussion on women in STEM careers' },
-      { id: 'p13', url: '/images/gallery/wie-3.jpg', caption: 'Mentorship pairing activity with 1st-year students' },
-      { id: 'p14', url: '/images/gallery/wie-4.jpg', caption: 'Group photo of WIE executive team' },
-    ],
-  },
 };
 
 /**
@@ -389,7 +454,7 @@ export const STORIES_DATA: Record<string, StoryArticle> = {
     id: 's1',
     title: 'Reflections on Our Applied Neural Networks Workshop Series',
     slug: 'applied-neural-networks-workshop-series',
-    type: 'Event Report',
+    type: PublicationType.EVENT_REPORT,
     author: 'EDS Technical Lead',
     authorRole: 'IEEE EDS Chapter Lead',
     publishedDate: 'AUG 08, 2026',
@@ -407,7 +472,7 @@ export const STORIES_DATA: Record<string, StoryArticle> = {
     id: 's2',
     title: 'Empowering Women in Engineering: WIE MAIT 2026 Roadmap',
     slug: 'empowering-women-in-engineering-roadmap',
-    type: 'Article',
+    type: PublicationType.ARTICLE,
     author: 'WIE Student Chair',
     authorRole: 'WIE Affinity Group Chair',
     publishedDate: 'JUL 25, 2026',
