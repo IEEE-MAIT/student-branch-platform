@@ -4,6 +4,8 @@ import { PrismaNeon } from '@prisma/adapter-neon';
 import ws from 'ws';
 import * as dotenv from 'dotenv';
 import { resolve } from 'path';
+import { EVENTS_DATA, ACHIEVEMENTS_DATA, CHAPTERS_DATA, STORIES_DATA, GALLERY_ALBUMS_DATA } from '../src/lib/data';
+import { OFFICERS_STORE } from '../src/lib/officers';
 
 // Load variables from .dev.vars
 dotenv.config({ path: resolve(process.cwd(), '.dev.vars') });
@@ -18,9 +20,6 @@ if (!process.env.DATABASE_URI) {
 const pool = new Pool({ connectionString: process.env.DATABASE_URI });
 const adapter = new PrismaNeon(pool);
 const prisma = new PrismaClient({ adapter });
-
-import { EVENTS_DATA, ACHIEVEMENTS_DATA, CHAPTERS_DATA, STORIES_DATA, GALLERY_ALBUMS_DATA } from '../src/lib/data';
-import { OFFICERS_STORE } from '../src/lib/officers';
 
 async function seed() {
   console.log('Connected to Neon Postgres via Prisma ORM.');

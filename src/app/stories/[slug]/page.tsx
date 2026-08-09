@@ -21,6 +21,26 @@ interface StoryPageProps {
 
 export const revalidate = 60; // ISR Cache
 
+/**
+ * Server-side HTML sanitizer.
+ * Strips <script>, <style>, <iframe>, <object>, <embed> tags and all
+ * on* event handler attributes (onclick, onerror, etc.) to prevent XSS.
+ * This runs server-side in the RSC before rendering — no client library needed.
+ */
+function sanitizeHtml(html: string): string {
+  return html
+    // Remove dangerous tags entirely (including content inside script/style)
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+    .replace(/<iframe\b[^>]*>.*?<\/iframe>/gi, '')
+    .replace(/<object\b[^>]*>.*?<\/object>/gi, '')
+    .replace(/<embed\b[^>]*/gi, '')
+    // Strip on* event handler attributes from any remaining tags
+    .replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*)/gi, '')
+    // Strip javascript: hrefs
+    .replace(/href\s*=\s*(?:"javascript:[^"]*"|'javascript:[^']*')/gi, '');
+}
+
 export async function generateMetadata({ params }: StoryPageProps) {
   const resolvedParams = await params;
   const story = await getDynamicStoryBySlug(resolvedParams.slug);
@@ -39,6 +59,8 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
   if (!story) {
     notFound();
   }
+
+  const safeHtml = sanitizeHtml(story.contentHtml);
 
   return (
     <>
@@ -70,8 +92,11 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
             </div>
           </div>
 
-          {/* Article Body Content */}
-          <div className="space-y-6 text-base text-ink-muted leading-relaxed font-sans" dangerouslySetInnerHTML={{ __html: story.contentHtml }} />
+          {/* Article Body Content — sanitized before render */}
+          <div
+            className="space-y-6 text-base text-ink-muted leading-relaxed font-sans prose prose-headings:font-serif prose-a:text-ieee-blue"
+            dangerouslySetInnerHTML={{ __html: safeHtml }}
+          />
 
           {/* Back Footer */}
           <div className="mt-12 pt-8 border-t border-warm-200 flex justify-between items-center">

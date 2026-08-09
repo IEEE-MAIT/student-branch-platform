@@ -6,21 +6,24 @@ import { Button } from '@/components/ui/Button';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { StatMetric } from '@/components/content/StatMetric';
 import { EventPreview } from '@/components/content/EventPreview';
-import { PersonCard } from '@/components/content/PersonCard';
 import { AchievementRow } from '@/components/content/AchievementRow';
 import { ChapterPanel } from '@/components/content/ChapterPanel';
-import { CHAPTERS_DATA, BRANCH_STATS } from '@/lib/data';
-import { getDynamicEvents, getDynamicAchievements } from '@/lib/api';
+import { BRANCH_STATS } from '@/lib/data';
+import { getDynamicEvents, getDynamicAchievements, getDynamicChapters } from '@/lib/api';
 import Link from 'next/link';
 
-export default async function HomePage() {
-  const eventsList = await getDynamicEvents();
-  const achievementsList = await getDynamicAchievements();
+export const revalidate = 60; // ISR: revalidate every 60 seconds
 
-  const upcomingEvents = eventsList.filter(e => e.status === 'upcoming');
+export default async function HomePage() {
+  const [eventsList, achievementsList, chaptersList] = await Promise.all([
+    getDynamicEvents(),
+    getDynamicAchievements(),
+    getDynamicChapters(),
+  ]);
+
+  const upcomingEvents = eventsList.filter((e: any) => e.status === 'upcoming');
   const featuredEvent = upcomingEvents[0];
   const remainingUpcoming = upcomingEvents.slice(1);
-  const chaptersList = Object.values(CHAPTERS_DATA);
   const featuredAchievements = achievementsList.slice(0, 3);
 
   return (

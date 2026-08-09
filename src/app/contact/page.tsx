@@ -19,10 +19,37 @@ import { Button } from '@/components/ui/Button';
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    setError('');
+    const form = e.currentTarget;
+    const data = {
+      name: (form.elements.namedItem('name') as HTMLInputElement).value,
+      email: (form.elements.namedItem('email') as HTMLInputElement).value,
+      subject: (form.elements.namedItem('subject') as HTMLSelectElement).value,
+      message: (form.elements.namedItem('message') as HTMLTextAreaElement).value,
+    };
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const json = await res.json();
+        setError(json.error || 'Submission failed. Please try again.');
+      } else {
+        setSubmitted(true);
+      }
+    } catch {
+      setError('Network error. Please check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -112,6 +139,7 @@ export default function ContactPage() {
                       </label>
                       <input
                         type="text"
+                        name="name"
                         required
                         placeholder="e.g. Aarav Sharma"
                         className="w-full px-3 py-2 text-sm border border-warm-200 rounded-[2px] focus:outline-none focus:border-ieee-blue font-sans"
@@ -123,6 +151,7 @@ export default function ContactPage() {
                       </label>
                       <input
                         type="email"
+                        name="email"
                         required
                         placeholder="name@domain.com"
                         className="w-full px-3 py-2 text-sm border border-warm-200 rounded-[2px] focus:outline-none focus:border-ieee-blue font-sans"
@@ -134,10 +163,10 @@ export default function ContactPage() {
                     <label className="block font-mono text-xs uppercase tracking-wider text-ink font-medium mb-1">
                       Subject / Topic
                     </label>
-                    <select className="w-full px-3 py-2 text-sm border border-warm-200 rounded-[2px] focus:outline-none focus:border-ieee-blue bg-white font-sans">
+                    <select name="subject" className="w-full px-3 py-2 text-sm border border-warm-200 rounded-[2px] focus:outline-none focus:border-ieee-blue bg-white font-sans">
                       <option>General Inquiry</option>
-                      <option>Membership & Registration</option>
-                      <option>Event & Workshop Collaboration</option>
+                      <option>Membership &amp; Registration</option>
+                      <option>Event &amp; Workshop Collaboration</option>
                       <option>Sponsorship / Industry Partnership</option>
                     </select>
                   </div>
@@ -147,6 +176,7 @@ export default function ContactPage() {
                       Message
                     </label>
                     <textarea
+                      name="message"
                       rows={4}
                       required
                       placeholder="How can IEEE MAIT assist you?"
@@ -154,8 +184,14 @@ export default function ContactPage() {
                     />
                   </div>
 
-                  <Button type="submit" variant="primary" size="md" className="w-full sm:w-auto">
-                    Submit Message →
+                  {error && (
+                    <p className="text-sm font-mono text-red-600 border border-red-200 bg-red-50 px-3 py-2 rounded-[2px]">
+                      {error}
+                    </p>
+                  )}
+
+                  <Button type="submit" variant="primary" size="md" className="w-full sm:w-auto" disabled={loading}>
+                    {loading ? 'Sending...' : 'Submit Message →'}
                   </Button>
                 </form>
               )}

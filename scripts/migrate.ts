@@ -120,6 +120,13 @@ async function migrate() {
       );
     `);
     await client.query(`CREATE UNIQUE INDEX IF NOT EXISTS "chapters_slug_key" ON chapters("slug");`);
+    // Safely add new columns to any pre-existing chapters table
+    await client.query(`ALTER TABLE chapters ADD COLUMN IF NOT EXISTS "mission" TEXT;`);
+    await client.query(`ALTER TABLE chapters ADD COLUMN IF NOT EXISTS "leaderName" TEXT;`);
+    await client.query(`ALTER TABLE chapters ADD COLUMN IF NOT EXISTS "leaderRole" TEXT;`);
+    await client.query(`ALTER TABLE chapters ADD COLUMN IF NOT EXISTS "memberCount" INTEGER;`);
+    await client.query(`ALTER TABLE chapters ADD COLUMN IF NOT EXISTS "eventCount" INTEGER;`);
+
 
     console.log('Creating stories table...');
     await client.query(`
