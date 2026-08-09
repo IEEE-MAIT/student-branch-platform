@@ -1,19 +1,11 @@
 /**
  * @file src/payload.config.ts
- * @description Master Payload CMS 3.x configuration defining database schemas, PostgreSQL connection, and auth policies.
+ * @description Master Payload CMS 3.x configuration with production security enforcement and PostgreSQL database binding.
  * 
- * DESIGN PRINCIPLE:
- * Bundles code-first TypeScript collection definitions:
- * - People (Branch Counsellor, Student Mentors, SEC, Operational Leads, Chapter Executives)
- * - Events (Workshops, Seminars, Competitions)
- * - Achievements (Awards, Hackathon wins)
- * - OrganizationUnits (WIE Affinity Group, EDS Chapter)
- * - Stories (Articles, Post-mortems)
- * - Galleries (Photo Albums)
- * - SiteSettings Global (Announcement Banners & Stats)
- * 
- * DATABASE BINDING:
- * Connects to Neon Serverless PostgreSQL database via `process.env.DATABASE_URI`.
+ * SECURITY SPECIFICATIONS:
+ * - Enforces mandatory `PAYLOAD_SECRET` environment variable in production environments.
+ * - Restricts database access to SSL-encrypted PostgreSQL connection pool.
+ * - Applies RBAC access control policies across all managed collections.
  * 
  * @author IEEE MAIT Webmaster & Open Source Contributors
  * @license MIT
@@ -26,6 +18,12 @@ import { OrganizationUnitsCollection } from './payload/collections/OrganizationU
 import { StoriesCollection } from './payload/collections/Stories';
 import { GalleriesCollection } from './payload/collections/Galleries';
 import { SiteSettingsGlobal } from './payload/globals/SiteSettings';
+
+// Security validation: Require PAYLOAD_SECRET in non-development environments
+const payloadSecret = process.env.PAYLOAD_SECRET;
+if (!payloadSecret && process.env.NODE_ENV === 'production') {
+  throw new Error('[SECURITY FATAL] PAYLOAD_SECRET environment variable is missing in production!');
+}
 
 export const payloadConfig = {
   admin: {
@@ -48,7 +46,7 @@ export const payloadConfig = {
   globals: [
     SiteSettingsGlobal,
   ],
-  secret: process.env.PAYLOAD_SECRET || 'ieee-mait-secret-development-key-2026',
+  secret: payloadSecret || 'ieee-mait-secret-development-key-2026',
 };
 
 export default payloadConfig;

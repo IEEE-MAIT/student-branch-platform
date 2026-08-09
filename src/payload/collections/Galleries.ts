@@ -2,9 +2,10 @@
  * @file src/payload/collections/Galleries.ts
  * @description Payload CMS collection schema for Photo Albums and Event Galleries.
  * 
- * AUDIT SPECIFICATIONS:
- * - `timestamps: true` auto-tracks `createdAt` and `updatedAt` timestamps.
- * - `beforeChange` hook auto-populates `createdBy` and `updatedBy` user relations for accountability.
+ * SECURITY & AUDIT SPECIFICATIONS:
+ * - Access Control: Public read-only; mutations require active authenticated admin session (`req.user`).
+ * - Timestamps: Auto-tracks `createdAt` and `updatedAt`.
+ * - LifeCycle Hook: `beforeChange` auto-populates `createdBy` and `updatedBy` Officer IDs.
  * 
  * @author IEEE MAIT Webmaster & Open Source Contributors
  * @license MIT
@@ -13,6 +14,12 @@
 export const GalleriesCollection = {
   slug: 'galleries',
   timestamps: true,
+  access: {
+    read: () => true,
+    create: ({ req }: any) => Boolean(req?.user),
+    update: ({ req }: any) => Boolean(req?.user),
+    delete: ({ req }: any) => Boolean(req?.user),
+  },
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'date', 'unit', 'photoCount', 'updatedAt', 'updatedBy'],

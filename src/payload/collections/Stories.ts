@@ -2,9 +2,10 @@
  * @file src/payload/collections/Stories.ts
  * @description Payload CMS collection schema for Stories, Articles, and Technical Event Reports.
  * 
- * AUDIT SPECIFICATIONS:
- * - `timestamps: true` auto-tracks `createdAt` and `updatedAt` timestamps.
- * - `beforeChange` hook auto-populates `createdBy` and `updatedBy` user relations for accountability.
+ * SECURITY & AUDIT SPECIFICATIONS:
+ * - Access Control: Public read-only; mutations require active authenticated admin session (`req.user`).
+ * - Timestamps: Auto-tracks `createdAt` and `updatedAt`.
+ * - LifeCycle Hook: `beforeChange` auto-populates `createdBy` and `updatedBy` Officer IDs.
  * 
  * @author IEEE MAIT Webmaster & Open Source Contributors
  * @license MIT
@@ -15,6 +16,12 @@ import { PublicationType } from '../../lib/data';
 export const StoriesCollection = {
   slug: 'stories',
   timestamps: true,
+  access: {
+    read: () => true,
+    create: ({ req }: any) => Boolean(req?.user),
+    update: ({ req }: any) => Boolean(req?.user),
+    delete: ({ req }: any) => Boolean(req?.user),
+  },
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'author', 'unit', 'publishedDate', 'updatedAt', 'updatedBy'],

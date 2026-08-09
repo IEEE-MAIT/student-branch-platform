@@ -2,9 +2,10 @@
  * @file src/payload/collections/People.ts
  * @description Payload CMS collection schema for Branch People, Faculty Counselors, SEC Officers, and Leads.
  * 
- * AUDIT SPECIFICATIONS:
- * - `timestamps: true` auto-tracks `createdAt` and `updatedAt` timestamps.
- * - `beforeChange` hook auto-populates `createdBy` and `updatedBy` user relations for accountability.
+ * SECURITY & AUDIT SPECIFICATIONS:
+ * - Access Control: Public read-only; mutations require active authenticated admin session (`req.user`).
+ * - Timestamps: Auto-tracks `createdAt` and `updatedAt`.
+ * - LifeCycle Hook: `beforeChange` auto-populates `createdBy` and `updatedBy` Officer IDs.
  * 
  * @author IEEE MAIT Webmaster & Open Source Contributors
  * @license MIT
@@ -15,6 +16,12 @@ import { PersonCategory } from '../../lib/data';
 export const PeopleCollection = {
   slug: 'people',
   timestamps: true,
+  access: {
+    read: () => true,
+    create: ({ req }: any) => Boolean(req?.user),
+    update: ({ req }: any) => Boolean(req?.user),
+    delete: ({ req }: any) => Boolean(req?.user),
+  },
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'role', 'category', 'updatedAt', 'updatedBy'],
