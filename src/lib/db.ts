@@ -2,7 +2,9 @@
  * @file src/lib/db.ts
  * @description Centralized Prisma ORM Connection Engine using Neon Driver Adapter.
  * 
- * Works gracefully in Edge runtimes like Cloudflare Pages and Next.js Edge APIs.
+ * EDGE SAFETY PROTOCOL:
+ * Conditionally loads WebSocket implementations to prevent Node `ws` module crashes
+ * on Cloudflare Edge while maintaining local `npm run dev` compatibility.
  * 
  * @author IEEE MAIT Webmaster
  * @license MIT
@@ -11,11 +13,15 @@
 import { Pool, neonConfig } from '@neondatabase/serverless';
 import { PrismaNeon } from '@prisma/adapter-neon';
 import { PrismaClient } from '@prisma/client';
-import ws from 'ws';
 
-if (typeof window === 'undefined') {
-  // Set up WebSocket constructor for Node.js/Edge compatibility
-  neonConfig.webSocketConstructor = ws;
+if (typeof WebSocket !== 'undefined') {
+  // Cloudflare Edge natively supports WebSocket
+  neonConfig.webSocketConstructor = WebSocket as any;
+} else {
+  // Local Node.js Development Fallback
+  import('ws').then((wsModule) => {
+    neonConfig.webSocketConstructor = wsModule.default || wsModule;
+  }).catch(() => {});
 }
 
 if (!process.env.DATABASE_URI) {
