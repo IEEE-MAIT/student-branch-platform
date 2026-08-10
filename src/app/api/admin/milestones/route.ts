@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { verifyJWT } from '@/lib/jwt';
 import { hasPermission } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { recordAuditLog } from '@/lib/auditLog';
 
 export async function GET() {
   try {
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized. Insufficient permissions.' }, { status: 403 });
     }
 
-    const body = await req.json();
+    const body: any = await req.json();
     const { year, title, description, category, sortOrder } = body;
 
     if (!year || !title) {
@@ -40,17 +41,13 @@ export async function POST(req: Request) {
       },
     });
 
-    try {
-      await prisma.auditLog.create({
-        data: {
-          timestamp: new Date().toISOString(),
-          officerName: payload.name,
-          officerEmail: payload.email,
-          action: 'CREATE_MILESTONE',
-          details: `Added milestone: ${title} (${year})`,
-        },
-      });
-    } catch (e) {}
+    await recordAuditLog({
+      performedBy: payload.name || payload.email,
+      actionType: 'CREATE',
+      entityType: 'MILESTONE',
+      entityTitle: title,
+      changeSummary: `Added milestone: ${title} (${year})`,
+    });
 
     return NextResponse.json(item);
   } catch (error: any) {
@@ -77,17 +74,13 @@ export async function DELETE(req: Request) {
 
     await prisma.milestone.delete({ where: { id } });
 
-    try {
-      await prisma.auditLog.create({
-        data: {
-          timestamp: new Date().toISOString(),
-          officerName: payload.name,
-          officerEmail: payload.email,
-          action: 'DELETE_MILESTONE',
-          details: `Deleted milestone ID: ${id}`,
-        },
-      });
-    } catch (e) {}
+    await recordAuditLog({
+      performedBy: payload.name || payload.email,
+      actionType: 'DELETE',
+      entityType: 'MILESTONE',
+      entityTitle: id,
+      changeSummary: `Deleted milestone ID: ${id}`,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

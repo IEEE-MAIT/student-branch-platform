@@ -6,8 +6,8 @@ import React from 'react';
 interface BadgeProps {
   /** Badge text or icon content */
   children: React.ReactNode;
-  /** Visual variant: ieee (IEEE Blue subtle), mait (MAIT Warm subtle), neutral (warm gray), outline */
-  variant?: 'ieee' | 'mait' | 'neutral' | 'outline';
+  /** Visual variant: ieee (IEEE Blue subtle), mait (MAIT Warm subtle), neutral / default (warm gray), outline */
+  variant?: 'ieee' | 'mait' | 'neutral' | 'outline' | 'default';
   /** Size scale */
   size?: 'sm' | 'md';
   /** Custom CSS classes */
@@ -25,6 +25,8 @@ export const Badge: React.FC<BadgeProps> = ({
 }) => {
   const baseStyles = 'inline-flex items-center font-mono uppercase tracking-wider rounded-[2px] border';
 
+  const selectedVariant = variant === 'default' ? 'neutral' : variant;
+
   const variantStyles = {
     ieee: 'bg-ieee-subtle text-ieee-blue border-ieee-blue/20',
     mait: 'bg-mait-subtle text-mait-warm border-mait-warm/20',
@@ -38,7 +40,7 @@ export const Badge: React.FC<BadgeProps> = ({
   };
 
   return (
-    <span className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}>
+    <span className={`${baseStyles} ${variantStyles[selectedVariant]} ${sizeStyles[size]} ${className}`}>
       {children}
     </span>
   );

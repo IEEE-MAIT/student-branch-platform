@@ -10,6 +10,8 @@ interface StatMetricProps {
   value: string;
   /** Explanatory subtext */
   subtext?: string;
+  /** Explanatory description alias */
+  description?: string;
   /** Custom CSS classes */
   className?: string;
 }
@@ -22,8 +24,11 @@ export const StatMetric: React.FC<StatMetricProps> = ({
   label,
   value,
   subtext,
+  description,
   className = '',
 }) => {
+  const noteText = subtext || description;
+
   return (
     <div className={`flex flex-col py-4 px-6 border-r border-warm-200 last:border-r-0 ${className}`}>
       <span className="font-mono text-3xl sm:text-4xl font-normal text-ieee-blue tracking-tight mb-1">
@@ -32,9 +37,9 @@ export const StatMetric: React.FC<StatMetricProps> = ({
       <span className="text-xs uppercase font-mono tracking-wider text-ink font-semibold">
         {label}
       </span>
-      {subtext && (
+      {noteText && (
         <span className="text-[11px] text-warm-400 mt-0.5 font-sans">
-          {subtext}
+          {noteText}
         </span>
       )}
     </div>

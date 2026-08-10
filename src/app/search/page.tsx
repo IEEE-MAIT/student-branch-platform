@@ -110,7 +110,7 @@ export default function SearchPage() {
                     Events ({searchResults.events.length})
                   </h3>
                   <div className="border border-warm-200 bg-white rounded-[2px] divide-y divide-warm-200">
-                    {searchResults.events.map(event => (
+                    {searchResults.events.map((event: any) => (
                       <EventPreview
                         key={event.id}
                         title={event.title}
@@ -132,7 +132,7 @@ export default function SearchPage() {
                     Achievements ({searchResults.achievements.length})
                   </h3>
                   <div className="border-t border-warm-200">
-                    {searchResults.achievements.map(item => (
+                    {searchResults.achievements.map((item: any) => (
                       <AchievementRow
                         key={item.id}
                         year={item.year}
@@ -153,7 +153,7 @@ export default function SearchPage() {
                     Chapters ({searchResults.chapters.length})
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {searchResults.chapters.map(ch => (
+                    {searchResults.chapters.map((ch: any) => (
                       <div key={ch.id} className="p-4 border border-warm-200 bg-white rounded-[2px]">
                         <span className="font-mono text-xs text-ieee-blue uppercase block mb-1">{ch.type}</span>
                         <Link href={`/chapters/${ch.slug}`} className="font-serif text-xl text-ink hover:text-ieee-blue font-normal">
@@ -173,7 +173,7 @@ export default function SearchPage() {
                     Stories ({searchResults.stories.length})
                   </h3>
                   <div className="space-y-3">
-                    {searchResults.stories.map(s => (
+                    {searchResults.stories.map((s: any) => (
                       <div key={s.id} className="p-4 border border-warm-200 bg-white rounded-[2px]">
                         <span className="font-mono text-xs text-ieee-blue uppercase block mb-1">{s.publishedDate} · {s.unit}</span>
                         <Link href={`/stories/${s.slug}`} className="font-serif text-xl text-ink hover:text-ieee-blue font-normal">

@@ -11,15 +11,19 @@ interface PersonCardProps {
   /** Designation or role (e.g. 'Branch Counselor', 'Chairperson') */
   role: string;
   /** Academic department or branch */
-  department?: string;
+  department?: string | null;
   /** Academic year term */
-  academicYear?: string;
+  academicYear?: string | null;
   /** Portrait photo image URL */
-  imageSrc?: string;
+  imageSrc?: string | null;
   /** LinkedIn profile URL */
-  linkedIn?: string;
+  linkedIn?: string | null;
+  /** Category label (e.g. 'SEC', 'Counsellor') */
+  category?: string | null;
+  /** Size / hierarchy scale alias */
+  size?: 'mentor' | 'featured' | 'standard' | 'compact' | string;
   /** Organizational hierarchy scale: mentor, featured, standard, compact */
-  hierarchy?: 'mentor' | 'featured' | 'standard' | 'compact';
+  hierarchy?: 'mentor' | 'featured' | 'standard' | 'compact' | string;
 }
 
 /**
@@ -33,11 +37,14 @@ export const PersonCard: React.FC<PersonCardProps> = ({
   academicYear,
   imageSrc,
   linkedIn,
+  category,
+  size,
   hierarchy = 'standard',
 }) => {
-  const isMentor = hierarchy === 'mentor';
-  const isFeatured = hierarchy === 'featured';
-  const isCompact = hierarchy === 'compact';
+  const scale = size || hierarchy;
+  const isMentor = scale === 'mentor';
+  const isFeatured = scale === 'featured';
+  const isCompact = scale === 'compact';
 
   if (isCompact) {
     return (

@@ -1,11 +1,10 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URI")
+  url      = env("DATABASE_URL")
 }
 
 model Event {
@@ -105,13 +104,13 @@ model Story {
 }
 
 model Gallery {
-  id          String  @id @default(cuid())
+  id          String         @id @default(cuid())
   title       String
-  slug        String  @unique
+  slug        String         @unique
   date        String
   category    String
   coverImage  String
-  imageCount  Int     @default(0)
+  imageCount  Int            @default(0)
   description String?
   photos      GalleryPhoto[]
 
@@ -155,7 +154,7 @@ model Milestone {
 model Resource {
   id            String  @id @default(cuid())
   title         String
-  type          String  // Newsletter | AnnualReport | Document | Other
+  type          String // Newsletter | AnnualReport | Document | Other
   fileUrl       String?
   publishedDate String
   description   String?

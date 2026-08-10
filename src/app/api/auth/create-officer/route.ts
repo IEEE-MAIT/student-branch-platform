@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Forbidden: Only Super Admin can register new officers.' }, { status: 403 });
     }
 
-    const body = await request.json();
+    const body: any = await request.json();
     const { name, email, password, role, category } = body || {};
 
     const validCategory = Object.values(PersonCategory).includes(category) ? category : PersonCategory.SEC;

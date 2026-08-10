@@ -90,7 +90,7 @@ END:VCALENDAR`;
                     Event Schedule
                   </h3>
                   <div className="border border-warm-200 rounded-[2px] divide-y divide-warm-200 bg-white">
-                    {event.schedule.map((item, idx) => (
+                    {event.schedule.map((item: any, idx: number) => (
                       <div key={idx} className="p-4 flex items-start gap-4">
                         <span className="font-mono text-xs font-semibold text-ieee-blue w-20 flex-shrink-0 pt-0.5">
                           {item.time}
@@ -111,7 +111,7 @@ END:VCALENDAR`;
                     Featured Speakers
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {event.speakers.map((sp, idx) => (
+                    {event.speakers.map((sp: any, idx: number) => (
                       <div key={idx} className="p-4 border border-warm-200 rounded-[2px] bg-warm-100/30">
                         <h4 className="font-serif text-lg text-ink font-normal">{sp.name}</h4>
                         <p className="text-xs text-ieee-blue font-medium mt-0.5">{sp.title}</p>

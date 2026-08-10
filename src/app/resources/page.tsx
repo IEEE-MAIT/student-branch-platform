@@ -122,7 +122,7 @@ export default async function ResourcesPage() {
           />
 
           <div className="pt-8 space-y-12 max-w-3xl">
-            {Object.entries(grouped).map(([type, items]) => (
+            {Object.entries(grouped).map(([type, items]: [string, any]) => (
               <div key={type}>
                 {/* Section header */}
                 <div className="flex items-center gap-3 mb-4 pb-3 border-b border-warm-200">
@@ -134,7 +134,7 @@ export default async function ResourcesPage() {
 
                 {/* Resource rows — clean list format per spec */}
                 <div className="space-y-0 divide-y divide-warm-200 border border-warm-200 rounded-[2px]">
-                  {(items as any[]).map((resource) => (
+                  {(items as any[]).map((resource: any) => (
                     <div
                       key={resource.id}
                       className="flex items-start justify-between gap-4 px-5 py-4 bg-white hover:bg-warm-100/40 transition-colors group"

@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { verifyJWT } from '@/lib/jwt';
 import { hasPermission } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { recordAuditLog } from '@/lib/auditLog';
 
 export async function GET() {
   try {
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized. Insufficient permissions.' }, { status: 403 });
     }
 
-    const body = await req.json();
+    const body: any = await req.json();
     const { name, role, category, department, hierarchy, imageUrl, bio, linkedin } = body;
 
     if (!name || !role || !category) {
@@ -36,24 +37,18 @@ export async function POST(req: Request) {
         role,
         category,
         department: department || '',
-        hierarchy: typeof hierarchy === 'number' ? hierarchy : 10,
+        hierarchy: String(hierarchy ?? 'standard'),
         imageUrl,
-        bio,
-        linkedin,
       },
     });
 
-    try {
-      await prisma.auditLog.create({
-        data: {
-          timestamp: new Date().toISOString(),
-          officerName: payload.name,
-          officerEmail: payload.email,
-          action: 'CREATE_PERSON',
-          details: `Created team member: ${name} (${role})`,
-        },
-      });
-    } catch (e) {}
+    await recordAuditLog({
+      performedBy: payload.name || payload.email,
+      actionType: 'CREATE',
+      entityType: 'PERSON',
+      entityTitle: name,
+      changeSummary: `Created team member: ${name} (${role})`,
+    });
 
     return NextResponse.json(person);
   } catch (error: any) {
@@ -80,17 +75,13 @@ export async function DELETE(req: Request) {
 
     await prisma.person.delete({ where: { id } });
 
-    try {
-      await prisma.auditLog.create({
-        data: {
-          timestamp: new Date().toISOString(),
-          officerName: payload.name,
-          officerEmail: payload.email,
-          action: 'DELETE_PERSON',
-          details: `Deleted person ID: ${id}`,
-        },
-      });
-    } catch (e) {}
+    await recordAuditLog({
+      performedBy: payload.name || payload.email,
+      actionType: 'DELETE',
+      entityType: 'PERSON',
+      entityTitle: id,
+      changeSummary: `Deleted team member ID: ${id}`,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

@@ -12,23 +12,23 @@ interface EventPreviewProps {
   /** URL slug */
   slug: string;
   /** Formatted date string */
-  date: string;
+  date?: string | null;
   /** Time range */
-  time?: string;
+  time?: string | null;
   /** Venue location */
-  venue: string;
+  venue?: string | null;
   /** Organizing unit name */
-  unit: string;
+  unit?: string | null;
   /** Event category tag */
-  category: string;
+  category?: string | null;
   /** Short description */
-  description?: string;
+  description?: string | null;
   /** Poster image URL */
-  imageSrc?: string;
+  imageSrc?: string | null;
   /** Whether to render as featured next event hero card */
   isFeatured?: boolean;
   /** Registration URL */
-  registrationLink?: string;
+  registrationLink?: string | null;
 }
 
 /**

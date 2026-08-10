@@ -17,7 +17,7 @@ export default function AdminResourcesPage() {
   const loadResources = () => {
     fetch('/api/admin/resources')
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: any) => {
         if (Array.isArray(data)) setResources(data);
       })
       .finally(() => setLoading(false));
@@ -42,7 +42,7 @@ export default function AdminResourcesPage() {
           fileUrl,
         }),
       });
-      const data = await res.json();
+      const data: any = await res.json();
       if (res.ok) {
         setMsg({ type: 'success', text: `Resource '${title}' published!` });
         setTitle('');
@@ -65,7 +65,7 @@ export default function AdminResourcesPage() {
         setMsg({ type: 'success', text: 'Resource record deleted.' });
         loadResources();
       } else {
-        const data = await res.json();
+        const data: any = await res.json();
         setMsg({ type: 'error', text: data.error || 'Delete failed.' });
       }
     } catch {
@@ -185,7 +185,7 @@ export default function AdminResourcesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-warm-200">
-                {resources.map((item) => (
+                {resources.map((item: any) => (
                   <tr key={item.id} className="hover:bg-warm-100/30">
                     <td className="p-3 font-medium text-ink">{item.title}</td>
                     <td className="p-3 font-mono text-xs text-ieee-blue">{item.type}</td>

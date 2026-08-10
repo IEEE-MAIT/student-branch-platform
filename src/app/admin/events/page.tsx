@@ -21,7 +21,7 @@ export default function AdminEventsPage() {
   const loadEvents = () => {
     fetch('/api/events')
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: any) => {
         if (Array.isArray(data)) setEvents(data);
       })
       .finally(() => setLoading(false));
@@ -50,7 +50,7 @@ export default function AdminEventsPage() {
           description,
         }),
       });
-      const data = await res.json();
+      const data: any = await res.json();
       if (res.ok) {
         setMsg({ type: 'success', text: `Event created successfully!` });
         setTitle('');
@@ -73,7 +73,7 @@ export default function AdminEventsPage() {
         setMsg({ type: 'success', text: 'Event deleted successfully.' });
         loadEvents();
       } else {
-        const data = await res.json();
+        const data: any = await res.json();
         setMsg({ type: 'error', text: data.error || 'Delete failed.' });
       }
     } catch {
@@ -241,7 +241,7 @@ export default function AdminEventsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-warm-200">
-                {events.map((evt) => (
+                {events.map((evt: any) => (
                   <tr key={evt.id} className="hover:bg-warm-100/30">
                     <td className="p-3 font-medium text-ink">{evt.title}</td>
                     <td className="p-3 font-mono text-[11px] text-warm-400">{evt.unit}</td>

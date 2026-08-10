@@ -33,7 +33,7 @@ export async function POST(request: Request) {
       if (payload) performedBy = payload.email;
     }
 
-    const body = await request.json();
+    const body: any = await request.json();
     let updates: any = {};
 
     if (typeof body.announcementMessage === 'string') {

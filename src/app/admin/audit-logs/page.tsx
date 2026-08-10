@@ -9,7 +9,7 @@ export default function AdminAuditLogsPage() {
   useEffect(() => {
     fetch('/api/audit-logs')
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: any) => {
         if (Array.isArray(data)) setLogs(data);
       })
       .finally(() => setLoading(false));
@@ -38,7 +38,7 @@ export default function AdminAuditLogsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-warm-200 font-mono text-xs">
-              {logs.map((log) => (
+              {logs.map((log: any) => (
                 <tr key={log.id} className="hover:bg-warm-100/30">
                   <td className="p-3 text-warm-400 whitespace-nowrap">{log.timestamp}</td>
                   <td className="p-3 text-ink font-bold">{log.officerName || log.officerEmail}</td>

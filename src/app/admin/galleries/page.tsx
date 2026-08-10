@@ -18,7 +18,7 @@ export default function AdminGalleriesPage() {
   const loadGalleries = () => {
     fetch('/api/admin/galleries')
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: any) => {
         if (Array.isArray(data)) setGalleries(data);
       })
       .finally(() => setLoading(false));
@@ -44,7 +44,7 @@ export default function AdminGalleriesPage() {
           description,
         }),
       });
-      const data = await res.json();
+      const data: any = await res.json();
       if (res.ok) {
         setMsg({ type: 'success', text: `Gallery album '${title}' created!` });
         setTitle('');
@@ -68,7 +68,7 @@ export default function AdminGalleriesPage() {
         setMsg({ type: 'success', text: 'Gallery album deleted.' });
         loadGalleries();
       } else {
-        const data = await res.json();
+        const data: any = await res.json();
         setMsg({ type: 'error', text: data.error || 'Delete failed.' });
       }
     } catch {
@@ -199,7 +199,7 @@ export default function AdminGalleriesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-warm-200">
-                {galleries.map((item) => (
+                {galleries.map((item: any) => (
                   <tr key={item.id} className="hover:bg-warm-100/30">
                     <td className="p-3 font-medium text-ink">{item.title}</td>
                     <td className="p-3 font-mono text-xs text-warm-400">{item.category}</td>

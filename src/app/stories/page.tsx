@@ -46,7 +46,7 @@ export default async function StoriesPage() {
 
           <div className="space-y-6 pt-4">
             {stories.length > 0 ? (
-              stories.map(story => (
+              stories.map((story: any) => (
                 <div key={story.id} className="p-6 border border-warm-200 bg-white rounded-[2px] space-y-3 hover:border-ieee-blue transition-colors">
                   <div className="flex flex-wrap items-center gap-3 font-mono text-xs text-ieee-blue">
                     <span>{story.date}</span>

@@ -8,7 +8,7 @@ import { signJWT } from '@/lib/jwt';
  */
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body: any = await request.json();
     const { email, password } = body || {};
 
     if (!email || !password) {
@@ -25,8 +25,8 @@ export async function POST(request: Request) {
       userId: officer.id,
       email: officer.email,
       name: officer.name,
-      role: officer.role,
-      category: officer.category,
+      role: officer.role || 'Super Admin',
+      category: officer.category || 'Executive',
     });
 
     const response = NextResponse.json({

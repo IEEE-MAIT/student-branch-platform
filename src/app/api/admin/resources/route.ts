@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { verifyJWT } from '@/lib/jwt';
 import { hasPermission } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { recordAuditLog } from '@/lib/auditLog';
 
 export async function GET() {
   try {
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized. Insufficient permissions.' }, { status: 403 });
     }
 
-    const body = await req.json();
+    const body: any = await req.json();
     const { title, type, publishedDate, description, fileUrl, status } = body;
 
     if (!title || !type) {
@@ -41,17 +42,13 @@ export async function POST(req: Request) {
       },
     });
 
-    try {
-      await prisma.auditLog.create({
-        data: {
-          timestamp: new Date().toISOString(),
-          officerName: payload.name,
-          officerEmail: payload.email,
-          action: 'CREATE_RESOURCE',
-          details: `Added resource: ${title} (${type})`,
-        },
-      });
-    } catch (e) {}
+    await recordAuditLog({
+      performedBy: payload.name || payload.email,
+      actionType: 'CREATE',
+      entityType: 'RESOURCE',
+      entityTitle: title,
+      changeSummary: `Added resource: ${title} (${type})`,
+    });
 
     return NextResponse.json(item);
   } catch (error: any) {
@@ -78,17 +75,13 @@ export async function DELETE(req: Request) {
 
     await prisma.resource.delete({ where: { id } });
 
-    try {
-      await prisma.auditLog.create({
-        data: {
-          timestamp: new Date().toISOString(),
-          officerName: payload.name,
-          officerEmail: payload.email,
-          action: 'DELETE_RESOURCE',
-          details: `Deleted resource ID: ${id}`,
-        },
-      });
-    } catch (e) {}
+    await recordAuditLog({
+      performedBy: payload.name || payload.email,
+      actionType: 'DELETE',
+      entityType: 'RESOURCE',
+      entityTitle: id,
+      changeSummary: `Deleted resource ID: ${id}`,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

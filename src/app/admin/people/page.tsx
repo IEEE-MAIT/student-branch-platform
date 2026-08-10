@@ -20,7 +20,7 @@ export default function AdminPeoplePage() {
   const loadPeople = () => {
     fetch('/api/people')
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: any) => {
         if (Array.isArray(data)) setPeople(data);
       })
       .finally(() => setLoading(false));
@@ -48,7 +48,7 @@ export default function AdminPeoplePage() {
           linkedin,
         }),
       });
-      const data = await res.json();
+      const data: any = await res.json();
       if (res.ok) {
         setMsg({ type: 'success', text: `Team member ${name} added successfully!` });
         setName('');
@@ -73,7 +73,7 @@ export default function AdminPeoplePage() {
         setMsg({ type: 'success', text: 'Roster record removed.' });
         loadPeople();
       } else {
-        const data = await res.json();
+        const data: any = await res.json();
         setMsg({ type: 'error', text: data.error || 'Delete failed.' });
       }
     } catch {
@@ -228,7 +228,7 @@ export default function AdminPeoplePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-warm-200">
-                {people.map((p) => (
+                {people.map((p: any) => (
                   <tr key={p.id} className="hover:bg-warm-100/30">
                     <td className="p-3 font-mono text-xs font-bold text-warm-400">{p.hierarchy}</td>
                     <td className="p-3 font-medium text-ink">{p.name}</td>

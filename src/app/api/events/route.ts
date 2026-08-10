@@ -19,7 +19,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body: any = await request.json();
 
     if (!body || typeof body !== 'object') {
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });

@@ -28,10 +28,17 @@ export const metadata: Metadata = {
 };
 
 export default async function HistoryPage() {
+  interface MilestoneItem {
+    year: string | number;
+    title: string;
+    description?: string | null;
+    category?: string | null;
+  }
+
   const dbMilestones = await getDynamicMilestones();
 
   // Fallback to static data if DB has nothing yet
-  const milestones =
+  const milestones: MilestoneItem[] =
     dbMilestones.length > 0
       ? dbMilestones.map((m: any) => ({
           year: m.year,

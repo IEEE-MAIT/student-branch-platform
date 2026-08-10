@@ -17,7 +17,7 @@ export default function AdminMilestonesPage() {
   const loadMilestones = () => {
     fetch('/api/admin/milestones')
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: any) => {
         if (Array.isArray(data)) setMilestones(data);
       })
       .finally(() => setLoading(false));
@@ -42,7 +42,7 @@ export default function AdminMilestonesPage() {
           description,
         }),
       });
-      const data = await res.json();
+      const data: any = await res.json();
       if (res.ok) {
         setMsg({ type: 'success', text: `Milestone '${title}' added to history!` });
         setTitle('');
@@ -64,7 +64,7 @@ export default function AdminMilestonesPage() {
         setMsg({ type: 'success', text: 'Milestone record deleted.' });
         loadMilestones();
       } else {
-        const data = await res.json();
+        const data: any = await res.json();
         setMsg({ type: 'error', text: data.error || 'Delete failed.' });
       }
     } catch {
@@ -184,7 +184,7 @@ export default function AdminMilestonesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-warm-200">
-                {milestones.map((item) => (
+                {milestones.map((item: any) => (
                   <tr key={item.id} className="hover:bg-warm-100/30">
                     <td className="p-3 font-mono font-bold text-ieee-blue">{item.year}</td>
                     <td className="p-3 font-medium text-ink">{item.title}</td>

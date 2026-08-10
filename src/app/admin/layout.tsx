@@ -42,7 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     fetch('/api/auth/session')
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: any) => {
         if (data.authenticated) {
           setSession(data);
         } else {
@@ -62,7 +62,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      const data = await res.json();
+      const data: any = await res.json();
       if (res.ok && data.success) {
         setSession({ authenticated: true, officer: data.officer });
         router.refresh();
@@ -202,7 +202,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <div className="px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-widest text-warm-300">
                   CMS Navigation
                 </div>
-                {ADMIN_NAV.map((item) => {
+                {ADMIN_NAV.map((item: any) => {
                   const isActive = pathname === item.href;
                   return (
                     <Link

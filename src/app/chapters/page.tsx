@@ -45,7 +45,7 @@ export default async function ChaptersPage() {
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
-            {chaptersList.map(ch => (
+            {chaptersList.map((ch: any) => (
               <ChapterPanel
                 key={ch.id}
                 name={ch.name}

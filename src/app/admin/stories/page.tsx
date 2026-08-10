@@ -20,7 +20,7 @@ export default function AdminStoriesPage() {
   const loadStories = () => {
     fetch('/api/stories')
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: any) => {
         if (Array.isArray(data)) setStories(data);
       })
       .finally(() => setLoading(false));
@@ -48,7 +48,7 @@ export default function AdminStoriesPage() {
           contentHtml,
         }),
       });
-      const data = await res.json();
+      const data: any = await res.json();
       if (res.ok) {
         setMsg({ type: 'success', text: `Story '${title}' published!` });
         setTitle('');
@@ -72,7 +72,7 @@ export default function AdminStoriesPage() {
         setMsg({ type: 'success', text: 'Story deleted.' });
         loadStories();
       } else {
-        const data = await res.json();
+        const data: any = await res.json();
         setMsg({ type: 'error', text: data.error || 'Delete failed.' });
       }
     } catch {
@@ -226,7 +226,7 @@ export default function AdminStoriesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-warm-200">
-                {stories.map((item) => (
+                {stories.map((item: any) => (
                   <tr key={item.id} className="hover:bg-warm-100/30">
                     <td className="p-3 font-medium text-ink">{item.title}</td>
                     <td className="p-3 font-mono text-xs text-warm-400">{item.author || '—'}</td>

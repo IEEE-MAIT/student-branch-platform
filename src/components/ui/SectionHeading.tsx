@@ -7,9 +7,9 @@ interface SectionHeadingProps {
   /** Main section title rendered in Instrument Serif */
   title: string;
   /** Subtitle or explanatory narrative text */
-  subtitle?: string;
+  subtitle?: string | null;
   /** Monospaced category prefix label */
-  category?: string;
+  category?: string | null;
   /** Text alignment */
   align?: 'left' | 'center';
   /** Custom CSS classes */

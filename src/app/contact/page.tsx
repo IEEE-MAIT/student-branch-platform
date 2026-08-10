@@ -29,10 +29,10 @@ export default function ContactPage() {
     setError('');
     const form = e.currentTarget;
     const data = {
-      name: (form.elements.namedItem('name') as HTMLInputElement).value,
-      email: (form.elements.namedItem('email') as HTMLInputElement).value,
-      subject: (form.elements.namedItem('subject') as HTMLSelectElement).value,
-      message: (form.elements.namedItem('message') as HTMLTextAreaElement).value,
+      name: (form.elements.namedItem('name') as any)?.value || '',
+      email: (form.elements.namedItem('email') as any)?.value || '',
+      subject: (form.elements.namedItem('subject') as any)?.value || '',
+      message: (form.elements.namedItem('message') as any)?.value || '',
     };
     try {
       const res = await fetch('/api/contact', {
@@ -41,7 +41,7 @@ export default function ContactPage() {
         body: JSON.stringify(data),
       });
       if (!res.ok) {
-        const json = await res.json();
+        const json: any = await res.json();
         setError(json.error || 'Submission failed. Please try again.');
       } else {
         setSubmitted(true);

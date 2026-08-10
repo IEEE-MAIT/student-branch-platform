@@ -9,11 +9,11 @@ interface AchievementRowProps {
   /** Title of achievement */
   title: string;
   /** Conferring organization */
-  conferredBy: string;
+  conferredBy?: string | null;
   /** Associated branch unit or student team */
-  unitOrTeam?: string;
+  unitOrTeam?: string | null;
   /** Category classification tag */
-  category?: string;
+  category?: string | null;
   /** Custom CSS classes */
   className?: string;
 }

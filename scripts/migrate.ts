@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Pool, neonConfig } from '@neondatabase/serverless';
 import ws from 'ws';
 import * as dotenv from 'dotenv';

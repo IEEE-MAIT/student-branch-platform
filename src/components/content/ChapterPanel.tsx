@@ -12,13 +12,15 @@ interface ChapterPanelProps {
   /** Unit classification type (e.g. 'Affinity Group', 'Technical Chapter') */
   type: string;
   /** Overview summary description */
-  description: string;
-  /** Current active member count string */
-  memberCount?: string;
-  /** Total events organized count string */
-  eventCount?: string;
+  description?: string | null;
+  /** Current active member count */
+  memberCount?: number | string | null;
+  /** Total events organized count */
+  eventCount?: number | string | null;
   /** Global IEEE parent society (e.g. 'IEEE Women in Engineering') */
-  parentSociety?: string;
+  parentSociety?: string | null;
+  /** Established year string */
+  establishedYear?: string | null;
 }
 
 /**

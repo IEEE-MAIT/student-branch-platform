@@ -15,14 +15,19 @@
  */
 
 import React, { useEffect, useCallback } from 'react';
-import { GalleryPhoto } from '@/lib/data';
+
+export interface LightboxPhoto {
+  id: string;
+  caption: string;
+  url?: string | null;
+}
 
 /**
  * Props for Lightbox component.
  */
 interface LightboxProps {
   /** Array of photo items in current album */
-  photos: GalleryPhoto[];
+  photos: LightboxPhoto[];
   /** Zero-based index of photo currently displayed */
   currentIndex: number;
   /** Visibility state of modal */

@@ -3,10 +3,11 @@ import { cookies } from 'next/headers';
 import { verifyJWT } from '@/lib/jwt';
 import { hasPermission } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { recordAuditLog } from '@/lib/auditLog';
 
 export async function GET() {
   try {
-    const stories = await prisma.story.findMany();
+    const stories = await prisma.story.findMany({ orderBy: { date: 'desc' } });
     return NextResponse.json(stories);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized. Insufficient permissions.' }, { status: 403 });
     }
 
-    const body = await req.json();
+    const body: any = await req.json();
     const { title, slug, author, date, category, readTime, excerpt, contentHtml } = body;
 
     if (!title || !slug || !contentHtml) {
@@ -37,23 +38,18 @@ export async function POST(req: Request) {
         author: author || payload.name,
         date: date || new Date().toISOString().split('T')[0],
         category: category || 'General',
-        readTime: readTime || '5 min read',
-        excerpt,
+        excerpt: excerpt || '',
         contentHtml,
       },
     });
 
-    try {
-      await prisma.auditLog.create({
-        data: {
-          timestamp: new Date().toISOString(),
-          officerName: payload.name,
-          officerEmail: payload.email,
-          action: 'CREATE_STORY',
-          details: `Published article: ${title} (${slug})`,
-        },
-      });
-    } catch (e) {}
+    await recordAuditLog({
+      performedBy: payload.name || payload.email,
+      actionType: 'CREATE',
+      entityType: 'ARTICLE',
+      entityTitle: title,
+      changeSummary: `Published story article: ${title} (${slug})`,
+    });
 
     return NextResponse.json(story);
   } catch (error: any) {
@@ -80,17 +76,13 @@ export async function DELETE(req: Request) {
 
     await prisma.story.delete({ where: { id } });
 
-    try {
-      await prisma.auditLog.create({
-        data: {
-          timestamp: new Date().toISOString(),
-          officerName: payload.name,
-          officerEmail: payload.email,
-          action: 'DELETE_STORY',
-          details: `Deleted story ID: ${id}`,
-        },
-      });
-    } catch (e) {}
+    await recordAuditLog({
+      performedBy: payload.name || payload.email,
+      actionType: 'DELETE',
+      entityType: 'ARTICLE',
+      entityTitle: id,
+      changeSummary: `Deleted story ID: ${id}`,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

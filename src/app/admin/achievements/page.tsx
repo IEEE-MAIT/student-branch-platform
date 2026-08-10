@@ -18,7 +18,7 @@ export default function AdminAchievementsPage() {
   const loadAchievements = () => {
     fetch('/api/achievements')
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: any) => {
         if (Array.isArray(data)) setAchievements(data);
       })
       .finally(() => setLoading(false));
@@ -37,7 +37,7 @@ export default function AdminAchievementsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ year, title, conferredBy, unitOrTeam, category, description }),
       });
-      const data = await res.json();
+      const data: any = await res.json();
       if (res.ok) {
         setMsg({ type: 'success', text: 'Achievement recorded successfully!' });
         setTitle('');
@@ -59,7 +59,7 @@ export default function AdminAchievementsPage() {
         setMsg({ type: 'success', text: 'Achievement deleted.' });
         loadAchievements();
       } else {
-        const data = await res.json();
+        const data: any = await res.json();
         setMsg({ type: 'error', text: data.error || 'Delete failed.' });
       }
     } catch {
@@ -192,7 +192,7 @@ export default function AdminAchievementsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-warm-200">
-                {achievements.map((item) => (
+                {achievements.map((item: any) => (
                   <tr key={item.id} className="hover:bg-warm-100/30">
                     <td className="p-3 font-mono text-ieee-blue font-bold">{item.year}</td>
                     <td className="p-3 font-medium text-ink">{item.title}</td>

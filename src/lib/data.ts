@@ -171,7 +171,7 @@ export interface MilestoneItem {
  */
 export interface GalleryPhoto {
   id: string;
-  url: string;
+  url?: string | null;
   caption: string;
   width?: number;
   height?: number;

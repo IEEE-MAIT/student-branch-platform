@@ -25,9 +25,9 @@ export const revalidate = 60; // ISR Cache
 export default async function PeoplePage() {
   const allPeople = await getDynamicPeople();
 
-  const counsellors = allPeople.filter(p => p.category === 'Counsellor');
-  const sec = allPeople.filter(p => p.category === 'SEC');
-  const webAndOp = allPeople.filter(p => p.category === 'Web' || p.category === 'Operational');
+  const counsellors = allPeople.filter((p: any) => p.category === 'Counsellor');
+  const sec = allPeople.filter((p: any) => p.category === 'SEC');
+  const webAndOp = allPeople.filter((p: any) => p.category === 'Web' || p.category === 'Operations');
 
   return (
     <>
@@ -55,7 +55,7 @@ export default async function PeoplePage() {
             </h3>
             {counsellors.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {counsellors.map(person => (
+                {counsellors.map((person: any) => (
                   <PersonCard
                     key={person.id}
                     name={person.name}
@@ -78,7 +78,7 @@ export default async function PeoplePage() {
             </h3>
             {sec.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {sec.map(person => (
+                {sec.map((person: any) => (
                   <PersonCard
                     key={person.id}
                     name={person.name}
@@ -101,7 +101,7 @@ export default async function PeoplePage() {
             </h3>
             {webAndOp.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {webAndOp.map(person => (
+                {webAndOp.map((person: any) => (
                   <PersonCard
                     key={person.id}
                     name={person.name}

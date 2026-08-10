@@ -50,7 +50,7 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
           <SectionHeading
             category={chapter.type}
             title={chapter.name}
-            subtitle={chapter.description}
+            subtitle={chapter.description || undefined}
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 pt-4">
@@ -73,15 +73,15 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
 
                 {chapterEvents.length > 0 ? (
                   <div className="border border-warm-200 bg-white rounded-[2px] divide-y divide-warm-200">
-                    {chapterEvents.map(event => (
+                    {chapterEvents.map((event: any) => (
                       <EventPreview
                         key={event.id}
                         title={event.title}
                         slug={event.slug}
-                        date={event.date}
-                        venue={event.venue}
-                        unit={event.unit}
-                        category={event.category}
+                        date={event.date || undefined}
+                        venue={event.venue || undefined}
+                        unit={event.unit || undefined}
+                        category={event.category || undefined}
                       />
                     ))}
                   </div>

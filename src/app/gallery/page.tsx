@@ -46,7 +46,7 @@ export default async function GalleryPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
             {albums.length > 0 ? (
-              albums.map(album => (
+              albums.map((album: any) => (
                 <Link
                   key={album.id}
                   href={`/gallery/${album.slug}`}

@@ -3,10 +3,11 @@ import { cookies } from 'next/headers';
 import { verifyJWT } from '@/lib/jwt';
 import { hasPermission } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { recordAuditLog } from '@/lib/auditLog';
 
 export async function GET() {
   try {
-    const list = await prisma.achievement.findMany();
+    const list = await prisma.achievement.findMany({ orderBy: { year: 'desc' } });
     return NextResponse.json(list);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized. Insufficient permissions.' }, { status: 403 });
     }
 
-    const body = await req.json();
+    const body: any = await req.json();
     const { year, title, conferredBy, unitOrTeam, category, description } = body;
 
     if (!year || !title) {
@@ -34,18 +35,13 @@ export async function POST(req: Request) {
       data: { year, title, conferredBy, unitOrTeam, category, description },
     });
 
-    // Record Audit Log
-    try {
-      await prisma.auditLog.create({
-        data: {
-          timestamp: new Date().toISOString(),
-          officerName: payload.name,
-          officerEmail: payload.email,
-          action: 'CREATE_ACHIEVEMENT',
-          details: `Created achievement: ${title} (${year})`,
-        },
-      });
-    } catch (e) {}
+    await recordAuditLog({
+      performedBy: payload.name || payload.email,
+      actionType: 'CREATE',
+      entityType: 'ACHIEVEMENT',
+      entityTitle: title,
+      changeSummary: `Created achievement honor: ${title} (${year})`,
+    });
 
     return NextResponse.json(item);
   } catch (error: any) {
@@ -72,17 +68,13 @@ export async function DELETE(req: Request) {
 
     await prisma.achievement.delete({ where: { id } });
 
-    try {
-      await prisma.auditLog.create({
-        data: {
-          timestamp: new Date().toISOString(),
-          officerName: payload.name,
-          officerEmail: payload.email,
-          action: 'DELETE_ACHIEVEMENT',
-          details: `Deleted achievement ID: ${id}`,
-        },
-      });
-    } catch (e) {}
+    await recordAuditLog({
+      performedBy: payload.name || payload.email,
+      actionType: 'DELETE',
+      entityType: 'ACHIEVEMENT',
+      entityTitle: id,
+      changeSummary: `Deleted achievement ID: ${id}`,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
