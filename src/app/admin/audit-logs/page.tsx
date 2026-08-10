@@ -41,13 +41,15 @@ export default function AdminAuditLogsPage() {
               {logs.map((log: any) => (
                 <tr key={log.id} className="hover:bg-warm-100/30">
                   <td className="p-3 text-warm-400 whitespace-nowrap">{log.timestamp}</td>
-                  <td className="p-3 text-ink font-bold">{log.officerName || log.officerEmail}</td>
+                  <td className="p-3 text-ink font-bold">{log.performedBy}</td>
                   <td className="p-3">
                     <span className="px-2 py-0.5 bg-ieee-subtle text-ieee-blue rounded-[2px] font-bold text-[10px]">
-                      {log.action}
+                      {log.actionType}
                     </span>
                   </td>
-                  <td className="p-3 text-warm-400 font-sans">{log.details}</td>
+                  <td className="p-3 text-warm-400 font-sans">
+                    {log.entityType} {log.entityTitle ? `- ${log.entityTitle}` : ''} {log.changeSummary ? `(${log.changeSummary})` : ''}
+                  </td>
                 </tr>
               ))}
 

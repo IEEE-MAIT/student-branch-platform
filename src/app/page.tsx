@@ -13,6 +13,7 @@ import { BRANCH_STATS } from '@/lib/data';
 import { getDynamicEvents, getDynamicAchievements, getDynamicChapters, getDynamicPeople } from '@/lib/api';
 import Link from 'next/link';
 
+// Cache bust for Prisma hierarchy Int change
 export const revalidate = 60; // ISR: revalidate every 60 seconds
 
 export default async function HomePage() {

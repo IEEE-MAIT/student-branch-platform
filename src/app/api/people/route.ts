@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { prisma } from '@/lib/db'; // cache bust for prisma hierarchy int
 
 export async function GET(req: Request) {
   try {

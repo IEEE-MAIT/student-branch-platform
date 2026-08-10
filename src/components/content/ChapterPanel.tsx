@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 /**
  * Props for ChapterPanel component.
@@ -39,7 +40,7 @@ export const ChapterPanel: React.FC<ChapterPanelProps> = ({
   return (
     <div className="border border-warm-200 bg-white p-6 sm:p-8 rounded-[2px] flex flex-col justify-between space-y-6">
       <div>
-        <div className="flex items-center justify-between gap-2 mb-3">
+        <div className="flex items-center justify-between gap-2 mb-5">
           <span className="font-mono text-xs uppercase tracking-wider text-ieee-blue font-semibold">
             {type}
           </span>
@@ -50,9 +51,21 @@ export const ChapterPanel: React.FC<ChapterPanelProps> = ({
           )}
         </div>
 
-        <h3 className="font-serif text-2xl text-ink font-normal mb-3">
-          {name}
-        </h3>
+        {slug === 'eds' || slug === 'wie' ? (
+          <div className="mb-4 flex items-center h-20">
+            <Image 
+              src={slug === 'eds' ? "/eds_mait_logo.png" : "/wie_ag_mait_logo.png"} 
+              alt={`${name} Logo`} 
+              width={300} 
+              height={100} 
+              className="w-auto max-h-16 object-contain"
+            />
+          </div>
+        ) : (
+          <h3 className="font-serif text-2xl text-ink font-normal mb-3">
+            {name}
+          </h3>
+        )}
 
         <p className="text-sm text-warm-400 leading-relaxed line-clamp-3 font-sans">
           {description}

@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Container } from './Container';
 
 /**
@@ -113,7 +114,13 @@ export const Footer: React.FC = () => {
 
           {/* Column 4: Institutional Summary */}
           <div className="space-y-4">
-            <h3 className="font-serif text-xl font-normal text-white">IEEE MAIT</h3>
+            <Image 
+              src="/main_student_branch_logo.png" 
+              alt="IEEE MAIT Student Branch Logo" 
+              width={300} 
+              height={80} 
+              className="w-auto h-14 object-contain filter brightness-0 invert opacity-90"
+            />
             <div className="accent-rule bg-ieee-blue my-2" />
             <p className="text-xs text-warm-300 leading-relaxed">
               IEEE Student Branch at Maharaja Agrasen Institute of Technology, Delhi. Advancing technology, building community, and fostering technical excellence since 2005.

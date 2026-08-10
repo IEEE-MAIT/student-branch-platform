@@ -15,6 +15,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Container } from './Container';
 import { Button } from '../ui/Button';
@@ -53,13 +54,15 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center justify-between h-20">
           {/* IEEE + MAIT Co-Branding Header */}
           <Link href="/" className="flex items-center gap-4 group">
-            <div className="flex flex-col">
-              <span className="font-sans font-bold text-xl tracking-tight text-ieee-blue group-hover:text-ieee-dark transition-colors">
-                IEEE <span className="font-normal text-ink">MAIT</span>
-              </span>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-warm-300">
-                Student Branch · Est. 2005
-              </span>
+            <div className="flex flex-col justify-center py-2">
+              <Image 
+                src="/main_student_branch_logo.png" 
+                alt="IEEE MAIT Student Branch Logo" 
+                width={300} 
+                height={80} 
+                className="w-auto h-14 object-contain group-hover:opacity-90 transition-opacity"
+                priority
+              />
             </div>
             <div className="hidden sm:block h-8 w-[1px] bg-warm-200" />
             <div className="hidden md:flex flex-col text-xs text-warm-400 leading-tight">
