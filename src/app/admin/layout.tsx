@@ -24,6 +24,7 @@ const ADMIN_NAV = [
   { label: 'Stories & Articles', href: '/admin/stories' },
   { label: 'Galleries', href: '/admin/galleries' },
   { label: 'Resources', href: '/admin/resources' },
+  { label: 'Media Library', href: '/admin/assets' },
   { label: 'Milestones', href: '/admin/milestones' },
   { label: 'Audit Logs', href: '/admin/audit-logs' },
 ];

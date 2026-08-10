@@ -10,25 +10,46 @@ import { AchievementRow } from '@/components/content/AchievementRow';
 import { ChapterPanel } from '@/components/content/ChapterPanel';
 import { PersonCard } from '@/components/content/PersonCard';
 import { BRANCH_STATS } from '@/lib/data';
-import { getDynamicEvents, getDynamicAchievements, getDynamicChapters, getDynamicPeople } from '@/lib/api';
+import { prisma } from '@/lib/db';
 import Link from 'next/link';
 
-// Cache bust for Prisma hierarchy Int change
 export const revalidate = 60; // ISR: revalidate every 60 seconds
 
 export default async function HomePage() {
-  const [eventsList, achievementsList, chaptersList, peopleList] = await Promise.all([
-    getDynamicEvents(),
-    getDynamicAchievements(),
-    getDynamicChapters(),
-    getDynamicPeople(),
-  ]);
+  let upcomingEvents: any[] = [];
+  let featuredAchievements: any[] = [];
+  let chaptersList: any[] = [];
+  let topLeadership: any[] = [];
 
-  const upcomingEvents = eventsList.filter((e: any) => e.status === 'upcoming');
+  try {
+    // 1. Fetch only 4 upcoming events
+    upcomingEvents = await prisma.event.findMany({
+      where: { status: 'upcoming' },
+      orderBy: { date: 'asc' },
+      take: 4
+    });
+
+    // 2. Fetch only 3 achievements
+    featuredAchievements = await prisma.achievement.findMany({
+      orderBy: { year: 'desc' },
+      take: 3
+    });
+
+    // 3. Fetch chapters (there are only a few, so findMany is safe)
+    chaptersList = await prisma.chapter.findMany();
+
+    // 4. Fetch only top 4 leadership (avoiding full table scan and JS filter)
+    topLeadership = await prisma.person.findMany({
+      orderBy: { hierarchy: 'asc' },
+      take: 4
+    });
+  } catch (e) {
+    console.error("Homepage DB fetch error:", e);
+    // Fallback to empty arrays if DB fails
+  }
+
   const featuredEvent = upcomingEvents[0];
   const remainingUpcoming = upcomingEvents.slice(1);
-  const featuredAchievements = achievementsList.slice(0, 3);
-  const topLeadership = peopleList.slice(0, 4);
 
   return (
     <>

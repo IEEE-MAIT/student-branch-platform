@@ -71,7 +71,9 @@ export default function RootLayout({
       className={`${instrumentSerif.variable} ${inter.variable} ${jetbrainsMono.variable}`}
     >
       <head>
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" media="(prefers-color-scheme: light)" />
+        <link rel="icon" href="/favicon-dark.png" media="(prefers-color-scheme: dark)" />
+        <link rel="icon" href="/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)" />
         <link rel="apple-touch-icon" href="/favicon.svg" />
       </head>
       <body className="font-sans bg-white text-ink antialiased min-h-screen flex flex-col">

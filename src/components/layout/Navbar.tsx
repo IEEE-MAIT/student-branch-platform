@@ -141,10 +141,16 @@ export const Navbar: React.FC = () => {
               Gallery
             </Link>
 
-            <Link href="/search" className={`${linkClasses('/search')} flex items-center gap-1.5 font-mono text-xs text-ieee-blue bg-ieee-subtle px-2 py-1.5 rounded-[2px] transition-colors hover:bg-ieee-blue/10`}>
-              <span>🔍 Search</span>
-              <kbd className="hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-white/60 border border-ieee-blue/20 rounded text-[9px] text-ieee-blue shadow-sm ml-1 font-sans font-medium">
-                <span className="text-[10px]">⌘</span>K
+            <Link 
+              href="/search" 
+              className="flex items-center gap-2 text-ink hover:text-ieee-blue transition-all duration-200 group p-1.5 px-2.5 border border-warm-200 hover:border-ieee-blue/40 rounded-lg bg-warm-50/50 hover:bg-white shadow-sm"
+              aria-label="Search"
+            >
+              <svg className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <kbd className="hidden lg:flex items-center gap-0.5 px-1.5 py-0.5 bg-white border border-warm-200 rounded text-[10px] text-warm-400 group-hover:text-ieee-blue group-hover:border-ieee-blue/30 font-sans font-medium transition-colors shadow-sm">
+                <span className="text-[11px] leading-none">⌘</span>K
               </kbd>
             </Link>
           </nav>

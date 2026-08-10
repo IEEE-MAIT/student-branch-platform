@@ -30,6 +30,7 @@ export default function AdminPeoplePage() {
   const [imageUrl, setImageUrl] = useState('');
   const [bio, setBio] = useState('');
   const [linkedin, setLinkedin] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const loadPeople = () => {
     fetch('/api/people')
@@ -58,6 +59,31 @@ export default function AdminPeoplePage() {
         }
       });
   }, []);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    setUploadingImage(true);
+    setMsg(null);
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const res = await fetch('/api/admin/assets/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const json: any = await res.json();
+      if (json.success) {
+        setImageUrl(json.data.secure_url);
+        setMsg({ type: 'success', text: 'Image uploaded to Cloudinary successfully!' });
+      } else {
+        setMsg({ type: 'error', text: json.error || 'Failed to upload image.' });
+      }
+    } catch {
+      setMsg({ type: 'error', text: 'Error uploading image.' });
+    }
+    setUploadingImage(false);
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -292,13 +318,36 @@ export default function AdminPeoplePage() {
 
           <div className="sm:col-span-2">
             <label className="block font-mono text-xs text-warm-400 mb-1">Photo Image URL</label>
-            <input
-              type="text"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="https://images.unsplash.com/photo-..."
-              className="w-full px-3 py-2 border rounded-[2px]"
-            />
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="https://res.cloudinary.com/..."
+                className="flex-1 px-3 py-2 border rounded-[2px]"
+              />
+              <div className="relative">
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleImageUpload} 
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                  title="Upload Image"
+                />
+                <button 
+                  type="button" 
+                  disabled={uploadingImage}
+                  className="px-4 py-2 bg-warm-200 text-ink text-xs font-mono font-medium rounded-[2px] disabled:opacity-50 whitespace-nowrap h-full"
+                >
+                  {uploadingImage ? 'Uploading...' : 'Upload File'}
+                </button>
+              </div>
+            </div>
+            {imageUrl && (
+              <div className="mt-2">
+                <img src={imageUrl} alt="Preview" className="h-16 w-16 object-cover rounded-[2px] border border-warm-200" />
+              </div>
+            )}
           </div>
         </div>
 
