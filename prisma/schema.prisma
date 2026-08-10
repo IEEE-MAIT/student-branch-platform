@@ -8,9 +8,9 @@ datasource db {
 }
 
 model Event {
-  id               String  @id @default(cuid())
+  id               String        @id @default(cuid())
   title            String
-  slug             String  @unique
+  slug             String        @unique
   date             String?
   time             String?
   venue            String?
@@ -21,20 +21,46 @@ model Event {
   description      String?
   imageSrc         String?
   registrationLink String?
+  galleryId        String?
+  storyId          String?
+  chapterId        String?
+  academicYearId   String?
+  gallery          Gallery?      @relation(fields: [galleryId], references: [id], onDelete: SetNull)
+  story            Story?        @relation("EventReport", fields: [storyId], references: [id], onDelete: SetNull)
+  chapter          Chapter?      @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  academicYear     AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  achievements     Achievement[]
 
   @@map("events")
 }
 
 model Achievement {
-  id          String  @id @default(cuid())
-  year        String
-  title       String
-  conferredBy String?
-  unitOrTeam  String?
-  category    String?
-  description String?
+  id             String              @id @default(cuid())
+  year           String
+  title          String
+  conferredBy    String?
+  unitOrTeam     String?
+  category       String?
+  description    String?
+  chapterId      String?
+  eventId        String?
+  academicYearId String?
+  chapter        Chapter?            @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  event          Event?              @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  academicYear   AcademicYear?       @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  people         AchievementPerson[]
 
   @@map("achievements")
+}
+
+model AchievementPerson {
+  achievementId String
+  personId      String
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  person        Person      @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@id([achievementId, personId])
+  @@map("achievement_people")
 }
 
 model SiteSetting {
@@ -73,9 +99,9 @@ model AuditLog {
 }
 
 model Chapter {
-  id              String  @id @default(cuid())
+  id              String                   @id @default(cuid())
   name            String
-  slug            String  @unique
+  slug            String                   @unique
   type            String
   parentSociety   String?
   establishedYear String?
@@ -83,22 +109,32 @@ model Chapter {
   mission         String?
   leaderName      String?
   leaderRole      String?
-  memberCount     Int     @default(0)
-  eventCount      Int     @default(0)
+  memberCount     Int                      @default(0)
+  eventCount      Int                      @default(0)
+  events          Event[]
+  achievements    Achievement[]
+  stories         Story[]
+  galleries       Gallery[]
+  memberships     OrganizationMembership[]
 
   @@map("chapters")
 }
 
 model Story {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   title       String
-  slug        String  @unique
+  slug        String   @unique
   date        String
   author      String
+  authorId    String?
   category    String
   excerpt     String
   contentHtml String
   imageUrl    String?
+  chapterId   String?
+  authorPerson Person?  @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  chapter     Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  events      Event[]  @relation("EventReport")
 
   @@map("stories")
 }
@@ -112,7 +148,10 @@ model Gallery {
   coverImage  String
   imageCount  Int            @default(0)
   description String?
+  chapterId   String?
+  chapter     Chapter?       @relation(fields: [chapterId], references: [id], onDelete: SetNull)
   photos      GalleryPhoto[]
+  events      Event[]
 
   @@map("galleries")
 }
@@ -127,8 +166,32 @@ model GalleryPhoto {
   @@map("gallery_photos")
 }
 
+model Role {
+  id          String                   @id @default(cuid())
+  title       String                   @unique
+  hierarchy   Int                      @default(1)
+  category    String // SEC | Lead | ChapterEC | MentorRole
+  isActive    Boolean                  @default(true)
+  memberships OrganizationMembership[]
+
+  @@map("roles")
+}
+
+model AcademicYear {
+  id           String                   @id @default(cuid())
+  label        String                   @unique // e.g. "2025-26"
+  startDate    String?
+  endDate      String?
+  isCurrent    Boolean                  @default(false)
+  memberships  OrganizationMembership[]
+  events       Event[]
+  achievements Achievement[]
+
+  @@map("academic_years")
+}
+
 model Person {
-  id           String  @id @default(cuid())
+  id           String                   @id @default(cuid())
   name         String
   role         String
   department   String?
@@ -136,8 +199,33 @@ model Person {
   hierarchy    String
   category     String?
   imageUrl     String?
+  email        String?
+  linkedIn     String?
+  github       String?
+  bio          String?
+  memberships  OrganizationMembership[]
+  stories      Story[]
+  achievements AchievementPerson[]
 
   @@map("people")
+}
+
+model OrganizationMembership {
+  id             String       @id @default(cuid())
+  personId       String
+  roleId         String
+  academicYearId String
+  chapterId      String?
+  startDate      String?
+  endDate        String?
+  isCurrent      Boolean      @default(true)
+  sortOrder      Int          @default(0)
+  person         Person       @relation(fields: [personId], references: [id], onDelete: Cascade)
+  role           Role         @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  chapter        Chapter?     @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+
+  @@map("organization_memberships")
 }
 
 model Milestone {

@@ -32,6 +32,8 @@ export function GalleryAlbumViewer({ album }: { album: Album }) {
     setLightboxOpen(true);
   };
 
+  const photosList = Array.isArray(album?.photos) ? album.photos : [];
+
   return (
     <>
       <Container size="default">
@@ -50,7 +52,7 @@ export function GalleryAlbumViewer({ album }: { album: Album }) {
 
         {/* Photo Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
-          {album.photos.map((photo, idx) => (
+          {photosList.map((photo, idx) => (
             <div
               key={photo.id}
               onClick={() => openLightboxAtIndex(idx)}
@@ -69,7 +71,7 @@ export function GalleryAlbumViewer({ album }: { album: Album }) {
               </div>
             </div>
           ))}
-          {album.photos.length === 0 && (
+          {photosList.length === 0 && (
             <div className="col-span-full p-8 text-center text-sm font-mono text-warm-400 border border-warm-200 bg-warm-50 rounded-[2px]">
               No photos uploaded for this album yet.
             </div>
@@ -79,7 +81,7 @@ export function GalleryAlbumViewer({ album }: { album: Album }) {
 
       {/* Lightbox Modal */}
       <Lightbox
-        photos={album.photos}
+        photos={photosList}
         currentIndex={photoIndex}
         isOpen={lightboxOpen}
         onClose={() => setLightboxOpen(false)}

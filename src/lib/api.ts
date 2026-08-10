@@ -3,15 +3,14 @@
  * @description Dynamic Data Fetching Engine for IEEE MAIT Student Branch platform.
  * 
  * Uses Prisma ORM during SSR for edge-compatible data fetching without HTTP latency.
+ * Wraps DB calls with safe exception handling to ensure serverless pages degrade gracefully.
  * 
  * @author IEEE MAIT Webmaster
  * @license MIT
  */
 
 import {
-  ChapterItem,
-  StoryArticle,
-  GalleryAlbum,
+  EVENTS_DATA,
   CHAPTERS_DATA,
   STORIES_DATA,
   GALLERY_ALBUMS_DATA,
@@ -22,6 +21,25 @@ function getBaseUrl(): string {
   if (typeof window !== 'undefined') return '';
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
   return `http://localhost:${process.env.PORT || 3000}`;
+}
+
+export async function getDynamicEventBySlug(slug: string) {
+  if (typeof window !== 'undefined') return EVENTS_DATA.find((e) => e.slug === slug) || null;
+  try {
+    const dbEvent = await prisma.event.findUnique({ where: { slug } });
+    if (dbEvent) {
+      let speakers = dbEvent.imageSrc ? dbEvent.description : null; // safe check
+      try {
+        if (typeof dbEvent.description === 'string' && dbEvent.description.startsWith('[')) {
+          // optional parsing
+        }
+      } catch (e) {}
+      return dbEvent;
+    }
+  } catch (e) {
+    console.warn(`Failed to fetch event ${slug} from DB`, e);
+  }
+  return EVENTS_DATA.find((e) => e.slug === slug) || null;
 }
 
 export async function getDynamicEvents(): Promise<any[]> {
@@ -59,41 +77,98 @@ export async function getDynamicAchievements(): Promise<any[]> {
 }
 
 export async function getDynamicChapterBySlug(slug: string) {
-  if (typeof window !== 'undefined') return null;
-  return await prisma.chapter.findUnique({ where: { slug } });
+  if (typeof window !== 'undefined') return CHAPTERS_DATA[slug] || null;
+  try {
+    const dbChapter = await prisma.chapter.findUnique({ where: { slug } });
+    if (dbChapter) return dbChapter;
+  } catch (e) {
+    console.warn(`Failed to fetch chapter ${slug} from DB`, e);
+  }
+  return CHAPTERS_DATA[slug] || null;
 }
 
 export async function getDynamicStoryBySlug(slug: string) {
-  if (typeof window !== 'undefined') return null;
-  return await prisma.story.findUnique({ where: { slug } });
+  if (typeof window !== 'undefined') return STORIES_DATA[slug] || null;
+  try {
+    const dbStory = await prisma.story.findUnique({ where: { slug } });
+    if (dbStory) return dbStory;
+  } catch (e) {
+    console.warn(`Failed to fetch story ${slug} from DB`, e);
+  }
+  return STORIES_DATA[slug] || null;
 }
 
 export async function getDynamicGalleryAlbumBySlug(slug: string) {
-  if (typeof window !== 'undefined') return null;
-  return await prisma.gallery.findUnique({ 
-    where: { slug },
-    include: { photos: true } 
-  });
+  if (typeof window !== 'undefined') return GALLERY_ALBUMS_DATA[slug] || null;
+  try {
+    const dbGallery = await prisma.gallery.findUnique({ 
+      where: { slug },
+      include: { photos: true } 
+    });
+    if (dbGallery) return dbGallery;
+  } catch (e) {
+    console.warn(`Failed to fetch gallery ${slug} from DB`, e);
+  }
+  return GALLERY_ALBUMS_DATA[slug] || null;
 }
 
 export async function getDynamicStories() {
-  if (typeof window !== 'undefined') return [];
-  return await prisma.story.findMany({ orderBy: { date: 'desc' } });
+  if (typeof window !== 'undefined') return Object.values(STORIES_DATA);
+  try {
+    const dbStories = await prisma.story.findMany({ orderBy: { date: 'desc' } });
+    if (dbStories.length > 0) return dbStories;
+  } catch (e) {
+    console.warn('Failed to fetch stories from DB', e);
+  }
+  return Object.values(STORIES_DATA);
 }
 
 export async function getDynamicGalleries() {
-  if (typeof window !== 'undefined') return [];
-  return await prisma.gallery.findMany({ orderBy: { date: 'desc' } });
+  if (typeof window !== 'undefined') return Object.values(GALLERY_ALBUMS_DATA);
+  try {
+    const dbGalleries = await prisma.gallery.findMany({ orderBy: { date: 'desc' } });
+    if (dbGalleries.length > 0) return dbGalleries;
+  } catch (e) {
+    console.warn('Failed to fetch galleries from DB', e);
+  }
+  return Object.values(GALLERY_ALBUMS_DATA);
 }
 
 export async function getDynamicChapters() {
-  if (typeof window !== 'undefined') return [];
-  return await prisma.chapter.findMany();
+  if (typeof window !== 'undefined') return Object.values(CHAPTERS_DATA);
+  try {
+    const dbChapters = await prisma.chapter.findMany();
+    if (dbChapters.length > 0) return dbChapters;
+  } catch (e) {
+    console.warn('Failed to fetch chapters from DB', e);
+  }
+  return Object.values(CHAPTERS_DATA);
 }
 
 export async function getDynamicPeople() {
   if (typeof window !== 'undefined') return [];
-  return await prisma.person.findMany({ orderBy: { hierarchy: 'asc' } });
+  try {
+    return await prisma.person.findMany({ orderBy: { hierarchy: 'asc' } });
+  } catch (e) {
+    console.warn('Failed to fetch people from DB', e);
+    return [];
+  }
+}
+
+export async function getDynamicPeopleByAcademicYear(year: string) {
+  if (typeof window !== 'undefined') return [];
+  try {
+    const normalizedYear = year.replace('–', '-');
+    const all = await prisma.person.findMany({ orderBy: { hierarchy: 'asc' } });
+    return all.filter((p: any) => {
+      if (!p.academicYear) return true;
+      const pYear = p.academicYear.replace('–', '-');
+      return pYear === normalizedYear || p.academicYear === year;
+    });
+  } catch (e) {
+    console.warn('Failed to fetch people by year from DB', e);
+    return [];
+  }
 }
 
 export async function getDynamicSiteSettings() {
@@ -143,4 +218,3 @@ export async function getDynamicResources() {
     return [];
   }
 }
-

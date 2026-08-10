@@ -117,6 +117,22 @@ export default async function PeoplePage() {
             )}
           </div>
 
+          {/* Leadership Archive CTA Banner */}
+          <div className="pt-8 border-t border-warm-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-warm-100/40 p-6 rounded-[2px]">
+            <div>
+              <h4 className="font-serif text-xl text-ink font-normal">Past Leadership & Historical Committees</h4>
+              <p className="text-xs text-warm-400 font-sans mt-0.5">
+                Explore executive committee rosters and student leadership across previous academic years since 2005.
+              </p>
+            </div>
+            <a
+              href="/people/archive"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-ieee-blue text-white font-mono text-xs font-semibold rounded-[2px] hover:bg-ieee-dark transition-colors shrink-0"
+            >
+              Browse Leadership Archive →
+            </a>
+          </div>
+
         </Container>
       </main>
 

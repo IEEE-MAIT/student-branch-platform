@@ -6,7 +6,7 @@ import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { EVENTS_DATA } from '@/lib/data';
+import { getDynamicEventBySlug } from '@/lib/api';
 import Link from 'next/link';
 
 interface EventPageProps {
@@ -15,7 +15,7 @@ interface EventPageProps {
 
 export async function generateMetadata({ params }: EventPageProps) {
   const resolvedParams = await params;
-  const event = EVENTS_DATA.find(e => e.slug === resolvedParams.slug);
+  const event = await getDynamicEventBySlug(resolvedParams.slug);
   if (!event) return { title: 'Event Not Found — IEEE MAIT' };
 
   return {
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: EventPageProps) {
 
 export default async function EventDetailPage({ params }: EventPageProps) {
   const resolvedParams = await params;
-  const event = EVENTS_DATA.find(e => e.slug === resolvedParams.slug);
+  const event = await getDynamicEventBySlug(resolvedParams.slug);
 
   if (!event) {
     notFound();

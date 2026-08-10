@@ -60,7 +60,8 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
     notFound();
   }
 
-  const safeHtml = sanitizeHtml(story.contentHtml);
+  const rawHtml = story.contentHtml || (Array.isArray(story.content) ? story.content.map((p: string) => `<p>${p}</p>`).join('') : (typeof story.content === 'string' ? story.content : ''));
+  const safeHtml = sanitizeHtml(rawHtml);
 
   return (
     <>
