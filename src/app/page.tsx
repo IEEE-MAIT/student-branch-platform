@@ -22,27 +22,22 @@ export default async function HomePage() {
   let topLeadership: any[] = [];
 
   try {
-    // 1. Fetch only 4 upcoming events
-    upcomingEvents = await prisma.event.findMany({
-      where: { status: 'upcoming' },
-      orderBy: { date: 'asc' },
-      take: 4
-    });
-
-    // 2. Fetch only 3 achievements
-    featuredAchievements = await prisma.achievement.findMany({
-      orderBy: { year: 'desc' },
-      take: 3
-    });
-
-    // 3. Fetch chapters (there are only a few, so findMany is safe)
-    chaptersList = await prisma.chapter.findMany();
-
-    // 4. Fetch only top 4 leadership (avoiding full table scan and JS filter)
-    topLeadership = await prisma.person.findMany({
-      orderBy: { hierarchy: 'asc' },
-      take: 4
-    });
+    [upcomingEvents, featuredAchievements, chaptersList, topLeadership] = await Promise.all([
+      prisma.event.findMany({
+        where: { status: 'upcoming' },
+        orderBy: { date: 'asc' },
+        take: 4
+      }),
+      prisma.achievement.findMany({
+        orderBy: { year: 'desc' },
+        take: 3
+      }),
+      prisma.chapter.findMany(),
+      prisma.person.findMany({
+        orderBy: { hierarchy: 'asc' },
+        take: 4
+      })
+    ]);
   } catch (e) {
     console.error("Homepage DB fetch error:", e);
     // Fallback to empty arrays if DB fails
