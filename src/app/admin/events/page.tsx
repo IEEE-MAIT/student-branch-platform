@@ -11,7 +11,8 @@ export default function AdminEventsPage() {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
+  const [timeFrom, setTimeFrom] = useState('');
+  const [timeTo, setTimeTo] = useState('');
   const [venue, setVenue] = useState('');
   const [unit, setUnit] = useState('IEEE MAIT SB');
   const [category, setCategory] = useState('Workshop');
@@ -42,7 +43,7 @@ export default function AdminEventsPage() {
           title,
           slug: slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
           date,
-          time,
+          time: (timeFrom && timeTo) ? `${timeFrom} - ${timeTo}` : (timeFrom || timeTo || ''),
           venue,
           unit,
           category,
@@ -133,23 +134,32 @@ export default function AdminEventsPage() {
           <div>
             <label className="block font-mono text-xs text-warm-400 mb-1">Date</label>
             <input
-              type="text"
+              type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              placeholder="AUG 20, 2026"
               className="w-full px-3 py-2 border rounded-[2px]"
             />
           </div>
 
-          <div>
-            <label className="block font-mono text-xs text-warm-400 mb-1">Time</label>
-            <input
-              type="text"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              placeholder="2:00 PM – 4:00 PM IST"
-              className="w-full px-3 py-2 border rounded-[2px]"
-            />
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block font-mono text-xs text-warm-400 mb-1">Start Time</label>
+              <input
+                type="time"
+                value={timeFrom}
+                onChange={(e) => setTimeFrom(e.target.value)}
+                className="w-full px-3 py-2 border rounded-[2px]"
+              />
+            </div>
+            <div>
+              <label className="block font-mono text-xs text-warm-400 mb-1">End Time</label>
+              <input
+                type="time"
+                value={timeTo}
+                onChange={(e) => setTimeTo(e.target.value)}
+                className="w-full px-3 py-2 border rounded-[2px]"
+              />
+            </div>
           </div>
 
           <div>
@@ -187,6 +197,11 @@ export default function AdminEventsPage() {
               <option value="Seminar">Seminar</option>
               <option value="Hackathon">Hackathon</option>
               <option value="Panel">Panel</option>
+              <option value="Competition">Competition</option>
+              <option value="Tech Talk">Tech Talk</option>
+              <option value="Conference">Conference</option>
+              <option value="Networking">Networking</option>
+              <option value="Training">Training</option>
             </select>
           </div>
 

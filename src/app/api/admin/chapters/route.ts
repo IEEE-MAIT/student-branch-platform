@@ -18,7 +18,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('ieee_mait_session')?.value;
+    const token = cookieStore.get('auth_token')?.value;
     const payload = token ? verifyJWT(token) : null;
 
     if (!payload || !hasPermission(payload.role, 'Settings', 'create')) {
@@ -69,7 +69,7 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('ieee_mait_session')?.value;
+    const token = cookieStore.get('auth_token')?.value;
     const payload = token ? verifyJWT(token) : null;
 
     if (!payload || !hasPermission(payload.role, 'Settings', 'delete')) {
