@@ -16,7 +16,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Container } from './Container';
 import { Button } from '../ui/Button';
 
@@ -27,6 +27,19 @@ export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        router.push('/search');
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [router]);
 
   /**
    * Helper to check if a route path is currently active.
@@ -128,8 +141,11 @@ export const Navbar: React.FC = () => {
               Gallery
             </Link>
 
-            <Link href="/search" className={`${linkClasses('/search')} flex items-center gap-1 font-mono text-xs text-ieee-blue bg-ieee-subtle px-2 py-1 rounded-[2px]`}>
-              🔍 Search
+            <Link href="/search" className={`${linkClasses('/search')} flex items-center gap-1.5 font-mono text-xs text-ieee-blue bg-ieee-subtle px-2 py-1.5 rounded-[2px] transition-colors hover:bg-ieee-blue/10`}>
+              <span>🔍 Search</span>
+              <kbd className="hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-white/60 border border-ieee-blue/20 rounded text-[9px] text-ieee-blue shadow-sm ml-1 font-sans font-medium">
+                <span className="text-[10px]">⌘</span>K
+              </kbd>
             </Link>
           </nav>
 
