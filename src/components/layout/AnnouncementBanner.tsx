@@ -13,35 +13,38 @@
  * @license MIT
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 /**
  * Props for AnnouncementBanner component.
  */
 interface AnnouncementBannerProps {
-  /** Announcement text message */
-  message?: string | null;
-  /** Action link text */
-  linkText?: string | null;
-  /** Action link target URL */
-  linkHref?: string | null;
-  /** Whether the banner is globally active */
-  active?: boolean;
+  // Props are now obsolete but kept for backward compatibility if ever passed manually.
 }
 
 /**
  * Site-wide Announcement Banner Component.
  */
-export const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
-  message,
-  linkText,
-  linkHref,
-  active = true,
-}) => {
-  const [visible, setVisible] = useState(true);
+export const AnnouncementBanner: React.FC<AnnouncementBannerProps> = () => {
+  const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState<any>(null);
 
-  if (!active || !visible || !message) return null;
+  useEffect(() => {
+    fetch('/api/site-settings')
+      .then(res => res.json())
+      .then((data: any) => {
+        if (!data.error && data.announcementActive) {
+          setSettings(data);
+          setVisible(true);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading || !visible || !settings || !settings.announcementMessage) return null;
 
   return (
     <div className="bg-ieee-blue text-white px-4 py-2 text-xs font-mono flex items-center justify-between border-b border-ieee-dark">
@@ -49,10 +52,10 @@ export const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
         <span className="bg-white/20 font-bold px-2 py-0.5 rounded-[2px] uppercase text-[10px]">
           Announcement
         </span>
-        <span className="font-sans font-medium text-white">{message}</span>
-        {linkHref && linkText && (
-          <Link href={linkHref} className="underline hover:text-ieee-subtle font-semibold tracking-wide">
-            {linkText}
+        <span className="font-sans font-medium text-white">{settings.announcementMessage}</span>
+        {settings.announcementLinkHref && settings.announcementLinkText && (
+          <Link href={settings.announcementLinkHref} className="underline hover:text-ieee-subtle font-semibold tracking-wide">
+            {settings.announcementLinkText}
           </Link>
         )}
       </div>

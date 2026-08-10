@@ -210,6 +210,7 @@ export const SearchClient: React.FC<SearchClientProps> = ({
                     {searchResults.achievements.map((item: any) => (
                       <AchievementRow
                         key={item.id}
+                        id={item.id}
                         year={item.year}
                         title={item.title}
                         conferredBy={item.conferredBy}
