@@ -135,6 +135,26 @@ END:VCALENDAR`;
                   📅 Add to Calendar (.ics)
                 </a>
               </div>
+
+              {/* Event Gallery */}
+              {event.images && event.images.length > 0 && (
+                <div className="pt-10 border-t border-warm-200 mt-10">
+                  <h3 className="font-serif text-2xl text-ink font-normal mb-6">
+                    Event Gallery
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {event.images.map((img: string, idx: number) => (
+                      <a href={img} target="_blank" rel="noopener noreferrer" key={idx} className="block group overflow-hidden border border-warm-200 rounded-[2px]">
+                        <img 
+                          src={img} 
+                          alt={`Gallery photo ${idx + 1}`} 
+                          className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-500" 
+                        />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Event Logistics Sidebar */}

@@ -21,6 +21,7 @@ model Event {
   status           String?
   description      String?
   imageSrc         String?
+  images           String[]      @default([])
   registrationLink String?
   galleryId        String?
   storyId          String?
@@ -43,6 +44,8 @@ model Achievement {
   unitOrTeam     String?
   category       String?
   description    String?
+  imageSrc       String?
+  images         String[]            @default([])
   chapterId      String?
   eventId        String?
   academicYearId String?

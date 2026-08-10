@@ -6,6 +6,7 @@ export default function AdminEventsPage() {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // Form states
   const [title, setTitle] = useState('');
@@ -18,6 +19,9 @@ export default function AdminEventsPage() {
   const [category, setCategory] = useState('Workshop');
   const [status, setStatus] = useState('upcoming');
   const [description, setDescription] = useState('');
+  const [imageSrc, setImageSrc] = useState('');
+  const [images, setImages] = useState<string[]>([]);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const loadEvents = () => {
     fetch('/api/events')
@@ -32,14 +36,86 @@ export default function AdminEventsPage() {
     loadEvents();
   }, []);
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    setUploadingImage(true);
+    setMsg(null);
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const res = await fetch('/api/admin/assets/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const json: any = await res.json();
+      if (json.success) {
+        setImageSrc(json.data.secure_url);
+        setMsg({ type: 'success', text: 'Image uploaded to Cloudinary successfully!' });
+      } else {
+        setMsg({ type: 'error', text: json.error || 'Failed to upload image.' });
+      }
+    } catch {
+      setMsg({ type: 'error', text: 'Error uploading image.' });
+    }
+    setUploadingImage(false);
+  };
+
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const files = Array.from(e.target.files);
+    
+    // Check max limit
+    if (images.length + files.length > 15) {
+      setMsg({ type: 'error', text: 'Maximum 15 photos allowed per event.' });
+      return;
+    }
+
+    setUploadingImage(true);
+    setMsg(null);
+    
+    const newImages = [...images];
+    
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const res = await fetch('/api/admin/assets/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const json: any = await res.json();
+        if (json.success) {
+          newImages.push(json.data.secure_url);
+        }
+      } catch (err) {
+        console.error('Gallery upload error:', err);
+      }
+    }
+    
+    setImages(newImages);
+    setUploadingImage(false);
+  };
+
+  const removeGalleryImage = (index: number) => {
+    const updated = [...images];
+    updated.splice(index, 1);
+    setImages(updated);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMsg(null);
     try {
-      const res = await fetch('/api/admin/events', {
-        method: 'POST',
+      const isEditing = !!editingId;
+      const url = '/api/admin/events';
+      const method = isEditing ? 'PUT' : 'POST';
+      
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          id: editingId,
           title,
           slug: slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
           date,
@@ -49,21 +125,66 @@ export default function AdminEventsPage() {
           category,
           status,
           description,
+          imageSrc,
+          images,
         }),
       });
       const data: any = await res.json();
       if (res.ok) {
-        setMsg({ type: 'success', text: `Event created successfully!` });
-        setTitle('');
-        setSlug('');
-        setDescription('');
+        setMsg({ type: 'success', text: `Event ${isEditing ? 'updated' : 'created'} successfully!` });
+        cancelEdit();
         loadEvents();
       } else {
-        setMsg({ type: 'error', text: data.error || 'Failed to create event.' });
+        setMsg({ type: 'error', text: data.error || `Failed to ${isEditing ? 'update' : 'create'} event.` });
       }
     } catch {
-      setMsg({ type: 'error', text: 'Server error creating event.' });
+      setMsg({ type: 'error', text: 'Server error saving event.' });
     }
+  };
+
+  const handleEdit = (evt: any) => {
+    setEditingId(evt.id);
+    setTitle(evt.title || '');
+    setSlug(evt.slug || '');
+    setDate(evt.date || '');
+    
+    // Parse time string if it exists (format: "HH:MM - HH:MM")
+    if (evt.time) {
+      const parts = evt.time.split(' - ');
+      setTimeFrom(parts[0] || '');
+      setTimeTo(parts[1] || '');
+    } else {
+      setTimeFrom('');
+      setTimeTo('');
+    }
+
+    setVenue(evt.venue || '');
+    setUnit(evt.unit || 'IEEE MAIT SB');
+    setCategory(evt.category || 'Workshop');
+    setStatus(evt.status || 'upcoming');
+    setDescription(evt.description || '');
+    setImageSrc(evt.imageSrc || '');
+    setImages(evt.images || []);
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setTitle('');
+    setSlug('');
+    setDate('');
+    setTimeFrom('');
+    setTimeTo('');
+    setVenue('');
+    setUnit('IEEE MAIT SB');
+    setCategory('Workshop');
+    setStatus('upcoming');
+    setDescription('');
+    setImageSrc('');
+    setImages([]);
+    setMsg(null);
   };
 
   const handleDelete = async (id: string) => {
@@ -101,11 +222,22 @@ export default function AdminEventsPage() {
         </div>
       )}
 
-      {/* Create Form */}
-      <form onSubmit={handleCreate} className="p-6 border border-warm-200 bg-warm-100/20 rounded-[2px] space-y-4">
-        <h3 className="font-serif text-lg text-ink font-normal border-b border-warm-200 pb-2">
-          Create New Event
-        </h3>
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="p-6 border border-warm-200 bg-warm-100/20 rounded-[2px] space-y-4">
+        <div className="flex justify-between items-center border-b border-warm-200 pb-2">
+          <h3 className="font-serif text-lg text-ink font-normal">
+            {editingId ? 'Edit Event' : 'Create New Event'}
+          </h3>
+          {editingId && (
+            <button
+              type="button"
+              onClick={cancelEdit}
+              className="text-xs font-mono text-warm-400 hover:text-ink underline"
+            >
+              Cancel Edit
+            </button>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-sans text-xs">
           <div>
@@ -216,6 +348,80 @@ export default function AdminEventsPage() {
               <option value="past">Past / Completed</option>
             </select>
           </div>
+
+          <div className="sm:col-span-2">
+            <label className="block font-mono text-xs text-warm-400 mb-1">Event Image URL (Cover Photo)</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={imageSrc}
+                onChange={(e) => setImageSrc(e.target.value)}
+                placeholder="https://res.cloudinary.com/..."
+                className="flex-1 px-3 py-2 border rounded-[2px]"
+              />
+              <div className="relative">
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleImageUpload} 
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                  title="Upload Image"
+                />
+                <button 
+                  type="button" 
+                  disabled={uploadingImage}
+                  className="px-4 py-2 bg-warm-200 text-ink text-xs font-mono font-medium rounded-[2px] disabled:opacity-50 whitespace-nowrap h-full"
+                >
+                  {uploadingImage ? 'Uploading...' : 'Upload File'}
+                </button>
+              </div>
+            </div>
+            {imageSrc && (
+              <div className="mt-2">
+                <img src={imageSrc} alt="Preview" className="h-24 w-auto object-cover rounded-[2px] border border-warm-200" />
+              </div>
+            )}
+          </div>
+          
+          <div className="sm:col-span-2 pt-2 border-t border-warm-200">
+            <label className="block font-mono text-xs text-warm-400 mb-1">Event Gallery Photos (Max 15)</label>
+            <div className="relative inline-block mb-3">
+              <input 
+                type="file" 
+                accept="image/*" 
+                multiple
+                onChange={handleGalleryUpload} 
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                title="Upload Gallery Photos"
+                disabled={uploadingImage || images.length >= 15}
+              />
+              <button 
+                type="button" 
+                disabled={uploadingImage || images.length >= 15}
+                className="px-4 py-2 bg-ieee-blue text-white text-xs font-mono font-medium rounded-[2px] disabled:opacity-50 whitespace-nowrap"
+              >
+                {uploadingImage ? 'Uploading Photos...' : `Select Photos (${images.length}/15)`}
+              </button>
+            </div>
+            
+            {images.length > 0 && (
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                {images.map((imgUrl, idx) => (
+                  <div key={idx} className="relative group">
+                    <img src={imgUrl} alt={`Gallery ${idx + 1}`} className="w-full aspect-square object-cover rounded-[2px] border border-warm-200" />
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryImage(idx)}
+                      className="absolute top-1 right-1 bg-red-600/90 text-white p-1 rounded-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                      title="Remove Photo"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div>
@@ -229,12 +435,23 @@ export default function AdminEventsPage() {
           />
         </div>
 
-        <button
-          type="submit"
-          className="px-6 py-2.5 bg-ieee-blue text-white font-mono text-xs font-bold uppercase tracking-wider rounded-[2px]"
-        >
-          Publish Event Record →
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            className="px-6 py-2.5 bg-ieee-blue text-white font-mono text-xs font-bold uppercase tracking-wider rounded-[2px]"
+          >
+            {editingId ? 'Update Event Record →' : 'Publish Event Record →'}
+          </button>
+          {editingId && (
+            <button
+              type="button"
+              onClick={cancelEdit}
+              className="px-6 py-2.5 border border-warm-200 text-ink font-mono text-xs font-medium rounded-[2px] hover:bg-warm-100"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
 
       {/* Events Table */}
@@ -271,12 +488,28 @@ export default function AdminEventsPage() {
                       </span>
                     </td>
                     <td className="p-3 text-right">
-                      <button
-                        onClick={() => handleDelete(evt.id)}
-                        className="font-mono text-xs text-red-600 hover:underline"
-                      >
-                        Delete
-                      </button>
+                      <div className="flex items-center justify-end gap-3">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleEdit(evt);
+                          }}
+                          className="font-mono text-xs text-ieee-blue hover:underline"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleDelete(evt.id);
+                          }}
+                          className="font-mono text-xs text-red-600 hover:underline"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

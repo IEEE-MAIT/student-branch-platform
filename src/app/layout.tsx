@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Inter, JetBrains_Mono } from "next/font/google";
 import { AnnouncementBanner } from "@/components/layout/AnnouncementBanner";
 import { ServiceWorkerRegister } from "@/components/layout/ServiceWorkerRegister";
+import { getDynamicSiteSettings } from "@/lib/api";
 import "./globals.css";
 
 const instrumentSerif = Instrument_Serif({
@@ -60,11 +61,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const siteSettings = await getDynamicSiteSettings();
+
   return (
     <html
       lang="en"
@@ -78,7 +81,12 @@ export default function RootLayout({
       </head>
       <body className="font-sans bg-white text-ink antialiased min-h-screen flex flex-col">
         <ServiceWorkerRegister />
-        <AnnouncementBanner />
+        <AnnouncementBanner 
+          active={siteSettings.announcementActive}
+          message={siteSettings.announcementMessage}
+          linkText={siteSettings.announcementLinkText}
+          linkHref={siteSettings.announcementLinkHref}
+        />
         {children}
       </body>
     </html>

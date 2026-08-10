@@ -76,6 +76,17 @@ export async function getDynamicAchievements(): Promise<any[]> {
   return [];
 }
 
+export async function getDynamicAchievementById(id: string) {
+  if (typeof window !== 'undefined') return null;
+  try {
+    const dbAchievement = await prisma.achievement.findUnique({ where: { id } });
+    if (dbAchievement) return dbAchievement;
+  } catch (e) {
+    console.warn(`Failed to fetch achievement ${id} from DB`, e);
+  }
+  return null;
+}
+
 export async function getDynamicChapterBySlug(slug: string) {
   if (typeof window !== 'undefined') return CHAPTERS_DATA[slug] || null;
   try {

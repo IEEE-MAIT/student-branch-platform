@@ -14,6 +14,9 @@ export default function AdminAchievementsPage() {
   const [unitOrTeam, setUnitOrTeam] = useState('IEEE MAIT SB');
   const [category, setCategory] = useState('Branch Honor');
   const [description, setDescription] = useState('');
+  const [imageSrc, setImageSrc] = useState('');
+  const [images, setImages] = useState<string[]>([]);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const loadAchievements = () => {
     fetch('/api/achievements')
@@ -28,6 +31,55 @@ export default function AdminAchievementsPage() {
     loadAchievements();
   }, []);
 
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const files = Array.from(e.target.files);
+    
+    // Check max limit
+    if (images.length + files.length > 4) {
+      setMsg({ type: 'error', text: 'Maximum 4 photos allowed per achievement.' });
+      return;
+    }
+
+    setUploadingImage(true);
+    setMsg(null);
+    
+    const newImages = [...images];
+    
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const res = await fetch('/api/admin/assets/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const json: any = await res.json();
+        if (json.success) {
+          newImages.push(json.data.secure_url);
+        }
+      } catch (err) {
+        console.error('Gallery upload error:', err);
+      }
+    }
+    
+    
+    if (newImages.length > 0 && !imageSrc) {
+      setImageSrc(newImages[0]);
+    }
+    setImages(newImages);
+    setUploadingImage(false);
+  };
+
+  const removeGalleryImage = (index: number) => {
+    const updated = [...images];
+    const removed = updated.splice(index, 1)[0];
+    if (imageSrc === removed) {
+      setImageSrc(updated.length > 0 ? updated[0] : '');
+    }
+    setImages(updated);
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setMsg(null);
@@ -35,13 +87,15 @@ export default function AdminAchievementsPage() {
       const res = await fetch('/api/admin/achievements', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ year, title, conferredBy, unitOrTeam, category, description }),
+        body: JSON.stringify({ year, title, conferredBy, unitOrTeam, category, description, imageSrc, images }),
       });
       const data: any = await res.json();
       if (res.ok) {
         setMsg({ type: 'success', text: 'Achievement recorded successfully!' });
         setTitle('');
         setDescription('');
+        setImageSrc('');
+        setImages([]);
         loadAchievements();
       } else {
         setMsg({ type: 'error', text: data.error || 'Failed to record achievement.' });
@@ -163,6 +217,63 @@ export default function AdminAchievementsPage() {
             placeholder="Official citation or summary of the competition victory..."
             className="w-full px-3 py-2 border rounded-[2px] font-sans text-xs"
           />
+        </div>
+
+        <div className="sm:col-span-2 pt-2 border-t border-warm-200">
+          <label className="block font-mono text-xs text-warm-400 mb-1">Achievement Photos (Max 4)</label>
+          <p className="text-[10px] font-sans text-warm-400 mb-2">Upload up to 4 photos. Click "Set as Cover" to choose the main photo.</p>
+          <div className="relative inline-block mb-3">
+            <input 
+              type="file" 
+              accept="image/*" 
+              multiple
+              onChange={handleGalleryUpload} 
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+              title="Upload Photos"
+              disabled={uploadingImage || images.length >= 4}
+            />
+            <button 
+              type="button" 
+              disabled={uploadingImage || images.length >= 4}
+              className="px-4 py-2 bg-ieee-blue text-white text-xs font-mono font-medium rounded-[2px] disabled:opacity-50 whitespace-nowrap"
+            >
+              {uploadingImage ? 'Uploading Photos...' : `Select Photos (${images.length}/4)`}
+            </button>
+          </div>
+          
+          {images.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {images.map((imgUrl, idx) => (
+                <div key={idx} className={`relative group border-2 rounded-[2px] overflow-hidden ${imageSrc === imgUrl ? 'border-ieee-blue' : 'border-warm-200'}`}>
+                  {imageSrc === imgUrl && (
+                    <div className="absolute top-0 left-0 right-0 bg-ieee-blue text-white text-[10px] font-mono text-center py-0.5 z-10">
+                      COVER PHOTO
+                    </div>
+                  )}
+                  <img src={imgUrl} alt={`Photo ${idx + 1}`} className="w-full aspect-square object-cover" />
+                  
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-1 flex justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      type="button"
+                      onClick={() => setImageSrc(imgUrl)}
+                      className={`text-[10px] font-mono px-1 rounded-[2px] ${imageSrc === imgUrl ? 'text-warm-300 cursor-default' : 'text-white hover:bg-white/20'}`}
+                      disabled={imageSrc === imgUrl}
+                    >
+                      {imageSrc === imgUrl ? 'Selected' : 'Set as Cover'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryImage(idx)}
+                      className="text-red-400 hover:text-red-300 px-1"
+                      title="Remove Photo"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <button

@@ -21,24 +21,27 @@ import Link from 'next/link';
  */
 interface AnnouncementBannerProps {
   /** Announcement text message */
-  message?: string;
+  message?: string | null;
   /** Action link text */
-  linkText?: string;
+  linkText?: string | null;
   /** Action link target URL */
-  linkHref?: string;
+  linkHref?: string | null;
+  /** Whether the banner is globally active */
+  active?: boolean;
 }
 
 /**
  * Site-wide Announcement Banner Component.
  */
 export const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
-  message = "Membership Drive 2025–26 is officially open! Join 150+ students advancing technology at MAIT.",
-  linkText = "Register Now →",
-  linkHref = "/join",
+  message,
+  linkText,
+  linkHref,
+  active = true,
 }) => {
   const [visible, setVisible] = useState(true);
 
-  if (!visible) return null;
+  if (!active || !visible || !message) return null;
 
   return (
     <div className="bg-ieee-blue text-white px-4 py-2 text-xs font-mono flex items-center justify-between border-b border-ieee-dark">
@@ -47,9 +50,11 @@ export const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
           Announcement
         </span>
         <span className="font-sans font-medium text-white">{message}</span>
-        <Link href={linkHref} className="underline hover:text-ieee-subtle font-semibold tracking-wide">
-          {linkText}
-        </Link>
+        {linkHref && linkText && (
+          <Link href={linkHref} className="underline hover:text-ieee-subtle font-semibold tracking-wide">
+            {linkText}
+          </Link>
+        )}
       </div>
 
       <button

@@ -75,11 +75,11 @@ export default async function HomePage() {
                 Advancing technology, building community, and fostering technical excellence at {BRANCH_STATS.institution}. Established in {BRANCH_STATS.establishedYear}.
               </p>
 
-              <div className="pt-4 flex flex-wrap items-center gap-4">
-                <Button href="/join" variant="primary" size="lg">
+              <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+                <Button href="/join" variant="primary" size="lg" className="w-full sm:w-auto justify-center">
                   Join IEEE MAIT →
                 </Button>
-                <Button href="/about" variant="secondary" size="lg">
+                <Button href="/about" variant="secondary" size="lg" className="w-full sm:w-auto justify-center">
                   Explore Our Work
                 </Button>
               </div>
@@ -90,7 +90,7 @@ export default async function HomePage() {
         {/* 2. BRANCH AT A GLANCE */}
         <section className="border-b border-warm-200 bg-warm-100/60 py-2">
           <Container size="default">
-            <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-warm-200 py-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 md:divide-x divide-warm-200 py-4">
               <StatMetric label="Active Members" value={BRANCH_STATS.activeMembers} description="Student Branch & Chapters" />
               <StatMetric label="Events Organized" value={BRANCH_STATS.eventsOrganized} description="Workshops, Seminars & Panels" />
               <StatMetric label="Active Units" value={BRANCH_STATS.activeUnits} description="WIE Affinity Group & EDS Chapter" />
@@ -187,7 +187,7 @@ export default async function HomePage() {
                 subtitle="The student leaders steering IEEE MAIT's technical initiatives, chapter operations, and community outreach."
               />
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-8">
                 {topLeadership.map((person: any) => (
                   <PersonCard
                     key={person.id}

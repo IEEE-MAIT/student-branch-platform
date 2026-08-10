@@ -4,6 +4,7 @@ import { verifyJWT } from '@/lib/jwt';
 import { hasPermission } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { recordAuditLog } from '@/lib/auditLog';
+import { validateSafeUrl } from '@/lib/security';
 
 export async function GET() {
   try {
@@ -31,8 +32,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Year and Title are required.' }, { status: 400 });
     }
 
+    const sanitizedImageSrc = body.imageSrc ? validateSafeUrl(body.imageSrc) : null;
+    
+    // Ensure images is an array of valid URLs, limited to 4
+    let sanitizedImages: string[] = [];
+    if (Array.isArray(body.images)) {
+      sanitizedImages = body.images
+        .map((url: any) => typeof url === 'string' ? validateSafeUrl(url) : null)
+        .filter(Boolean) as string[];
+      if (sanitizedImages.length > 4) {
+        sanitizedImages = sanitizedImages.slice(0, 4);
+      }
+    }
+
     const item = await prisma.achievement.create({
-      data: { year, title, conferredBy, unitOrTeam, category, description },
+      data: { 
+        year, 
+        title, 
+        conferredBy, 
+        unitOrTeam, 
+        category, 
+        description,
+        imageSrc: sanitizedImageSrc,
+        images: sanitizedImages,
+      },
     });
 
     await recordAuditLog({

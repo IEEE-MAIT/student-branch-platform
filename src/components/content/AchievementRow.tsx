@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 /**
  * Props for AchievementRow component.
@@ -14,6 +15,12 @@ interface AchievementRowProps {
   unitOrTeam?: string | null;
   /** Category classification tag */
   category?: string | null;
+  /** Cover photo URL */
+  imageSrc?: string;
+  /** Gallery of photos */
+  images?: string[];
+  /** Achievement Database ID for linking */
+  id: string;
   /** Custom CSS classes */
   className?: string;
 }
@@ -28,22 +35,40 @@ export const AchievementRow: React.FC<AchievementRowProps> = ({
   conferredBy,
   unitOrTeam,
   category,
+  imageSrc,
+  images = [],
+  id,
   className = '',
 }) => {
   return (
-    <div className={`py-5 border-b border-warm-200 flex flex-col md:flex-row md:items-center justify-between gap-3 ${className}`}>
+    <Link href={`/achievements/${id}`} className={`py-5 border-b border-warm-200 flex flex-col md:flex-row md:items-center justify-between gap-3 group hover:bg-warm-50/50 transition-colors px-2 -mx-2 rounded-[2px] ${className}`}>
       <div className="flex items-start gap-6">
         <span className="font-mono text-sm font-semibold text-ieee-blue w-16 flex-shrink-0 pt-0.5">
           {year}
         </span>
 
         <div>
-          <h4 className="font-serif text-lg text-ink font-normal leading-snug">
-            {title}
-          </h4>
-          <p className="text-xs text-warm-400 font-sans mt-0.5">
-            {conferredBy}
-          </p>
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            {imageSrc && (
+              <img src={imageSrc} alt={title} className="w-16 h-16 object-cover rounded-[2px] border border-warm-200 flex-shrink-0" />
+            )}
+            <div>
+              <h4 className="font-serif text-lg text-ink font-normal leading-snug">
+                {title}
+              </h4>
+              <p className="text-xs text-warm-400 font-sans mt-0.5">
+                {conferredBy}
+              </p>
+            </div>
+          </div>
+          
+          {images.length > 0 && (
+            <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
+              {images.map((img, idx) => (
+                <img key={idx} src={img} alt={`${title} gallery ${idx + 1}`} className="h-12 w-auto object-cover rounded-[2px] border border-warm-200" />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -54,7 +79,10 @@ export const AchievementRow: React.FC<AchievementRowProps> = ({
             {category}
           </span>
         )}
+        <span className="text-ieee-blue opacity-0 group-hover:opacity-100 transition-opacity ml-2 hidden sm:inline-block">
+          View Details →
+        </span>
       </div>
-    </div>
+    </Link>
   );
 };

@@ -11,6 +11,8 @@ interface AchievementItem {
   unitOrTeam?: string | null;
   category?: string | null;
   description?: string | null;
+  imageSrc?: string | null;
+  images?: string[];
 }
 
 export function AchievementsFilter({ initialAchievements }: { initialAchievements: AchievementItem[] }) {
@@ -51,11 +53,14 @@ export function AchievementsFilter({ initialAchievements }: { initialAchievement
         {filteredAchievements.map(item => (
           <AchievementRow
             key={item.id}
+            id={item.id}
             year={item.year}
             title={item.title}
             conferredBy={item.conferredBy || undefined}
             unitOrTeam={item.unitOrTeam || undefined}
             category={item.category || undefined}
+            imageSrc={item.imageSrc || undefined}
+            images={item.images || []}
           />
         ))}
 

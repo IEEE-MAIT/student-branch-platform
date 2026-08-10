@@ -36,10 +36,24 @@ export async function POST(req: Request) {
 
     const sanitizedTitle = sanitizeText(body.title, 200);
     const sanitizedSlug = sanitizeText(body.slug, 100).toLowerCase().replace(/[^a-z0-9-]/g, '-');
-    const sanitizedDate = sanitizeText(body.date || 'OCT 2026', 50);
+    const sanitizedDate = sanitizeText(body.date || '', 50);
+    const sanitizedTime = sanitizeText(body.time || '', 50);
     const sanitizedVenue = sanitizeText(body.venue || 'MAIT Campus', 100);
     const sanitizedDescription = sanitizeText(body.description || '', 2000);
     const sanitizedRegistrationLink = body.registrationLink ? validateSafeUrl(body.registrationLink) : null;
+    const sanitizedImageSrc = body.imageSrc ? validateSafeUrl(body.imageSrc) : null;
+    
+    // Ensure images is an array of valid URLs, limited to 15
+    let sanitizedImages: string[] = [];
+    if (Array.isArray(body.images)) {
+      sanitizedImages = body.images
+        .map((url: any) => typeof url === 'string' ? validateSafeUrl(url) : null)
+        .filter(Boolean) as string[];
+      if (sanitizedImages.length > 15) {
+        sanitizedImages = sanitizedImages.slice(0, 15);
+      }
+    }
+
     const performedBy = payload.name || payload.email;
 
     const newEvent = await prisma.event.create({
@@ -47,6 +61,7 @@ export async function POST(req: Request) {
         title: sanitizedTitle,
         slug: sanitizedSlug,
         date: sanitizedDate,
+        time: sanitizedTime,
         venue: sanitizedVenue,
         unit: sanitizeText(body.unit || 'IEEE MAIT SB', 50),
         unitSlug: sanitizeText(body.unitSlug || 'sb', 20),
@@ -54,6 +69,8 @@ export async function POST(req: Request) {
         status: sanitizeText(body.status || 'upcoming', 20),
         description: sanitizedDescription,
         registrationLink: sanitizedRegistrationLink,
+        imageSrc: sanitizedImageSrc,
+        images: sanitizedImages,
       }
     });
 
@@ -99,6 +116,80 @@ export async function DELETE(req: Request) {
     });
 
     return NextResponse.json({ success: true });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
+    const payload = token ? verifyJWT(token) : null;
+
+    if (!payload || !hasPermission(payload.role, 'Events', 'edit')) {
+      return NextResponse.json({ error: 'Unauthorized. Insufficient permissions.' }, { status: 403 });
+    }
+
+    const body: any = await req.json();
+    if (!body || typeof body !== 'object' || !body.id) {
+      return NextResponse.json({ error: 'Invalid payload or missing ID' }, { status: 400 });
+    }
+
+    if (!body.title || typeof body.title !== 'string' || !body.slug || typeof body.slug !== 'string') {
+      return NextResponse.json({ error: 'Missing or invalid title or slug' }, { status: 400 });
+    }
+
+    const sanitizedTitle = sanitizeText(body.title, 200);
+    const sanitizedSlug = sanitizeText(body.slug, 100).toLowerCase().replace(/[^a-z0-9-]/g, '-');
+    const sanitizedDate = sanitizeText(body.date || '', 50);
+    const sanitizedTime = sanitizeText(body.time || '', 50);
+    const sanitizedVenue = sanitizeText(body.venue || 'MAIT Campus', 100);
+    const sanitizedDescription = sanitizeText(body.description || '', 2000);
+    const sanitizedRegistrationLink = body.registrationLink ? validateSafeUrl(body.registrationLink) : null;
+    const sanitizedImageSrc = body.imageSrc ? validateSafeUrl(body.imageSrc) : null;
+    
+    // Ensure images is an array of valid URLs, limited to 15
+    let sanitizedImages: string[] = [];
+    if (Array.isArray(body.images)) {
+      sanitizedImages = body.images
+        .map((url: any) => typeof url === 'string' ? validateSafeUrl(url) : null)
+        .filter(Boolean) as string[];
+      if (sanitizedImages.length > 15) {
+        sanitizedImages = sanitizedImages.slice(0, 15);
+      }
+    }
+
+    const performedBy = payload.name || payload.email;
+
+    const updatedEvent = await prisma.event.update({
+      where: { id: body.id },
+      data: {
+        title: sanitizedTitle,
+        slug: sanitizedSlug,
+        date: sanitizedDate,
+        time: sanitizedTime,
+        venue: sanitizedVenue,
+        unit: sanitizeText(body.unit || 'IEEE MAIT SB', 50),
+        unitSlug: sanitizeText(body.unitSlug || 'sb', 20),
+        category: sanitizeText(body.category || 'Technical Workshop', 50),
+        status: sanitizeText(body.status || 'upcoming', 20),
+        description: sanitizedDescription,
+        registrationLink: sanitizedRegistrationLink,
+        imageSrc: sanitizedImageSrc,
+        images: sanitizedImages,
+      }
+    });
+
+    await recordAuditLog({
+      performedBy,
+      actionType: 'UPDATE',
+      entityType: 'EVENT',
+      entityTitle: sanitizedTitle,
+      changeSummary: `Updated event "${sanitizedTitle}" (ID: ${body.id}).`,
+    });
+
+    return NextResponse.json(updatedEvent, { status: 200 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
