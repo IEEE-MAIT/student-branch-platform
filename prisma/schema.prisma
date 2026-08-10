@@ -250,3 +250,15 @@ model Resource {
 
   @@map("resources")
 }
+
+model Inquiry {
+  id        String  @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String
+  status    String  @default("Unread")
+  createdAt String
+  
+  @@map("inquiries")
+}

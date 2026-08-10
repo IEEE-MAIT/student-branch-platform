@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db';
 import { recordAuditLog } from '@/lib/auditLog';
 import { cookies } from 'next/headers';
 import { verifyJWT } from '@/lib/jwt';
+import { hasPermission } from '@/lib/auth';
 
 export async function GET() {
   try {
@@ -25,13 +26,14 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value;
-    let performedBy = 'mait.ieee.sb@gmail.com';
+    const token = cookieStore.get('ieee_mait_session')?.value;
+    const payload = token ? verifyJWT(token) : null;
 
-    if (token) {
-      const payload = verifyJWT(token);
-      if (payload) performedBy = payload.email;
+    if (!payload || !hasPermission(payload.role, 'Settings', 'edit')) {
+      return NextResponse.json({ error: 'Unauthorized. Insufficient permissions.' }, { status: 403 });
     }
+
+    const performedBy = payload.name || payload.email;
 
     const body: any = await request.json();
     let updates: any = {};

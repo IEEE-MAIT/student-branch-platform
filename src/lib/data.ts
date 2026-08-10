@@ -5,7 +5,7 @@
  * STRICT TYPE DESIGN:
  * Employs explicit TypeScript Enums for all categorical fields (PersonCategory, EventCategory,
  * EventStatus, OrganizingUnit, AchievementCategory, ChapterType, PublicationType) to eliminate
- * string typos and ensure 100% type safety across frontend pages and Payload CMS schemas.
+ * string typos and ensure 100% type safety across frontend pages and Prisma ORM schemas.
  *
  * @author IEEE MAIT Webmaster & Open Source Contributors
  * @license MIT

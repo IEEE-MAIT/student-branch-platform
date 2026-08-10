@@ -35,16 +35,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Log the inquiry to the audit trail so admins can see it in /admin
-    await prisma.auditLog.create({
+    // Save the inquiry to the dedicated Inquiry table
+    await prisma.inquiry.create({
       data: {
-        id: `contact-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        timestamp: new Date().toISOString(),
-        performedBy: `${name} <${email}>`,
-        actionType: 'CONTACT_INQUIRY',
-        entityType: 'ContactForm',
-        entityTitle: subject || 'General Inquiry',
-        changeSummary: `Message: ${message.slice(0, 300)}${message.length > 300 ? '...' : ''}`,
+        name,
+        email,
+        subject: subject || 'General Inquiry',
+        message,
+        createdAt: new Date().toISOString(),
+        status: 'Unread',
       },
     });
 
