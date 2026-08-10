@@ -171,9 +171,14 @@ export default async function HomePage() {
                     key={person.id}
                     name={person.name}
                     role={person.role}
-                    department={person.department}
-                    imageSrc={person.imageUrl}
                     category={person.category}
+                    department={person.department}
+                    imageUrl={person.imageUrl}
+                    linkedIn={person.linkedIn || person.linkedin}
+                    github={person.github}
+                    email={person.email}
+                    bio={person.bio}
+                    hierarchy={person.hierarchy}
                     size="standard"
                   />
                 ))}

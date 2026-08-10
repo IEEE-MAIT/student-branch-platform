@@ -9,10 +9,24 @@ export default function AdminPeoplePage() {
 
   // Form states
   const [name, setName] = useState('');
-  const [role, setRole] = useState('');
-  const [category, setCategory] = useState('SEC');
+  const [role, setRole] = useState('Chairperson');
+  const [category, setCategory] = useState('Senior Executive Committee');
+  const [chapterId, setChapterId] = useState('');
+  const [chapters, setChapters] = useState<any[]>([]);
+  const [academicYear, setAcademicYear] = useState('2025-26');
+  const [academicYears, setAcademicYears] = useState<any[]>([]);
   const [department, setDepartment] = useState('CSE');
-  const [hierarchy, setHierarchy] = useState(10);
+
+  const default20Years = Array.from({ length: 21 }, (_, i) => {
+    const start = 2025 - i;
+    const end = (start + 1).toString().slice(-2);
+    return {
+      label: `${start}–${end}`,
+      slug: `${start}-${end}`,
+      isCurrent: i === 0,
+    };
+  });
+  const [filterSession, setFilterSession] = useState('All');
   const [imageUrl, setImageUrl] = useState('');
   const [bio, setBio] = useState('');
   const [linkedin, setLinkedin] = useState('');
@@ -28,12 +42,37 @@ export default function AdminPeoplePage() {
 
   useEffect(() => {
     loadPeople();
+    fetch('/api/admin/chapters')
+      .then((res) => res.json())
+      .then((data: any) => {
+        if (Array.isArray(data)) setChapters(data);
+      });
+    fetch('/api/admin/academic-years')
+      .then((res) => res.json())
+      .then((data: any) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setAcademicYears(data);
+          const active = data.find((y: any) => y.isCurrent);
+          if (active) setAcademicYear(active.label);
+          else setAcademicYear(data[0].label);
+        }
+      });
   }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setMsg(null);
     try {
+      const secRoles = ['Chairperson', 'Vice-Chairperson', 'General Secretary', 'Web Master', 'Treasurer', 'Joint Secretary', 'PR Head', 'Creative Head', 'Sponsorship Head'];
+      const opRoles = ['Technical Lead', 'Creative Lead', 'PR Lead', 'Hardware Lead'];
+      
+      let computedHierarchy = 10;
+      if (secRoles.includes(role)) {
+        computedHierarchy = secRoles.indexOf(role) + 1;
+      } else if (opRoles.includes(role)) {
+        computedHierarchy = opRoles.indexOf(role) + 10;
+      }
+
       const res = await fetch('/api/admin/people', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -42,10 +81,12 @@ export default function AdminPeoplePage() {
           role,
           category,
           department,
-          hierarchy: Number(hierarchy),
+          hierarchy: computedHierarchy,
           imageUrl,
           bio,
           linkedin,
+          academicYear,
+          chapterId: (category === 'EDS Chapter' || category === 'Affinity Group') ? chapterId : undefined,
         }),
       });
       const data: any = await res.json();
@@ -80,6 +121,13 @@ export default function AdminPeoplePage() {
       setMsg({ type: 'error', text: 'Server error.' });
     }
   };
+
+  const filteredPeople = people.filter((p: any) => {
+    if (filterSession === 'All') return true;
+    const pYear = (p.academicYear || '2025-26').replace('–', '-');
+    const normalizedFilter = filterSession.replace('–', '-');
+    return pYear === normalizedFilter;
+  });
 
   return (
     <div className="space-y-8">
@@ -120,28 +168,101 @@ export default function AdminPeoplePage() {
           </div>
 
           <div>
-            <label className="block font-mono text-xs text-warm-400 mb-1">Role / Designation *</label>
-            <input
-              type="text"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              placeholder="Chairperson / Webmaster"
-              className="w-full px-3 py-2 border rounded-[2px]"
-              required
-            />
-          </div>
-
-          <div>
             <label className="block font-mono text-xs text-warm-400 mb-1">Category *</label>
             <select
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={(e) => {
+                const newCat = e.target.value;
+                setCategory(newCat);
+                if (newCat === 'Senior Executive Committee' || newCat === 'EDS Chapter' || newCat === 'Affinity Group') {
+                  setRole('Chairperson');
+                } else if (newCat === 'Operational Leads') {
+                  setRole('Technical Lead');
+                } else {
+                  setRole('');
+                }
+              }}
               className="w-full px-3 py-2 border rounded-[2px]"
             >
-              <option value="Counsellor">Counsellor / Mentor</option>
-              <option value="SEC">Senior Executive Committee (SEC)</option>
-              <option value="Web">Web / Technical Lead</option>
-              <option value="Operational">Operational Lead</option>
+              <option value="Senior Executive Committee">Senior Executive Committee (SEC)</option>
+              <option value="EDS Chapter">EDS Chapter</option>
+              <option value="Affinity Group">Affinity Group</option>
+              <option value="Operational Leads">Operational Leads</option>
+              <option value="Counsellor / Mentor">Counsellor / Mentor</option>
+            </select>
+          </div>
+
+          {(category === 'EDS Chapter' || category === 'Affinity Group') && (
+            <div>
+              <label className="block font-mono text-xs text-warm-400 mb-1">Select Chapter *</label>
+              <select
+                value={chapterId}
+                onChange={(e) => setChapterId(e.target.value)}
+                className="w-full px-3 py-2 border rounded-[2px]"
+                required
+              >
+                <option value="">-- Choose Chapter --</option>
+                {chapters.map((c: any) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div>
+            <label className="block font-mono text-xs text-warm-400 mb-1">Role / Designation *</label>
+            {(category === 'Senior Executive Committee' || category === 'EDS Chapter' || category === 'Affinity Group') ? (
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full px-3 py-2 border rounded-[2px]"
+              >
+                <option value="Chairperson">Chairperson</option>
+                <option value="Vice-Chairperson">Vice-Chairperson</option>
+                <option value="General Secretary">General Secretary</option>
+                <option value="Web Master">Web Master</option>
+                <option value="Treasurer">Treasurer</option>
+                <option value="Joint Secretary">Joint Secretary</option>
+                <option value="PR Head">PR Head</option>
+                <option value="Creative Head">Creative Head</option>
+                <option value="Sponsorship Head">Sponsorship Head</option>
+              </select>
+            ) : category === 'Operational Leads' ? (
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full px-3 py-2 border rounded-[2px]"
+              >
+                <option value="Technical Lead">Technical Lead</option>
+                <option value="Creative Lead">Creative Lead</option>
+                <option value="PR Lead">PR Lead</option>
+                <option value="Hardware Lead">Hardware Lead</option>
+              </select>
+            ) : (
+              <input
+                type="text"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                placeholder="Custom Role (e.g. Branch Counselor)"
+                className="w-full px-3 py-2 border rounded-[2px]"
+                required
+              />
+            )}
+          </div>
+
+          <div>
+            <label className="block font-mono text-xs text-warm-400 mb-1">Academic Year / Session *</label>
+            <select
+              value={academicYear}
+              onChange={(e) => setAcademicYear(e.target.value)}
+              className="w-full px-3 py-2 border rounded-[2px]"
+              required
+            >
+              {default20Years.map((y) => (
+                <option key={y.slug} value={y.slug}>
+                  {y.label} {y.isCurrent ? '(Current)' : ''}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -156,16 +277,7 @@ export default function AdminPeoplePage() {
             />
           </div>
 
-          <div>
-            <label className="block font-mono text-xs text-warm-400 mb-1">Hierarchy Order (1 = Top)</label>
-            <input
-              type="number"
-              value={hierarchy}
-              onChange={(e) => setHierarchy(Number(e.target.value))}
-              placeholder="10"
-              className="w-full px-3 py-2 border rounded-[2px]"
-            />
-          </div>
+
 
           <div>
             <label className="block font-mono text-xs text-warm-400 mb-1">LinkedIn Profile URL</label>
@@ -211,7 +323,31 @@ export default function AdminPeoplePage() {
 
       {/* Roster Table */}
       <div className="space-y-4">
-        <h3 className="font-serif text-lg text-ink font-normal">Active Leadership Roster ({people.length})</h3>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-warm-200 pb-3">
+          <div>
+            <h3 className="font-serif text-lg text-ink font-normal">
+              Leadership Roster ({filteredPeople.length})
+            </h3>
+            <p className="font-mono text-xs text-warm-400">
+              Viewing {filterSession === 'All' ? 'all sessions' : `session ${filterSession.replace('-', '–')}`} records
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="font-mono text-xs text-warm-400">Filter Session:</label>
+            <select
+              value={filterSession}
+              onChange={(e) => setFilterSession(e.target.value)}
+              className="px-3 py-1.5 border border-warm-200 rounded-[2px] font-mono text-xs bg-white text-ink"
+            >
+              <option value="All">All Sessions</option>
+              {default20Years.map((y) => (
+                <option key={y.slug} value={y.slug}>
+                  {y.label} {y.isCurrent ? '(Current)' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
         {loading ? (
           <p className="font-mono text-xs text-warm-300">Loading roster...</p>
@@ -224,16 +360,18 @@ export default function AdminPeoplePage() {
                   <th className="p-3">Name</th>
                   <th className="p-3">Role</th>
                   <th className="p-3">Category</th>
+                  <th className="p-3">Session</th>
                   <th className="p-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-warm-200">
-                {people.map((p: any) => (
+                {filteredPeople.map((p: any) => (
                   <tr key={p.id} className="hover:bg-warm-100/30">
                     <td className="p-3 font-mono text-xs font-bold text-warm-400">{p.hierarchy}</td>
                     <td className="p-3 font-medium text-ink">{p.name}</td>
                     <td className="p-3 font-mono text-xs text-ieee-blue">{p.role}</td>
                     <td className="p-3 font-mono text-[11px] text-warm-400">{p.category}</td>
+                    <td className="p-3 font-mono text-[11px] text-warm-400">{p.academicYear || '2025-26'}</td>
                     <td className="p-3 text-right">
                       <button
                         onClick={() => handleDelete(p.id)}
@@ -244,6 +382,13 @@ export default function AdminPeoplePage() {
                     </td>
                   </tr>
                 ))}
+                {filteredPeople.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="p-6 text-center font-mono text-xs text-warm-400">
+                      No team members found for session {filterSession.replace('-', '–')}.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

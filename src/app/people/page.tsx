@@ -25,9 +25,10 @@ export const revalidate = 60; // ISR Cache
 export default async function PeoplePage() {
   const allPeople = await getDynamicPeople();
 
-  const counsellors = allPeople.filter((p: any) => p.category === 'Counsellor');
-  const sec = allPeople.filter((p: any) => p.category === 'SEC');
-  const webAndOp = allPeople.filter((p: any) => p.category === 'Web' || p.category === 'Operations');
+  const counsellors = allPeople.filter((p: any) => p.category === 'Counsellor' || p.category === 'Counsellor / Mentor');
+  const sec = allPeople.filter((p: any) => p.category === 'SEC' || p.category === 'Senior Executive Committee');
+  const chapterLeads = allPeople.filter((p: any) => p.category === 'EDS Chapter' || p.category === 'Affinity Group' || p.category === 'EDS' || p.category === 'WIE' || p.category === 'Chapter');
+  const webAndOp = allPeople.filter((p: any) => p.category === 'Web' || p.category === 'Operations' || p.category === 'Operational Leads' || p.category === 'Operational' || p.category === 'Lead');
 
   return (
     <>
@@ -60,9 +61,15 @@ export default async function PeoplePage() {
                     key={person.id}
                     name={person.name}
                     role={person.role}
+                    category={person.category}
                     department={person.department || undefined}
                     academicYear={person.academicYear || undefined}
-                    hierarchy={person.hierarchy as any}
+                    imageUrl={person.imageUrl}
+                    linkedIn={person.linkedIn || person.linkedin}
+                    github={person.github}
+                    email={person.email}
+                    bio={person.bio}
+                    hierarchy={person.hierarchy}
                   />
                 ))}
               </div>
@@ -83,9 +90,15 @@ export default async function PeoplePage() {
                     key={person.id}
                     name={person.name}
                     role={person.role}
+                    category={person.category}
                     department={person.department || undefined}
                     academicYear={person.academicYear || undefined}
-                    hierarchy={person.hierarchy as any}
+                    imageUrl={person.imageUrl}
+                    linkedIn={person.linkedIn || person.linkedin}
+                    github={person.github}
+                    email={person.email}
+                    bio={person.bio}
+                    hierarchy={person.hierarchy}
                   />
                 ))}
               </div>
@@ -93,6 +106,33 @@ export default async function PeoplePage() {
               <p className="text-sm font-mono text-warm-400">No records found.</p>
             )}
           </div>
+
+          {/* Chapter & Affinity Group Leadership */}
+          {chapterLeads.length > 0 && (
+            <div className="mb-16 space-y-6">
+              <h3 className="font-mono text-xs font-semibold uppercase tracking-widest text-ieee-blue border-b border-warm-200 pb-2">
+                Society Chapter & Affinity Group Leadership
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {chapterLeads.map((person: any) => (
+                  <PersonCard
+                    key={person.id}
+                    name={person.name}
+                    role={person.role}
+                    category={person.category}
+                    department={person.department || undefined}
+                    academicYear={person.academicYear || undefined}
+                    imageUrl={person.imageUrl}
+                    linkedIn={person.linkedIn || person.linkedin}
+                    github={person.github}
+                    email={person.email}
+                    bio={person.bio}
+                    hierarchy={person.hierarchy}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Operational Leads */}
           <div className="mb-16 space-y-6">
@@ -106,9 +146,15 @@ export default async function PeoplePage() {
                     key={person.id}
                     name={person.name}
                     role={person.role}
+                    category={person.category}
                     department={person.department || undefined}
                     academicYear={person.academicYear || undefined}
-                    hierarchy={person.hierarchy as any}
+                    imageUrl={person.imageUrl}
+                    linkedIn={person.linkedIn || person.linkedin}
+                    github={person.github}
+                    email={person.email}
+                    bio={person.bio}
+                    hierarchy={person.hierarchy}
                   />
                 ))}
               </div>

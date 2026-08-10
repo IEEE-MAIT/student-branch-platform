@@ -26,13 +26,15 @@ interface LeadershipArchiveYearPageProps {
   params: Promise<{ year: string }>;
 }
 
-const KNOWN_ARCHIVE_YEARS = [
-  { label: '2025–26', slug: '2025-26', isCurrent: true },
-  { label: '2024–25', slug: '2024-25', isCurrent: false },
-  { label: '2023–24', slug: '2023-24', isCurrent: false },
-  { label: '2022–23', slug: '2022-23', isCurrent: false },
-  { label: '2021–22', slug: '2021-22', isCurrent: false },
-];
+const KNOWN_ARCHIVE_YEARS = Array.from({ length: 21 }, (_, i) => {
+  const start = 2025 - i;
+  const end = (start + 1).toString().slice(-2);
+  return {
+    label: `${start}–${end}`,
+    slug: `${start}-${end}`,
+    isCurrent: i === 0,
+  };
+});
 
 export const revalidate = 60; // ISR Cache
 
@@ -58,10 +60,10 @@ export default async function LeadershipArchiveYearPage({ params }: LeadershipAr
 
   const peopleForYear = await getDynamicPeopleByAcademicYear(rawYear);
 
-  const counsellors = peopleForYear.filter((p: any) => p.category === 'Counsellor');
-  const sec = peopleForYear.filter((p: any) => p.category === 'SEC');
-  const webAndOp = peopleForYear.filter((p: any) => p.category === 'Web' || p.category === 'Operations' || p.category === 'Lead');
-  const chapterLeads = peopleForYear.filter((p: any) => p.category === 'EDS' || p.category === 'WIE' || p.category === 'Chapter');
+  const counsellors = peopleForYear.filter((p: any) => p.category === 'Counsellor' || p.category === 'Counsellor / Mentor');
+  const sec = peopleForYear.filter((p: any) => p.category === 'SEC' || p.category === 'Senior Executive Committee');
+  const webAndOp = peopleForYear.filter((p: any) => p.category === 'Web' || p.category === 'Operations' || p.category === 'Operational Leads' || p.category === 'Operational' || p.category === 'Lead');
+  const chapterLeads = peopleForYear.filter((p: any) => p.category === 'EDS Chapter' || p.category === 'Affinity Group' || p.category === 'EDS' || p.category === 'WIE' || p.category === 'Chapter');
 
   return (
     <>
@@ -119,9 +121,15 @@ export default async function LeadershipArchiveYearPage({ params }: LeadershipAr
                     key={person.id}
                     name={person.name}
                     role={person.role}
+                    category={person.category}
                     department={person.department || undefined}
                     academicYear={person.academicYear || displayYear}
-                    hierarchy={person.hierarchy as any}
+                    imageUrl={person.imageUrl}
+                    linkedIn={person.linkedIn || person.linkedin}
+                    github={person.github}
+                    email={person.email}
+                    bio={person.bio}
+                    hierarchy={person.hierarchy}
                   />
                 ))}
               </div>
@@ -144,9 +152,15 @@ export default async function LeadershipArchiveYearPage({ params }: LeadershipAr
                     key={person.id}
                     name={person.name}
                     role={person.role}
+                    category={person.category}
                     department={person.department || undefined}
                     academicYear={person.academicYear || displayYear}
-                    hierarchy={person.hierarchy as any}
+                    imageUrl={person.imageUrl}
+                    linkedIn={person.linkedIn || person.linkedin}
+                    github={person.github}
+                    email={person.email}
+                    bio={person.bio}
+                    hierarchy={person.hierarchy}
                   />
                 ))}
               </div>
@@ -169,9 +183,15 @@ export default async function LeadershipArchiveYearPage({ params }: LeadershipAr
                     key={person.id}
                     name={person.name}
                     role={person.role}
+                    category={person.category}
                     department={person.department || undefined}
                     academicYear={person.academicYear || displayYear}
-                    hierarchy={person.hierarchy as any}
+                    imageUrl={person.imageUrl}
+                    linkedIn={person.linkedIn || person.linkedin}
+                    github={person.github}
+                    email={person.email}
+                    bio={person.bio}
+                    hierarchy={person.hierarchy}
                   />
                 ))}
               </div>

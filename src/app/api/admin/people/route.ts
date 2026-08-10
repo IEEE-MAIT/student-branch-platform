@@ -4,6 +4,7 @@ import { verifyJWT } from '@/lib/jwt';
 import { hasPermission } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { recordAuditLog } from '@/lib/auditLog';
+import { sanitizeText } from '@/lib/security';
 
 export async function GET() {
   try {
@@ -25,20 +26,110 @@ export async function POST(req: Request) {
     }
 
     const body: any = await req.json();
-    const { name, role, category, department, hierarchy, imageUrl, bio, linkedin } = body;
+    const { name, role, category, department, hierarchy, imageUrl, bio, linkedin, chapterId, academicYear } = body;
 
     if (!name || !role || !category) {
       return NextResponse.json({ error: 'Name, Role, and Category are required.' }, { status: 400 });
     }
 
+    // Sanitize inputs
+    const safeName = sanitizeText(name, 100);
+    const safeBio = bio ? sanitizeText(bio, 1000) : null;
+    const safeLinkedin = linkedin ? sanitizeText(linkedin, 200) : null;
+    const safeDepartment = department ? sanitizeText(department, 100) : '';
+    const safeAcademicYear = academicYear ? sanitizeText(academicYear, 50) : '2025-26';
+
+    // --- STRUCTURAL VALIDATION ENGINE ---
+    const secRoles = [
+      'Chairperson', 'Vice-Chairperson', 'General Secretary',
+      'Web Master', 'Treasurer', 'Joint Secretary',
+      'PR Head', 'Creative Head', 'Sponsorship Head'
+    ];
+    const operationalRoles = [
+      'Technical Lead', 'Creative Lead', 'PR Lead', 'Hardware Lead'
+    ];
+
+    const isSEC = category === 'Senior Executive Committee' || category === 'EDS Chapter' || category === 'Affinity Group';
+    const isOperational = category === 'Operational Leads';
+
+    if (isSEC && !secRoles.includes(role)) {
+      return NextResponse.json({ error: `Invalid role for ${category}. Allowed roles: ${secRoles.join(', ')}` }, { status: 400 });
+    }
+
+    if (isOperational && !operationalRoles.includes(role)) {
+      return NextResponse.json({ error: `Invalid role for ${category}. Allowed roles: ${operationalRoles.join(', ')}` }, { status: 400 });
+    }
+
+    // --- CAPACITY ENFORCEMENT (MAX 2 PER ROLE IN A CATEGORY, CHAPTER, AND ACADEMIC YEAR) ---
+    if (isSEC || isOperational) {
+      const existingCount = await prisma.person.count({
+        where: {
+          role: role,
+          category: category,
+          academicYear: safeAcademicYear,
+          ...(chapterId ? { memberships: { some: { chapterId } } } : {})
+        }
+      });
+
+      if (existingCount >= 2) {
+        return NextResponse.json({ error: `Position Limit Reached: There are already 2 active people holding the '${role}' position in this unit for ${safeAcademicYear}.` }, { status: 400 });
+      }
+    }
+    // --- END VALIDATION ---
+
+    // Fetch or create Role
+    let dbRole = await prisma.role.findFirst({ where: { title: role } });
+    if (!dbRole) {
+      dbRole = await prisma.role.create({
+        data: {
+          title: role,
+          category: isSEC ? 'SEC' : isOperational ? 'Operational' : 'General',
+          hierarchy: Number(hierarchy) || 10,
+          isActive: true
+        }
+      });
+    }
+
+    // Fetch or create Academic Year
+    let dbAcademicYear = await prisma.academicYear.findFirst({
+      where: {
+        OR: [
+          { label: safeAcademicYear },
+          { label: safeAcademicYear.replace('-', '–') },
+          { label: safeAcademicYear.replace('–', '-') }
+        ]
+      }
+    });
+
+    if (!dbAcademicYear) {
+      dbAcademicYear = await prisma.academicYear.create({
+        data: {
+          label: safeAcademicYear,
+          isCurrent: safeAcademicYear === '2025-26' || safeAcademicYear === '2025–26'
+        }
+      });
+    }
+
+    // Create Person and Membership
     const person = await prisma.person.create({
       data: {
-        name,
+        name: safeName,
         role,
         category,
-        department: department || '',
-        hierarchy: String(hierarchy ?? 'standard'),
+        academicYear: safeAcademicYear,
+        department: safeDepartment,
+        hierarchy: Number(hierarchy) || 10,
         imageUrl,
+        bio: safeBio,
+        linkedIn: safeLinkedin,
+        memberships: {
+          create: {
+            roleId: dbRole.id,
+            academicYearId: dbAcademicYear.id,
+            chapterId: chapterId || null,
+            isCurrent: dbAcademicYear.isCurrent,
+          }
+        }
       },
     });
 
@@ -46,8 +137,8 @@ export async function POST(req: Request) {
       performedBy: payload.name || payload.email,
       actionType: 'CREATE',
       entityType: 'PERSON',
-      entityTitle: name,
-      changeSummary: `Created team member: ${name} (${role})`,
+      entityTitle: safeName,
+      changeSummary: `Created team member: ${safeName} (${role})`,
     });
 
     return NextResponse.json(person);

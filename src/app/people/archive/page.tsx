@@ -22,14 +22,16 @@ export const metadata: Metadata = {
     'Historical record of IEEE MAIT Student Branch executive committees across academic years since 2005.',
 };
 
-// Academic years for which archive pages exist or will exist
-const ARCHIVE_YEARS = [
-  { label: '2025–26', slug: '2025-26', isCurrent: true },
-  { label: '2024–25', slug: '2024-25', isCurrent: false },
-  { label: '2023–24', slug: '2023-24', isCurrent: false },
-  { label: '2022–23', slug: '2022-23', isCurrent: false },
-  { label: '2021–22', slug: '2021-22', isCurrent: false },
-];
+// Academic years for which archive pages exist or will exist (past 20 years back to 2005–06)
+const ARCHIVE_YEARS = Array.from({ length: 21 }, (_, i) => {
+  const start = 2025 - i;
+  const end = (start + 1).toString().slice(-2);
+  return {
+    label: `${start}–${end}`,
+    slug: `${start}-${end}`,
+    isCurrent: i === 0,
+  };
+});
 
 export default function PeopleArchivePage() {
   return (
