@@ -159,14 +159,15 @@ export async function getDynamicChapters() {
 export async function getDynamicPeople() {
   if (typeof window !== 'undefined') return [];
   try {
-    const activeYear = await prisma.academicYear.findFirst({ where: { isCurrent: true } });
+    const [activeYear, all] = await prisma.$transaction([
+      prisma.academicYear.findFirst({ where: { isCurrent: true } }),
+      prisma.person.findMany({
+        orderBy: { hierarchy: 'asc' },
+        include: { memberships: { include: { academicYear: true } } }
+      })
+    ]);
     const currentLabel = activeYear?.label || '2025-26';
     const normalizedCurrent = currentLabel.replace('–', '-');
-
-    const all = await prisma.person.findMany({
-      orderBy: { hierarchy: 'asc' },
-      include: { memberships: { include: { academicYear: true } } }
-    });
 
     return all.filter((p: any) => {
       if (p.academicYear) {

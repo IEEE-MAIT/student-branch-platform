@@ -22,7 +22,7 @@ export default async function HomePage() {
   let topLeadership: any[] = [];
 
   try {
-    [upcomingEvents, featuredAchievements, chaptersList, topLeadership] = await Promise.all([
+    [upcomingEvents, featuredAchievements, chaptersList, topLeadership] = await prisma.$transaction([
       prisma.event.findMany({
         where: { status: 'upcoming' },
         orderBy: { date: 'asc' },
