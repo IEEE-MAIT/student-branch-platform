@@ -7,7 +7,7 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { getDynamicEventBySlug, getDynamicEvents } from '@/lib/api';
-import Link from 'next/link';
+import Link from '@/components/ui/AppLink';
 
 export async function generateStaticParams() {
   const events = await getDynamicEvents();

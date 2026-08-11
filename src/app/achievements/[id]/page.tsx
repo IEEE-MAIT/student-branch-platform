@@ -6,7 +6,7 @@ import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Badge } from '@/components/ui/Badge';
 import { getDynamicAchievementById, getDynamicAchievements } from '@/lib/api';
-import Link from 'next/link';
+import Link from '@/components/ui/AppLink';
 
 export async function generateStaticParams() {
   const achievements = await getDynamicAchievements();

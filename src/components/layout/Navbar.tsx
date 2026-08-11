@@ -14,7 +14,7 @@
  */
 
 import React, { useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/ui/AppLink';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { Container } from './Container';

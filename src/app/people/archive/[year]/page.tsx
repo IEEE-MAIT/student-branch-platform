@@ -20,7 +20,7 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { PersonCard } from '@/components/content/PersonCard';
 import { getDynamicPeopleByAcademicYear } from '@/lib/api';
-import Link from 'next/link';
+import Link from '@/components/ui/AppLink';
 
 interface LeadershipArchiveYearPageProps {
   params: Promise<{ year: string }>;

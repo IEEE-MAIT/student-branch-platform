@@ -5,7 +5,7 @@ import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { EventPreview } from '@/components/content/EventPreview';
 import { AchievementRow } from '@/components/content/AchievementRow';
-import Link from 'next/link';
+import Link from '@/components/ui/AppLink';
 
 export const STATIC_PAGES = [
   { title: 'Home', description: 'Main landing page of the IEEE MAIT Student Branch', url: '/' },

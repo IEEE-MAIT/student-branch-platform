@@ -13,7 +13,7 @@ import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { getDynamicGalleries } from '@/lib/api';
-import Link from 'next/link';
+import Link from '@/components/ui/AppLink';
 
 export const metadata = {
   title: 'Photo Gallery & Real Moments | IEEE MAIT Student Branch',

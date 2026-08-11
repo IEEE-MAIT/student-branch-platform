@@ -13,7 +13,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { Badge } from '@/components/ui/Badge';
 import { getDynamicStoryBySlug, getDynamicStories } from '@/lib/api';
-import Link from 'next/link';
+import Link from '@/components/ui/AppLink';
 
 export async function generateStaticParams() {
   const stories = await getDynamicStories();

@@ -9,7 +9,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/ui/AppLink';
 
 export default function AdminOverviewPage() {
   const [stats, setStats] = useState({

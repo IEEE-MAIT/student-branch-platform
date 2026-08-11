@@ -11,7 +11,7 @@ import { ChapterPanel } from '@/components/content/ChapterPanel';
 import { PersonCard } from '@/components/content/PersonCard';
 import { BRANCH_STATS } from '@/lib/data';
 import { prisma } from '@/lib/db';
-import Link from 'next/link';
+import Link from '@/components/ui/AppLink';
 
 export const revalidate = 60; // ISR: revalidate every 60 seconds
 

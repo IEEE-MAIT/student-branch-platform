@@ -13,7 +13,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
-import Link from 'next/link';
+import Link from '@/components/ui/AppLink';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {

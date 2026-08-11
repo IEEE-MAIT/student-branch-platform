@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Lightbox } from '@/components/gallery/Lightbox';
-import Link from 'next/link';
+import Link from '@/components/ui/AppLink';
 
 interface PhotoItem {
   id: string;
