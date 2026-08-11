@@ -6,8 +6,15 @@ import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { getDynamicEventBySlug } from '@/lib/api';
+import { getDynamicEventBySlug, getDynamicEvents } from '@/lib/api';
 import Link from 'next/link';
+
+export async function generateStaticParams() {
+  const events = await getDynamicEvents();
+  return events.map((event: any) => ({
+    slug: event.slug,
+  }));
+}
 
 interface EventPageProps {
   params: Promise<{ slug: string }>;

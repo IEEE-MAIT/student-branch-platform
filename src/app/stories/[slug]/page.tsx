@@ -12,8 +12,15 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { Badge } from '@/components/ui/Badge';
-import { getDynamicStoryBySlug } from '@/lib/api';
+import { getDynamicStoryBySlug, getDynamicStories } from '@/lib/api';
 import Link from 'next/link';
+
+export async function generateStaticParams() {
+  const stories = await getDynamicStories();
+  return stories.map((story: any) => ({
+    slug: story.slug,
+  }));
+}
 
 interface StoryPageProps {
   params: Promise<{ slug: string }>;

@@ -5,8 +5,15 @@ import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Badge } from '@/components/ui/Badge';
-import { getDynamicAchievementById } from '@/lib/api';
+import { getDynamicAchievementById, getDynamicAchievements } from '@/lib/api';
 import Link from 'next/link';
+
+export async function generateStaticParams() {
+  const achievements = await getDynamicAchievements();
+  return achievements.map((achievement: any) => ({
+    id: achievement.id,
+  }));
+}
 
 interface AchievementPageProps {
   params: Promise<{ id: string }>;

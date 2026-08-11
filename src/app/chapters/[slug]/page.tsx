@@ -6,7 +6,14 @@ import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Button } from '@/components/ui/Button';
 import { EventPreview } from '@/components/content/EventPreview';
-import { getDynamicChapterBySlug } from '@/lib/api';
+import { getDynamicChapterBySlug, getDynamicChapters } from '@/lib/api';
+
+export async function generateStaticParams() {
+  const chapters = await getDynamicChapters();
+  return chapters.map((chapter: any) => ({
+    slug: chapter.slug,
+  }));
+}
 
 interface ChapterPageProps {
   params: Promise<{ slug: string }>;

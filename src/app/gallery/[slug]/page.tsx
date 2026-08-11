@@ -11,7 +11,14 @@ import { notFound } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { GalleryAlbumViewer } from '@/components/content/GalleryAlbumViewer';
-import { getDynamicGalleryAlbumBySlug } from '@/lib/api';
+import { getDynamicGalleryAlbumBySlug, getDynamicGalleries } from '@/lib/api';
+
+export async function generateStaticParams() {
+  const galleries = await getDynamicGalleries();
+  return galleries.map((gallery: any) => ({
+    slug: gallery.slug,
+  }));
+}
 
 interface AlbumPageProps {
   params: Promise<{ slug: string }>;
