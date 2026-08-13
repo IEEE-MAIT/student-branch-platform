@@ -11,7 +11,7 @@
  * @license MIT
  */
 
-const CACHE_NAME = 'ieee-mait-pwa-v1';
+const CACHE_NAME = 'ieee-mait-pwa-v2';
 const PRECACHE_URLS = [
   '/',
   '/events',
@@ -23,7 +23,6 @@ const PRECACHE_URLS = [
   '/join',
   '/contact',
   '/favicon.svg',
-  '/globals.css',
 ];
 
 // Install Event: Pre-cache static assets

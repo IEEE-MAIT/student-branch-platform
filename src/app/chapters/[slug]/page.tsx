@@ -51,7 +51,7 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
     <>
       <Navbar />
 
-      <main className="flex-1 py-16 sm:py-24 bg-white">
+      <main className="flex-1 py-16 sm:py-24 bg-white page-enter">
         <Container size="default">
           {/* Chapter Identity Header */}
           <SectionHeading

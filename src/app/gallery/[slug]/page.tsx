@@ -48,7 +48,7 @@ export default async function AlbumDetailPage({ params }: AlbumPageProps) {
   return (
     <>
       <Navbar />
-      <main className="flex-1 py-16 sm:py-24 bg-white">
+      <main className="flex-1 py-16 sm:py-24 bg-white page-enter">
         <GalleryAlbumViewer album={album as any} />
       </main>
       <Footer />

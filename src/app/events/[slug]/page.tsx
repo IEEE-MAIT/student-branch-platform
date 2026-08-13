@@ -62,7 +62,7 @@ END:VCALENDAR`;
     <>
       <Navbar />
 
-      <main className="flex-1 py-16 sm:py-24 bg-white">
+      <main className="flex-1 py-16 sm:py-24 bg-white page-enter">
         <Container size="default">
           <Link href="/events" className="inline-flex items-center gap-1.5 font-mono text-xs text-warm-400 hover:text-ieee-blue mb-8 transition-colors">
             <span>← Back to Events Archive</span>

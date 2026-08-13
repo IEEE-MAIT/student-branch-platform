@@ -38,7 +38,7 @@ export default function PeopleArchivePage() {
     <>
       <Navbar />
 
-      <main className="flex-1 py-16 sm:py-24 bg-white">
+      <main className="flex-1 py-16 sm:py-24 bg-white page-enter">
         <Container size="default">
           <Breadcrumb
             items={[
