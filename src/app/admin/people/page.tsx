@@ -7,6 +7,9 @@ export default function AdminPeoplePage() {
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // Edit state
+  const [editingId, setEditingId] = useState<string | null>(null);
+
   // Form states
   const [name, setName] = useState('');
   const [role, setRole] = useState('Chairperson');
@@ -85,7 +88,39 @@ export default function AdminPeoplePage() {
     setUploadingImage(false);
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const cancelEdit = () => {
+    setEditingId(null);
+    setName('');
+    setRole('Chairperson');
+    setCategory('Senior Executive Committee');
+    setDepartment('CSE');
+    setAcademicYear('2025-26');
+    setChapterId('');
+    setImageUrl('');
+    setBio('');
+    setLinkedin('');
+  };
+
+  const handleEdit = (p: any) => {
+    setEditingId(p.id);
+    setName(p.name || '');
+    setRole(p.role || '');
+    setCategory(p.category || 'Senior Executive Committee');
+    setDepartment(p.department || 'CSE');
+    setAcademicYear(p.academicYear || '2025-26');
+    setImageUrl(p.imageUrl || '');
+    setBio(p.bio || '');
+    setLinkedin(p.linkedIn || p.linkedin || '');
+    const chapMembership = p.memberships?.find((m: any) => m.chapterId);
+    if (chapMembership) {
+      setChapterId(chapMembership.chapterId);
+    } else {
+      setChapterId('');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMsg(null);
     try {
@@ -99,10 +134,15 @@ export default function AdminPeoplePage() {
         computedHierarchy = opRoles.indexOf(role) + 10;
       }
 
-      const res = await fetch('/api/admin/people', {
-        method: 'POST',
+      const isEditing = !!editingId;
+      const url = '/api/admin/people';
+      const method = isEditing ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          id: editingId || undefined,
           name,
           role,
           category,
@@ -110,6 +150,7 @@ export default function AdminPeoplePage() {
           hierarchy: computedHierarchy,
           imageUrl,
           bio,
+          quote: bio,
           linkedin,
           academicYear,
           chapterId: (category === 'EDS Chapter' || category === 'Affinity Group') ? chapterId : undefined,
@@ -117,27 +158,26 @@ export default function AdminPeoplePage() {
       });
       const data: any = await res.json();
       if (res.ok) {
-        setMsg({ type: 'success', text: `Team member ${name} added successfully!` });
-        setName('');
-        setRole('');
-        setImageUrl('');
-        setBio('');
-        setLinkedin('');
+        setMsg({ type: 'success', text: `Team member ${name} ${isEditing ? 'updated' : 'added'} successfully!` });
+        cancelEdit();
         loadPeople();
       } else {
-        setMsg({ type: 'error', text: data.error || 'Failed to add person.' });
+        setMsg({ type: 'error', text: data.error || `Failed to ${isEditing ? 'update' : 'add'} person.` });
       }
     } catch {
-      setMsg({ type: 'error', text: 'Server error adding person.' });
+      setMsg({ type: 'error', text: 'Server error saving person.' });
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to remove this person from the active roster?')) return;
+    if (!confirm('Are you sure you want to remove this person from the active roster? (This also deletes their Cloudinary photo asset)')) return;
     try {
       const res = await fetch(`/api/admin/people?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
-        setMsg({ type: 'success', text: 'Roster record removed.' });
+        setMsg({ type: 'success', text: 'Roster record and associated photo asset removed.' });
+        if (editingId === id) {
+          cancelEdit();
+        }
         loadPeople();
       } else {
         const data: any = await res.json();
@@ -160,7 +200,7 @@ export default function AdminPeoplePage() {
       <div>
         <h2 className="font-serif text-2xl text-ink font-normal mb-1">Manage Leadership & People Roster</h2>
         <p className="font-sans text-xs text-warm-400">
-          Add or update Branch Counsellors, Mentors, SEC Officers, and Operational Leads.
+          Add, edit, or remove Branch Counsellors, Mentors, SEC Officers, and Operational Leads.
         </p>
       </div>
 
@@ -175,10 +215,21 @@ export default function AdminPeoplePage() {
       )}
 
       {/* Form */}
-      <form onSubmit={handleCreate} className="p-6 border border-warm-200 bg-warm-100/20 rounded-[2px] space-y-4 font-sans text-xs">
-        <h3 className="font-serif text-lg text-ink font-normal border-b border-warm-200 pb-2">
-          Add Team Member
-        </h3>
+      <form onSubmit={handleSubmit} className="p-6 border border-warm-200 bg-warm-100/20 rounded-[2px] space-y-4 font-sans text-xs">
+        <div className="flex items-center justify-between border-b border-warm-200 pb-2">
+          <h3 className="font-serif text-lg text-ink font-normal">
+            {editingId ? `Edit Team Member` : 'Add Team Member'}
+          </h3>
+          {editingId && (
+            <button
+              type="button"
+              onClick={cancelEdit}
+              className="font-mono text-xs text-warm-500 hover:text-ink underline"
+            >
+              Cancel Edit
+            </button>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -285,26 +336,30 @@ export default function AdminPeoplePage() {
               className="w-full px-3 py-2 border rounded-[2px]"
               required
             >
-              {default20Years.map((y) => (
-                <option key={y.slug} value={y.slug}>
-                  {y.label} {y.isCurrent ? '(Current)' : ''}
-                </option>
-              ))}
+              {academicYears.length > 0
+                ? academicYears.map((y) => (
+                    <option key={y.id} value={y.label}>
+                      {y.label} {y.isCurrent ? '(Current)' : ''}
+                    </option>
+                  ))
+                : default20Years.map((y) => (
+                    <option key={y.slug} value={y.label}>
+                      {y.label} {y.isCurrent ? '(Current)' : ''}
+                    </option>
+                  ))}
             </select>
           </div>
 
           <div>
-            <label className="block font-mono text-xs text-warm-400 mb-1">Department & Year</label>
+            <label className="block font-mono text-xs text-warm-400 mb-1">Department / Branch</label>
             <input
               type="text"
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
-              placeholder="CSE · 4th Year / ECE Department"
+              placeholder="e.g. CSE, IT, ECE, or Department of ECE"
               className="w-full px-3 py-2 border rounded-[2px]"
             />
           </div>
-
-
 
           <div>
             <label className="block font-mono text-xs text-warm-400 mb-1">LinkedIn Profile URL</label>
@@ -312,7 +367,7 @@ export default function AdminPeoplePage() {
               type="url"
               value={linkedin}
               onChange={(e) => setLinkedin(e.target.value)}
-              placeholder="https://linkedin.com/in/..."
+              placeholder="https://linkedin.com/in/username"
               className="w-full px-3 py-2 border rounded-[2px]"
             />
           </div>
@@ -345,30 +400,48 @@ export default function AdminPeoplePage() {
               </div>
             </div>
             {imageUrl && (
-              <div className="mt-2">
+              <div className="mt-2 flex items-center gap-3">
                 <img src={imageUrl} alt="Preview" className="h-16 w-16 object-cover rounded-[2px] border border-warm-200" />
+                <button
+                  type="button"
+                  onClick={() => setImageUrl('')}
+                  className="font-mono text-[11px] text-red-600 hover:underline"
+                >
+                  Remove Photo
+                </button>
               </div>
             )}
           </div>
         </div>
 
         <div>
-          <label className="block font-mono text-xs text-warm-400 mb-1">Short Biography</label>
+          <label className="block font-mono text-xs text-warm-400 mb-1">Quote / Short Biography</label>
           <textarea
             rows={2}
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            placeholder="Faculty counsellor or student executive background..."
+            placeholder="Faculty counsellor or student executive background, quote, or bio..."
             className="w-full px-3 py-2 border rounded-[2px] font-sans text-xs"
           />
         </div>
 
-        <button
-          type="submit"
-          className="px-6 py-2.5 bg-ieee-blue text-white font-mono text-xs font-bold uppercase tracking-wider rounded-[2px]"
-        >
-          Save to Roster →
-        </button>
+        <div className="flex items-center gap-3 pt-2">
+          <button
+            type="submit"
+            className="px-6 py-2.5 bg-ieee-blue text-white font-mono text-xs font-bold uppercase tracking-wider rounded-[2px] hover:bg-ieee-dark transition-colors"
+          >
+            {editingId ? 'Update Team Member →' : 'Save to Roster →'}
+          </button>
+          {editingId && (
+            <button
+              type="button"
+              onClick={cancelEdit}
+              className="px-4 py-2.5 border border-warm-300 text-ink font-mono text-xs rounded-[2px] hover:bg-warm-100 transition-colors"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
 
       {/* Roster Table */}
@@ -411,24 +484,34 @@ export default function AdminPeoplePage() {
                   <th className="p-3">Role</th>
                   <th className="p-3">Category</th>
                   <th className="p-3">Session</th>
-                  <th className="p-3 text-right">Action</th>
+                  <th className="p-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-warm-200">
                 {filteredPeople.map((p: any) => (
-                  <tr key={p.id} className="hover:bg-warm-100/30">
+                  <tr key={p.id} className={`hover:bg-warm-100/30 transition-colors ${editingId === p.id ? 'bg-ieee-blue/5 font-medium' : ''}`}>
                     <td className="p-3 font-mono text-xs font-bold text-warm-400">{p.hierarchy}</td>
                     <td className="p-3 font-medium text-ink">{p.name}</td>
                     <td className="p-3 font-mono text-xs text-ieee-blue">{p.role}</td>
                     <td className="p-3 font-mono text-[11px] text-warm-400">{p.category}</td>
                     <td className="p-3 font-mono text-[11px] text-warm-400">{p.academicYear || '2025-26'}</td>
                     <td className="p-3 text-right">
-                      <button
-                        onClick={() => handleDelete(p.id)}
-                        className="font-mono text-xs text-red-600 hover:underline"
-                      >
-                        Remove
-                      </button>
+                      <div className="flex items-center justify-end gap-3">
+                        <button
+                          type="button"
+                          onClick={() => handleEdit(p)}
+                          className="font-mono text-xs text-ieee-blue hover:underline"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(p.id)}
+                          className="font-mono text-xs text-red-600 hover:underline"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
