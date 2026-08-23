@@ -203,7 +203,10 @@ export async function getDynamicStories() {
 export async function getDynamicGalleries() {
   if (typeof window !== 'undefined') return Object.values(GALLERY_ALBUMS_DATA);
   try {
-    const dbGalleries = await prisma.gallery.findMany({ orderBy: { date: 'desc' } });
+    const dbGalleries = await prisma.gallery.findMany({
+      orderBy: { date: 'desc' },
+      include: { photos: true },
+    });
     if (dbGalleries.length > 0) return dbGalleries;
   } catch (e) {
     console.warn('Failed to fetch galleries from DB', e);
@@ -214,8 +217,25 @@ export async function getDynamicGalleries() {
 export async function getDynamicChapters() {
   if (typeof window !== 'undefined') return Object.values(CHAPTERS_DATA);
   try {
-    const dbChapters = await prisma.chapter.findMany();
-    if (dbChapters.length > 0) return dbChapters;
+    const dbChapters = await prisma.chapter.findMany({
+      include: {
+        leader: true,
+        projects: { orderBy: { year: 'desc' } },
+        initiatives: true,
+      },
+    });
+    if (dbChapters.length > 0) {
+      // Sort so 'sb' comes first, then 'eds', then 'wie', then others
+      const order = ['sb', 'eds', 'wie'];
+      return dbChapters.sort((a: any, b: any) => {
+        const idxA = order.indexOf(a.slug);
+        const idxB = order.indexOf(b.slug);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return a.name.localeCompare(b.name);
+      });
+    }
   } catch (e) {
     console.warn('Failed to fetch chapters from DB', e);
   }

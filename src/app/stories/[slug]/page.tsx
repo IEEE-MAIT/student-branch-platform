@@ -84,7 +84,12 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
           </Link>
 
           <div className="flex items-center gap-2 mb-4">
-            <Badge variant="ieee">{story.category}</Badge>
+            <Badge variant="ieee">{story.category || story.type || 'Article'}</Badge>
+            {story.readingTime && (
+              <span className="font-mono text-xs text-warm-400">
+                {story.readingTime}
+              </span>
+            )}
           </div>
 
           <h1 className="font-serif text-3xl sm:text-5xl text-ink font-normal leading-tight mb-4">
@@ -94,9 +99,12 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
           <div className="flex items-center justify-between border-y border-warm-200 py-3 mb-8 text-xs font-mono text-warm-400">
             <div>
               By <span className="text-ink font-semibold">{story.author}</span>
+              {story.authorRole && (
+                <span className="text-warm-400 font-normal"> · {story.authorRole}</span>
+              )}
             </div>
             <div>
-              {story.date}
+              {story.date || story.publishedDate}
             </div>
           </div>
 

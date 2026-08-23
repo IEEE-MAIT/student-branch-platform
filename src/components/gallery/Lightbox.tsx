@@ -15,6 +15,7 @@
  */
 
 import React, { useEffect, useCallback } from 'react';
+import Image from 'next/image';
 
 export interface LightboxPhoto {
   id: string;
@@ -22,9 +23,6 @@ export interface LightboxPhoto {
   url?: string | null;
 }
 
-/**
- * Props for Lightbox component.
- */
 interface LightboxProps {
   /** Array of photo items in current album */
   photos: LightboxPhoto[];
@@ -38,9 +36,6 @@ interface LightboxProps {
   onNavigate: (newIndex: number) => void;
 }
 
-/**
- * Fullscreen Interactive Lightbox Modal Component.
- */
 export const Lightbox: React.FC<LightboxProps> = ({
   photos,
   currentIndex,
@@ -50,31 +45,22 @@ export const Lightbox: React.FC<LightboxProps> = ({
 }) => {
   const currentPhoto = photos[currentIndex];
 
-  /**
-   * Advances to next photograph in gallery, wrapping to index 0 at end.
-   */
   const handleNext = useCallback(() => {
     if (currentIndex < photos.length - 1) {
       onNavigate(currentIndex + 1);
     } else {
-      onNavigate(0); // Wrap around to first photo
+      onNavigate(0);
     }
   }, [currentIndex, photos.length, onNavigate]);
 
-  /**
-   * Recedes to previous photograph in gallery, wrapping to last index at start.
-   */
   const handlePrev = useCallback(() => {
     if (currentIndex > 0) {
       onNavigate(currentIndex - 1);
     } else {
-      onNavigate(photos.length - 1); // Wrap around to last photo
+      onNavigate(photos.length - 1);
     }
   }, [currentIndex, photos.length, onNavigate]);
 
-  /**
-   * Keyboard shortcut event listener (Escape to close, Arrow keys to navigate).
-   */
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
@@ -103,10 +89,10 @@ export const Lightbox: React.FC<LightboxProps> = ({
         </span>
         <button
           onClick={onClose}
-          className="text-warm-300 hover:text-white p-2 text-xl font-mono focus:outline-none transition-colors"
+          className="text-warm-300 hover:text-white p-2 text-sm font-mono focus:outline-hidden hover:bg-white/10 rounded-[2px] transition-colors cursor-pointer"
           aria-label="Close Lightbox"
         >
-          ✕ Esc
+          ✕ Close (Esc)
         </button>
       </div>
 
@@ -115,30 +101,43 @@ export const Lightbox: React.FC<LightboxProps> = ({
         {/* Previous Image Button */}
         <button
           onClick={handlePrev}
-          className="absolute left-2 sm:left-4 z-10 p-3 text-white bg-black/50 hover:bg-black/80 border border-white/20 rounded-[2px] transition-colors"
+          className="absolute left-2 sm:left-6 z-20 p-3.5 text-white bg-black/60 hover:bg-ieee-blue/80 border border-white/20 rounded-[2px] transition-colors cursor-pointer text-xl"
           aria-label="Previous Photo"
         >
           ‹
         </button>
 
         {/* Display Frame */}
-        <div className="max-w-5xl max-h-full flex flex-col items-center justify-center p-2">
-          <div className="relative w-full max-h-[70vh] flex items-center justify-center bg-warm-200/10 border border-white/10 p-8 rounded-[2px]">
-            <div className="text-center space-y-3">
-              <span className="font-mono text-xs text-ieee-light uppercase tracking-wider block">
-                [Photograph Placeholder]
-              </span>
-              <h4 className="font-serif text-2xl text-white font-normal">
-                {currentPhoto.caption}
-              </h4>
+        <div className="max-w-5xl max-h-[75vh] w-full h-full flex flex-col items-center justify-center p-2 relative">
+          {currentPhoto.url ? (
+            <div className="relative w-full h-full max-h-[70vh] rounded-[2px] overflow-hidden">
+              <Image
+                src={currentPhoto.url}
+                alt={currentPhoto.caption}
+                fill
+                sizes="(max-width: 1280px) 100vw, 1200px"
+                className="object-contain"
+                priority
+              />
             </div>
-          </div>
+          ) : (
+            <div className="relative w-full max-h-[70vh] flex items-center justify-center bg-warm-200/10 border border-white/10 p-8 rounded-[2px]">
+              <div className="text-center space-y-3">
+                <span className="font-mono text-xs text-ieee-light uppercase tracking-wider block">
+                  IEEE MAIT Visual Archive
+                </span>
+                <h4 className="font-serif text-2xl text-white font-normal">
+                  {currentPhoto.caption}
+                </h4>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Next Image Button */}
         <button
           onClick={handleNext}
-          className="absolute right-2 sm:right-4 z-10 p-3 text-white bg-black/50 hover:bg-black/80 border border-white/20 rounded-[2px] transition-colors"
+          className="absolute right-2 sm:right-6 z-20 p-3.5 text-white bg-black/60 hover:bg-ieee-blue/80 border border-white/20 rounded-[2px] transition-colors cursor-pointer text-xl"
           aria-label="Next Photo"
         >
           ›

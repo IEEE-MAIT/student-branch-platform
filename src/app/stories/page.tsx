@@ -49,11 +49,11 @@ export default async function StoriesPage() {
               stories.map((story: any) => (
                 <div key={story.id} className="p-6 border border-warm-200 bg-white rounded-[2px] space-y-3 hover:border-ieee-blue transition-colors">
                   <div className="flex flex-wrap items-center gap-3 font-mono text-xs text-ieee-blue">
-                    <span>{story.date}</span>
+                    <span>{story.date || story.publishedDate}</span>
                     <span>·</span>
                     <span>By {story.author}</span>
                     <span className="bg-ieee-subtle border border-ieee-blue/20 px-2 py-0.5 rounded-[2px] uppercase text-[10px]">
-                      {story.category}
+                      {story.category || story.type || 'Article'}
                     </span>
                   </div>
                   <h3 className="font-serif text-2xl text-ink font-normal">

@@ -334,7 +334,7 @@ export default async function HomePage() {
                 galleryPhotos.map((photo, idx) => (
                   <Link
                     key={idx}
-                    href={`/gallery`}
+                    href={photo.albumSlug ? `/gallery/${photo.albumSlug}` : `/gallery`}
                     className="group relative aspect-4/3 bg-white/5 border border-white/10 overflow-hidden rounded-[2px] flex flex-col justify-end p-4 hover:border-ieee-light/60 transition-all duration-300"
                   >
                     {photo.url ? (

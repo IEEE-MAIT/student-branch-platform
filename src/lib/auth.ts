@@ -25,12 +25,20 @@ export type Resource =
   | 'Resources'
   | 'Settings'
   | 'Users'
-  | 'AuditLogs';
+  | 'AuditLogs'
+  | 'Chapters';
 
 export type Action = 'view' | 'create' | 'edit' | 'delete' | 'publish';
 
 // Permission Matrix mapping (Resource -> Action -> allowed roles)
 const PERMISSION_MATRIX: Record<Resource, Record<Action, Role[]>> = {
+  Chapters: {
+    view: ['Super Admin', 'Webmaster', 'Chairperson', 'General Secretary', 'Content Manager', 'Events Manager', 'Chapter Admin'],
+    create: ['Super Admin', 'Webmaster', 'Chairperson', 'Chapter Admin'],
+    edit: ['Super Admin', 'Webmaster', 'Chairperson', 'Chapter Admin'],
+    delete: ['Super Admin', 'Webmaster'],
+    publish: ['Super Admin', 'Webmaster', 'Chairperson', 'Chapter Admin'],
+  },
   People: {
     view: ['Super Admin', 'Webmaster', 'Chairperson', 'General Secretary', 'Content Manager', 'Events Manager', 'Chapter Admin'],
     create: ['Super Admin', 'Webmaster', 'Chairperson', 'General Secretary'],

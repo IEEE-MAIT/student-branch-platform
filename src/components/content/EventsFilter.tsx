@@ -32,8 +32,12 @@ export function EventsFilter({ initialEvents }: { initialEvents: EventItem[] }) 
     });
   }, [initialEvents, selectedUnit, selectedCategory]);
 
-  const upcomingEvents = filteredEvents.filter(e => e.status === 'upcoming');
-  const pastEvents = filteredEvents.filter(e => e.status === 'past');
+  const upcomingEvents = filteredEvents.filter(
+    (e) => e.status?.toLowerCase() === 'upcoming'
+  );
+  const pastEvents = filteredEvents.filter(
+    (e) => e.status?.toLowerCase() !== 'upcoming'
+  );
   const featuredUpcoming = upcomingEvents[0];
   const remainingUpcoming = upcomingEvents.slice(1);
 

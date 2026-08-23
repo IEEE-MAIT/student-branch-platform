@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     "Rohini Delhi"
   ],
   authors: [{ name: "IEEE MAIT Student Branch" }],
-  manifest: "/manifest.json",
+  manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
