@@ -8,19 +8,11 @@ import { resolve } from 'path';
 import { EVENTS_DATA, ACHIEVEMENTS_DATA, CHAPTERS_DATA, STORIES_DATA, GALLERY_ALBUMS_DATA } from '../src/lib/data';
 import { OFFICERS_STORE } from '../src/lib/officers';
 
-// Load variables from .dev.vars
+// Load variables from .env and .dev.vars
+dotenv.config({ path: resolve(process.cwd(), '.env') });
 dotenv.config({ path: resolve(process.cwd(), '.dev.vars') });
 
-neonConfig.webSocketConstructor = ws;
-
-if (!process.env.DATABASE_URI) {
-  console.error('FATAL ERROR: DATABASE_URI is not set in .dev.vars');
-  process.exit(1);
-}
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URI });
-const adapter = new PrismaNeon(pool);
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 async function seed() {
   console.log('Connected to Neon Postgres via Prisma ORM.');
@@ -106,7 +98,24 @@ async function seed() {
     for (const chap of chaptersArray) {
       await prisma.chapter.upsert({
         where: { slug: chap.slug },
-        update: {},
+        update: {
+          name: chap.name,
+          type: chap.type,
+          parentSociety: chap.parentSociety,
+          establishedYear: chap.establishedYear,
+          tagline: chap.tagline || null,
+          description: chap.description,
+          mission: (chap as any).mission || null,
+          logoUrl: chap.logoUrl || null,
+          accentColor: chap.accentColor || null,
+          instagramUrl: chap.instagramUrl || null,
+          linkedinUrl: chap.linkedinUrl || null,
+          githubUrl: chap.githubUrl || null,
+          leaderName: (chap as any).leaderName || null,
+          leaderRole: (chap as any).leaderRole || null,
+          memberCount: parseInt(String(chap.memberCount).replace(/\D/g, ''), 10) || 0,
+          eventCount: parseInt(String(chap.eventCount).replace(/\D/g, ''), 10) || 0,
+        },
         create: {
           id: chap.id,
           name: chap.name,
@@ -114,12 +123,18 @@ async function seed() {
           type: chap.type,
           parentSociety: chap.parentSociety,
           establishedYear: chap.establishedYear,
+          tagline: chap.tagline || null,
           description: chap.description,
           mission: (chap as any).mission || null,
+          logoUrl: chap.logoUrl || null,
+          accentColor: chap.accentColor || null,
+          instagramUrl: chap.instagramUrl || null,
+          linkedinUrl: chap.linkedinUrl || null,
+          githubUrl: chap.githubUrl || null,
           leaderName: (chap as any).leaderName || null,
           leaderRole: (chap as any).leaderRole || null,
           memberCount: parseInt(String(chap.memberCount).replace(/\D/g, ''), 10) || 0,
-          eventCount: parseInt(String(chap.eventCount).replace(/\D/g, ''), 10) || 0
+          eventCount: parseInt(String(chap.eventCount).replace(/\D/g, ''), 10) || 0,
         }
       });
     }
@@ -180,9 +195,9 @@ async function seed() {
     // The previous people data was completely hardcoded in the HTML! 
     // We will seed the basic structure here based on the HTML.
     const peopleSeed = [
-      { id: '1', name: 'Dr. Faculty Counselor', role: 'Branch Counsellor', department: 'Department of Electronics & Communication Engineering', academicYear: '2025–26', hierarchy: 'mentor', category: 'Counsellor' },
-      { id: '2', name: 'Chairperson Name', role: 'Chairperson', department: '3rd Year, CSE', academicYear: '2025–26', hierarchy: 'featured', category: 'SEC' },
-      { id: '3', name: 'Webmaster Lead', role: 'Webmaster', department: '3rd Year, CSE', academicYear: '2025–26', hierarchy: 'compact', category: 'Web' }
+      { id: '1', name: 'Dr. Faculty Counselor', role: 'Branch Counsellor', department: 'Department of Electronics & Communication Engineering', academicYear: '2025–26', hierarchy: 1, category: 'Counsellor' },
+      { id: '2', name: 'Chairperson Name', role: 'Chairperson', department: '3rd Year, CSE', academicYear: '2025–26', hierarchy: 2, category: 'SEC' },
+      { id: '3', name: 'Webmaster Lead', role: 'Webmaster', department: '3rd Year, CSE', academicYear: '2025–26', hierarchy: 3, category: 'Web' }
     ];
     for (const person of peopleSeed) {
       await prisma.person.upsert({

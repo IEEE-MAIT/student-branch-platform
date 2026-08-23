@@ -149,12 +149,20 @@ export interface ChapterItem {
   type: ChapterType;
   parentSociety: string;
   establishedYear: string;
+  tagline?: string;
   description: string;
   mission: string;
+  logoUrl?: string;
+  coverImageUrl?: string;
+  accentColor?: string;
+  instagramUrl?: string;
+  linkedinUrl?: string;
+  githubUrl?: string;
   memberCount: string;
   eventCount: string;
   leaderName: string;
   leaderRole: string;
+  leaderId?: string;
 }
 
 /**
@@ -235,11 +243,17 @@ export const CHAPTERS_DATA: Record<string, ChapterItem> = {
     type: ChapterType.AFFINITY_GROUP,
     parentSociety: 'IEEE Women in Engineering',
     establishedYear: '2015',
+    tagline: 'Empowering Women in Engineering & Technology',
     description: 'IEEE WIE is a global network of IEEE members and volunteers dedicated to promoting women engineers and scientists, and inspiring girls around the world to follow their academic interests in STEM.',
     mission: 'To facilitate the global recruitment and retention of women in technical disciplines, creating a vibrant community for skill-building and mentorship.',
+    logoUrl: '/wie_ag_mait_logo.png',
+    accentColor: '#7C3AED',
+    instagramUrl: 'https://instagram.com/wie_mait',
+    linkedinUrl: 'https://linkedin.com/company/wie-mait',
+    githubUrl: 'https://github.com/wie-mait',
     memberCount: '60+',
     eventCount: '15+',
-    leaderName: 'WIE Chair Name',
+    leaderName: 'WIE Chairperson',
     leaderRole: 'WIE Student Chair',
   },
   eds: {
@@ -249,11 +263,17 @@ export const CHAPTERS_DATA: Record<string, ChapterItem> = {
     type: ChapterType.TECHNICAL_CHAPTER,
     parentSociety: 'Electron Devices Society',
     establishedYear: '2018',
+    tagline: 'Advancing Solid-State Devices & Semiconductor Engineering',
     description: 'Focusing on electron devices, semiconductor physics, microelectronics, integrated circuits, and hardware engineering workshops.',
     mission: 'To advance technical learning in solid-state electronics, VLSI design, and microelectronics among engineering undergraduates.',
+    logoUrl: '/eds_mait_logo.png',
+    accentColor: '#00629B',
+    instagramUrl: 'https://instagram.com/eds_mait',
+    linkedinUrl: 'https://linkedin.com/company/eds-mait',
+    githubUrl: 'https://github.com/eds-mait',
     memberCount: '45+',
     eventCount: '12+',
-    leaderName: 'EDS Chair Name',
+    leaderName: 'EDS Chairperson',
     leaderRole: 'EDS Student Chair',
   },
 };
