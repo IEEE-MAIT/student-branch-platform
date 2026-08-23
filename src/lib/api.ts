@@ -30,7 +30,15 @@ function getBaseUrl(): string {
 export async function getDynamicEventBySlug(slug: string) {
   if (typeof window !== 'undefined') return EVENTS_DATA.find((e) => e.slug === slug) || null;
   try {
-    const dbEvent = await prisma.event.findUnique({ where: { slug } });
+    const dbEvent = await prisma.event.findUnique({
+      where: { slug },
+      include: {
+        story: true,
+        gallery: { include: { photos: true } },
+        chapter: true,
+        achievements: true,
+      },
+    });
     if (dbEvent) {
       return dbEvent;
     }
@@ -43,7 +51,14 @@ export async function getDynamicEventBySlug(slug: string) {
 export async function getDynamicEvents(): Promise<any[]> {
   if (typeof window === 'undefined') {
     try {
-      const dbEvents = await prisma.event.findMany({ orderBy: { date: 'desc' } });
+      const dbEvents = await prisma.event.findMany({
+        orderBy: { date: 'desc' },
+        include: {
+          story: true,
+          gallery: { include: { photos: true } },
+          chapter: true,
+        },
+      });
       if (dbEvents && dbEvents.length > 0) return dbEvents;
     } catch (e) {
       console.warn('Failed to fetch events from DB', e);
@@ -64,7 +79,14 @@ export async function getDynamicEvents(): Promise<any[]> {
 export async function getDynamicAchievements(): Promise<any[]> {
   if (typeof window === 'undefined') {
     try {
-      const dbAchievements = await prisma.achievement.findMany({ orderBy: { year: 'desc' } });
+      const dbAchievements = await prisma.achievement.findMany({
+        orderBy: { year: 'desc' },
+        include: {
+          people: { include: { person: true } },
+          chapter: true,
+          event: true,
+        },
+      });
       if (dbAchievements && dbAchievements.length > 0) return dbAchievements;
     } catch (e) {
       console.warn('Failed to fetch achievements from DB', e);
@@ -83,14 +105,23 @@ export async function getDynamicAchievements(): Promise<any[]> {
 }
 
 export async function getDynamicAchievementById(id: string) {
-  if (typeof window !== 'undefined') return null;
+  if (typeof window !== 'undefined') {
+    return ACHIEVEMENTS_DATA.find((a) => a.id === id) || null;
+  }
   try {
-    const dbAchievement = await prisma.achievement.findUnique({ where: { id } });
+    const dbAchievement = await prisma.achievement.findUnique({
+      where: { id },
+      include: {
+        people: { include: { person: true } },
+        chapter: true,
+        event: true,
+      },
+    });
     if (dbAchievement) return dbAchievement;
   } catch (e) {
     console.warn(`Failed to fetch achievement ${id} from DB`, e);
   }
-  return null;
+  return ACHIEVEMENTS_DATA.find((a) => a.id === id) || null;
 }
 
 export async function getDynamicChapterBySlug(slug: string) {
