@@ -100,8 +100,12 @@ export interface Person {
   department: string;
   academicYear: string;
   imageSrc?: string;
+  imageUrl?: string;
   linkedIn?: string;
+  github?: string;
+  email?: string;
   bio?: string;
+  hierarchy?: number;
 }
 
 /**
@@ -236,6 +240,26 @@ export const BRANCH_STATS = {
  * Master catalog of active chapters and affinity groups.
  */
 export const CHAPTERS_DATA: Record<string, ChapterItem> = {
+  sb: {
+    id: 'sb',
+    name: 'IEEE MAIT Student Branch',
+    slug: 'sb',
+    type: ChapterType.TECHNICAL_CHAPTER,
+    parentSociety: 'IEEE Region 10 · Delhi Section',
+    establishedYear: '2005',
+    tagline: 'Parent Student Branch & Flagship Operations',
+    description: 'The core student branch coordinating overarching technical activities, flagship annual symposiums, student memberships, and multi-chapter initiatives at MAIT.',
+    mission: 'To cultivate engineering excellence, foster multidisciplinary innovation, and provide leadership development opportunities across all engineering branches.',
+    logoUrl: '/main_student_branch_logo.png',
+    accentColor: '#00629B',
+    instagramUrl: 'https://instagram.com',
+    linkedinUrl: 'https://linkedin.com/company/ieee-mait',
+    githubUrl: 'https://github.com/IEEE-MAIT',
+    memberCount: '150+',
+    eventCount: '50+',
+    leaderName: 'Student Branch Chair',
+    leaderRole: 'Branch Student Chair',
+  },
   wie: {
     id: 'wie',
     name: 'WIE Affinity Group',
@@ -277,6 +301,76 @@ export const CHAPTERS_DATA: Record<string, ChapterItem> = {
     leaderRole: 'EDS Student Chair',
   },
 };
+
+/**
+ * Fallback People & Leadership catalog.
+ */
+export const PEOPLE_DATA: Person[] = [
+  {
+    id: 'p-1',
+    name: 'Dr. Monika Gupta',
+    role: 'Branch Counsellor',
+    category: PersonCategory.BRANCH_COUNSELLOR,
+    department: 'Department of Electronics & Communication Engineering',
+    academicYear: '2025–26',
+    bio: 'Professor and Branch Counsellor guiding IEEE MAIT Student Branch in fostering academic research, technical projects, and institutional excellence.',
+    imageSrc: '/images/people/counselor.jpg',
+    linkedIn: 'https://linkedin.com',
+  },
+  {
+    id: 'p-2',
+    name: 'Student Branch Chair',
+    role: 'Chairperson',
+    category: PersonCategory.SEC,
+    department: '4th Year, Computer Science & Engineering',
+    academicYear: '2025–26',
+    bio: 'Overseeing branch operations, flagship technical initiatives, multi-chapter collaborations, and student engagement programs.',
+    linkedIn: 'https://linkedin.com',
+    github: 'https://github.com',
+  },
+  {
+    id: 'p-3',
+    name: 'Student Branch Vice-Chair',
+    role: 'Vice Chairperson',
+    category: PersonCategory.SEC,
+    department: '4th Year, Information Technology',
+    academicYear: '2025–26',
+    bio: 'Leading strategic planning, event logistics, and cross-departmental coordination across technical workshops.',
+    linkedIn: 'https://linkedin.com',
+  },
+  {
+    id: 'p-4',
+    name: 'EDS Chapter Chair',
+    role: 'EDS Student Chair',
+    category: PersonCategory.EDS_EXECUTIVE,
+    department: '3rd Year, Electronics & Communication Engineering',
+    academicYear: '2025–26',
+    bio: 'Steering solid-state device workshops, VLSI design bootcamps, and semiconductor project showcases.',
+    linkedIn: 'https://linkedin.com',
+    github: 'https://github.com',
+  },
+  {
+    id: 'p-5',
+    name: 'WIE Student Chair',
+    role: 'WIE Student Chair',
+    category: PersonCategory.WIE_EXECUTIVE,
+    department: '3rd Year, Computer Science & Engineering',
+    academicYear: '2025–26',
+    bio: 'Directing the STEM mentorship circle, diversity initiatives, and technical leadership panels.',
+    linkedIn: 'https://linkedin.com',
+  },
+  {
+    id: 'p-6',
+    name: 'Lead Webmaster',
+    role: 'Lead Webmaster & Technical Head',
+    category: PersonCategory.OPERATIONAL_LEAD,
+    department: '3rd Year, Computer Science & Engineering',
+    academicYear: '2025–26',
+    bio: 'Architecting the IEEE MAIT digital platform, open-source repositories, and edge-native web infrastructure.',
+    linkedIn: 'https://linkedin.com',
+    github: 'https://github.com/IEEE-MAIT',
+  },
+];
 
 /**
  * Catalog of branch events and workshops.

@@ -14,6 +14,8 @@ import {
   CHAPTERS_DATA,
   STORIES_DATA,
   GALLERY_ALBUMS_DATA,
+  ACHIEVEMENTS_DATA,
+  PEOPLE_DATA,
 } from './data';
 import { prisma } from './db';
 
@@ -28,12 +30,6 @@ export async function getDynamicEventBySlug(slug: string) {
   try {
     const dbEvent = await prisma.event.findUnique({ where: { slug } });
     if (dbEvent) {
-      let speakers = dbEvent.imageSrc ? dbEvent.description : null; // safe check
-      try {
-        if (typeof dbEvent.description === 'string' && dbEvent.description.startsWith('[')) {
-          // optional parsing
-        }
-      } catch (e) {}
       return dbEvent;
     }
   } catch (e) {
@@ -45,35 +41,43 @@ export async function getDynamicEventBySlug(slug: string) {
 export async function getDynamicEvents(): Promise<any[]> {
   if (typeof window === 'undefined') {
     try {
-      return await prisma.event.findMany({ orderBy: { date: 'desc' } });
+      const dbEvents = await prisma.event.findMany({ orderBy: { date: 'desc' } });
+      if (dbEvents && dbEvents.length > 0) return dbEvents;
     } catch (e) {
       console.warn('Failed to fetch events from DB', e);
-      return [];
     }
+    return EVENTS_DATA;
   }
 
   try {
     const res = await fetch(`${getBaseUrl()}/api/events`, { next: { revalidate: 60 } });
-    if (res.ok) return await res.json();
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) return data;
+    }
   } catch (err) {}
-  return [];
+  return EVENTS_DATA;
 }
 
 export async function getDynamicAchievements(): Promise<any[]> {
   if (typeof window === 'undefined') {
     try {
-      return await prisma.achievement.findMany({ orderBy: { year: 'desc' } });
+      const dbAchievements = await prisma.achievement.findMany({ orderBy: { year: 'desc' } });
+      if (dbAchievements && dbAchievements.length > 0) return dbAchievements;
     } catch (e) {
       console.warn('Failed to fetch achievements from DB', e);
-      return [];
     }
+    return ACHIEVEMENTS_DATA;
   }
 
   try {
     const res = await fetch(`${getBaseUrl()}/api/achievements`, { next: { revalidate: 60 } });
-    if (res.ok) return await res.json();
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) return data;
+    }
   } catch (err) {}
-  return [];
+  return ACHIEVEMENTS_DATA;
 }
 
 export async function getDynamicAchievementById(id: string) {
@@ -184,7 +188,7 @@ export async function getDynamicChapters() {
 }
 
 export async function getDynamicPeople() {
-  if (typeof window !== 'undefined') return [];
+  if (typeof window !== 'undefined') return PEOPLE_DATA;
   try {
     const activeYear = await prisma.academicYear.findFirst({ where: { isCurrent: true } });
     const all = await prisma.person.findMany({
@@ -194,7 +198,7 @@ export async function getDynamicPeople() {
     const currentLabel = activeYear?.label || '2025-26';
     const normalizedCurrent = currentLabel.replace('–', '-');
 
-    return all.filter((p: any) => {
+    const filtered = all.filter((p: any) => {
       if (p.academicYear) {
         const pYear = p.academicYear.replace('–', '-');
         return pYear === normalizedCurrent || p.academicYear === currentLabel;
@@ -204,21 +208,23 @@ export async function getDynamicPeople() {
       }
       return true;
     });
+    if (filtered.length > 0) return filtered;
+    if (all.length > 0) return all;
   } catch (e) {
     console.warn('Failed to fetch people from DB', e);
-    return [];
   }
+  return PEOPLE_DATA;
 }
 
 export async function getDynamicPeopleByAcademicYear(year: string) {
-  if (typeof window !== 'undefined') return [];
+  if (typeof window !== 'undefined') return PEOPLE_DATA;
   try {
     const normalizedYear = year.replace('–', '-');
     const all = await prisma.person.findMany({
       orderBy: { hierarchy: 'asc' },
       include: { memberships: { include: { academicYear: true } } }
     });
-    return all.filter((p: any) => {
+    const filtered = all.filter((p: any) => {
       if (p.academicYear) {
         const pYear = p.academicYear.replace('–', '-');
         if (pYear === normalizedYear || p.academicYear === year) return true;
@@ -234,10 +240,11 @@ export async function getDynamicPeopleByAcademicYear(year: string) {
       }
       return false;
     });
+    if (filtered.length > 0) return filtered;
   } catch (e) {
     console.warn('Failed to fetch people by year from DB', e);
-    return [];
   }
+  return PEOPLE_DATA;
 }
 
 export async function getDynamicSiteSettings() {
