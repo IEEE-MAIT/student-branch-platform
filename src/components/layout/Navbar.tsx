@@ -75,6 +75,7 @@ export const Navbar: React.FC = () => {
                 height={80} 
                 className="w-auto h-14 object-contain group-hover:opacity-90 transition-opacity"
                 priority
+                unoptimized
               />
             </div>
             <div className="hidden sm:block h-8 w-[1px] bg-warm-200" />

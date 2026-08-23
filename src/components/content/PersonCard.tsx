@@ -82,7 +82,7 @@ export const PersonCard: React.FC<PersonCardProps> = ({
       <div className="flex items-center gap-3 p-3 bg-warm-100/60 border border-warm-200 rounded-[2px]">
         <div className="relative w-12 h-12 flex-shrink-0 bg-warm-200 overflow-hidden rounded-[2px]">
           {photo ? (
-            <Image src={photo} alt={name} fill className="object-cover" />
+            <Image src={photo} alt={name} fill sizes="48px" className="object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center font-serif text-warm-400 text-lg">
               {name.charAt(0)}
@@ -102,7 +102,13 @@ export const PersonCard: React.FC<PersonCardProps> = ({
     <div className={`flex border border-warm-200 bg-white rounded-[2px] transition-all duration-500 hover:shadow-xl sm:hover:-translate-y-1 hover:border-ieee-blue/30 group p-4 gap-4 ${isMentor ? 'flex-row sm:p-6 sm:gap-6' : 'flex-row sm:flex-col sm:p-5 sm:gap-0'}`}>
       <div className={`relative bg-warm-100 overflow-hidden rounded-[2px] flex-shrink-0 ${isMentor ? 'w-24 h-32 sm:w-48 sm:h-60' : isFeatured ? 'w-28 h-36 sm:w-full sm:h-72' : 'w-24 h-32 sm:w-full sm:h-64'}`}>
         {photo ? (
-          <Image src={photo} alt={name} fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+          <Image 
+            src={photo} 
+            alt={name} 
+            fill 
+            sizes="(max-width: 640px) 112px, (max-width: 1024px) 33vw, 280px"
+            className="object-cover transition-transform duration-700 group-hover:scale-105" 
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-warm-100 to-warm-200/50 border border-dashed border-warm-300 text-center p-2 sm:p-4 group-hover:border-ieee-blue/40 transition-colors duration-500">
             <span className="font-serif text-2xl sm:text-3xl text-warm-300">

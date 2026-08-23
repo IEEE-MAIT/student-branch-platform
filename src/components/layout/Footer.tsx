@@ -120,6 +120,7 @@ export const Footer: React.FC = () => {
               width={300} 
               height={80} 
               className="w-auto h-14 object-contain filter brightness-0 invert opacity-90"
+              unoptimized
             />
             <div className="accent-rule bg-ieee-blue my-2" />
             <p className="text-xs text-warm-300 leading-relaxed">

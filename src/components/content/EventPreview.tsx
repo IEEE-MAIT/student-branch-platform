@@ -93,7 +93,13 @@ export const EventPreview: React.FC<EventPreviewProps> = ({
 
         {imageSrc && (
           <div className="relative w-full lg:w-96 h-64 lg:h-auto min-h-[240px] bg-warm-100 rounded-[2px] overflow-hidden flex-shrink-0">
-            <Image src={imageSrc} alt={title} fill className="object-cover" />
+            <Image 
+              src={imageSrc} 
+              alt={title} 
+              fill 
+              sizes="(max-width: 1024px) 100vw, 384px"
+              className="object-cover" 
+            />
           </div>
         )}
       </div>

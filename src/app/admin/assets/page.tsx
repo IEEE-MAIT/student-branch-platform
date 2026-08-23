@@ -139,6 +139,7 @@ export default function AssetsPage() {
                   src={asset.secure_url}
                   alt={asset.public_id}
                   fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 250px"
                   className="object-cover"
                   unoptimized // We use unoptimized for the admin thumbnail view to save image optimization bandwidth
                 />

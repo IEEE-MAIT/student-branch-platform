@@ -59,6 +59,7 @@ export const ChapterPanel: React.FC<ChapterPanelProps> = ({
               width={300} 
               height={100} 
               className="w-auto max-h-16 object-contain"
+              unoptimized
             />
           </div>
         ) : (
