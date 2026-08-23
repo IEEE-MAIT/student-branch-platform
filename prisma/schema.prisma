@@ -129,6 +129,8 @@ model Chapter {
   achievements    Achievement[]
   stories         Story[]
   galleries       Gallery[]
+  projects        Project[]
+  initiatives     Initiative[]
   memberships     OrganizationMembership[]
   leader          Person?                  @relation("ChapterLeader", fields: [leaderId], references: [id], onDelete: SetNull)
 
@@ -277,4 +279,37 @@ model Inquiry {
   createdAt String
   
   @@map("inquiries")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  summary     String
+  description String?
+  githubUrl   String?
+  demoUrl     String?
+  coverImage  String?
+  chapterId   String?
+  chapter     Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  year        String
+  tags        String[] @default([])
+  featured    Boolean  @default(false)
+
+  @@map("projects")
+}
+
+model Initiative {
+  id             String   @id @default(cuid())
+  title          String
+  slug           String   @unique
+  description    String
+  status         String   @default("Active")
+  chapterId      String?
+  chapter        Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  iconName       String?
+  targetAudience String?
+  featured       Boolean  @default(false)
+
+  @@map("initiatives")
 }

@@ -12,12 +12,16 @@ import { AchievementRow } from '@/components/content/AchievementRow';
 import { PersonCard } from '@/components/content/PersonCard';
 import { ChapterHero } from '@/components/content/ChapterHero';
 import { ChapterSocialLinks } from '@/components/content/ChapterSocialLinks';
+import { ProjectCard } from '@/components/content/ProjectCard';
+import { InitiativeCard } from '@/components/content/InitiativeCard';
 import {
   getDynamicChapterBySlug,
   getDynamicChapters,
   getDynamicEvents,
   getDynamicAchievements,
   getDynamicChapterMemberships,
+  getDynamicProjects,
+  getDynamicInitiatives,
 } from '@/lib/api';
 
 export async function generateStaticParams() {
@@ -53,17 +57,20 @@ export async function generateMetadata({ params }: ChapterPageProps) {
 
 export default async function ChapterDetailPage({ params }: ChapterPageProps) {
   const resolvedParams = await params;
-  const chapter = await getDynamicChapterBySlug(resolvedParams.slug);
+  const slug = resolvedParams.slug;
+  const chapter = await getDynamicChapterBySlug(slug);
 
   if (!chapter) {
     notFound();
   }
 
   // Fetch related chapter entities concurrently
-  const [allEvents, allAchievements, chapterMemberships] = await Promise.all([
+  const [allEvents, allAchievements, chapterMemberships, chapterProjects, chapterInitiatives] = await Promise.all([
     getDynamicEvents(),
     getDynamicAchievements(),
     chapter.id ? getDynamicChapterMemberships(chapter.id) : Promise.resolve([]),
+    getDynamicProjects(slug),
+    getDynamicInitiatives(slug),
   ]);
 
   // Filter events by chapter slug or chapterId
@@ -81,6 +88,11 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
   const chapterStories = chapter.stories || [];
   const chapterGalleries = chapter.galleries || [];
 
+  // Specialized flags for differentiated portals
+  const isEDS = slug === 'eds';
+  const isWIE = slug === 'wie';
+  const isSB = slug === 'sb';
+
   return (
     <>
       <Navbar />
@@ -92,7 +104,7 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
             <Breadcrumb
               items={[
                 { label: 'Home', href: '/' },
-                { label: 'Chapters & Affinity Groups', href: '/chapters' },
+                { label: 'Communities & Chapters', href: '/chapters' },
                 { label: chapter.name },
               ]}
             />
@@ -120,15 +132,31 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
         <div className="border-b border-warm-200 bg-warm-100/30 py-4">
           <Container size="default">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 md:divide-x divide-warm-200 py-2">
-              <StatMetric label="Active Members" value={`${chapter.memberCount || '50+'}`} description="Enrolled Student Members" />
-              <StatMetric label="Events Organized" value={`${chapter.eventCount || chapterEvents.length || '10+'}`} description="Workshops & Symposia" />
-              <StatMetric label="Achievements" value={`${chapterAchievements.length || '3+'}`} description="Institutional Recognitions" />
-              <StatMetric label="Chartered Unit" value={chapter.establishedYear || 'Active'} description={chapter.parentSociety || 'Delhi Section'} />
+              <StatMetric 
+                label="Active Members" 
+                value={`${chapter.memberCount || '50+'}`} 
+                description="Enrolled Unit Members" 
+              />
+              <StatMetric 
+                label="Events Organized" 
+                value={`${chapter.eventCount || chapterEvents.length || '10+'}`} 
+                description="Workshops & Symposia" 
+              />
+              <StatMetric 
+                label="Active Projects" 
+                value={`${chapterProjects.length || '3+'}`} 
+                description={isEDS ? 'Hardware & VLSI Builds' : isWIE ? 'Mentorship Circles' : 'Flagship Operations'} 
+              />
+              <StatMetric 
+                label="Unit Charter" 
+                value={chapter.establishedYear || 'Active'} 
+                description={chapter.parentSociety || 'Delhi Section'} 
+              />
             </div>
           </Container>
         </div>
 
-        {/* Main Content & Sidebar Layout */}
+        {/* Main Sub-Portal Content & Sidebar Layout */}
         <Container size="default" className="py-16 sm:py-20">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             {/* Left Primary Column */}
@@ -145,6 +173,165 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
                   {chapter.mission || chapter.description}
                 </p>
               </section>
+
+              {/* ---------------------------------------------------- */}
+              {/* EDS SUB-PORTAL SPECIALIZATION: Hardware Workshop Tracks */}
+              {/* ---------------------------------------------------- */}
+              {isEDS && (
+                <section className="space-y-6">
+                  <div className="border-b border-warm-200 pb-3">
+                    <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-widest block">
+                      Technical Curriculum
+                    </span>
+                    <h2 className="font-serif text-2xl sm:text-3xl text-ink font-normal mt-0.5">
+                      EDS Technical Workshop Tracks
+                    </h2>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div className="border border-warm-200 bg-warm-50/50 p-5 rounded-[2px] space-y-2.5">
+                      <span className="font-mono text-xs font-bold text-ieee-blue uppercase">
+                        Track 01
+                      </span>
+                      <h4 className="font-serif text-lg text-ink font-normal">
+                        KiCad PCB Design & Prototyping
+                      </h4>
+                      <p className="text-xs text-warm-400 font-sans leading-relaxed">
+                        Schematic capture, multi-layer routing, design rule checks, Gerber export, and hands-on SMD soldering.
+                      </p>
+                    </div>
+
+                    <div className="border border-warm-200 bg-warm-50/50 p-5 rounded-[2px] space-y-2.5">
+                      <span className="font-mono text-xs font-bold text-ieee-blue uppercase">
+                        Track 02
+                      </span>
+                      <h4 className="font-serif text-lg text-ink font-normal">
+                        Digital VLSI & CMOS Simulation
+                      </h4>
+                      <p className="text-xs text-warm-400 font-sans leading-relaxed">
+                        Verilog HDL modeling, gate-level simulation, timing constraints, and FPGA synthesis using Vivado.
+                      </p>
+                    </div>
+
+                    <div className="border border-warm-200 bg-warm-50/50 p-5 rounded-[2px] space-y-2.5">
+                      <span className="font-mono text-xs font-bold text-ieee-blue uppercase">
+                        Track 03
+                      </span>
+                      <h4 className="font-serif text-lg text-ink font-normal">
+                        Embedded Edge-AI & TinyML
+                      </h4>
+                      <p className="text-xs text-warm-400 font-sans leading-relaxed">
+                        Deploying quantized neural networks onto ESP32-S3 and ARM Cortex microcontrollers with sub-50ms latency.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {/* ---------------------------------------------------- */}
+              {/* WIE SUB-PORTAL SPECIALIZATION: Travel Grants & Scholarships */}
+              {/* ---------------------------------------------------- */}
+              {isWIE && (
+                <section className="border border-purple-200 bg-purple-50/40 p-6 sm:p-8 rounded-[2px] space-y-4">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-semibold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-[2px] uppercase">
+                      Advancement Guide
+                    </span>
+                    <span className="font-mono text-xs text-warm-400">Global Opportunities</span>
+                  </div>
+                  <h3 className="font-serif text-2xl text-ink font-normal">
+                    IEEE WIE Travel Grants & Student Scholarships
+                  </h3>
+                  <p className="text-sm text-warm-400 font-sans leading-relaxed">
+                    IEEE Women in Engineering provides travel grants to attend flagship IEEE conferences, student project funding awards, and leadership development bursaries. Our advisory cell assists student authors in preparing award-winning proposals.
+                  </p>
+                  <div className="pt-2 flex flex-wrap gap-4">
+                    <Button href="/contact" variant="primary" size="md" className="!bg-purple-700 hover:!bg-purple-800">
+                      Request Application Review →
+                    </Button>
+                    <Button href="/stories/empowering-women-in-engineering-roadmap" variant="secondary" size="md" className="!border-purple-300 !text-purple-800">
+                      Read 2026 Roadmap
+                    </Button>
+                  </div>
+                </section>
+              )}
+
+              {/* ---------------------------------------------------- */}
+              {/* PROJECTS SHOWCASE (EDS Hardware Builds / Parent SB Projects) */}
+              {/* ---------------------------------------------------- */}
+              {chapterProjects.length > 0 && (
+                <section className="space-y-6">
+                  <div className="flex items-center justify-between border-b border-warm-200 pb-3">
+                    <div>
+                      <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-widest block">
+                        Student Builds
+                      </span>
+                      <h2 className="font-serif text-2xl sm:text-3xl text-ink font-normal mt-0.5">
+                        {isEDS ? 'Hardware & VLSI Project Showcase' : 'Active Technical Projects'}
+                      </h2>
+                    </div>
+                    <span className="font-mono text-xs text-warm-400">
+                      {chapterProjects.length} Projects
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {chapterProjects.map((project: any) => (
+                      <ProjectCard
+                        key={project.id || project.slug}
+                        title={project.title}
+                        slug={project.slug}
+                        summary={project.summary}
+                        description={project.description}
+                        githubUrl={project.githubUrl}
+                        demoUrl={project.demoUrl}
+                        coverImage={project.coverImage}
+                        year={project.year}
+                        tags={project.tags}
+                        accentColor={chapter.accentColor || undefined}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* ---------------------------------------------------- */}
+              {/* INITIATIVES SHOWCASE (WIE Mentorship Circles / Chapter Programs) */}
+              {/* ---------------------------------------------------- */}
+              {chapterInitiatives.length > 0 && (
+                <section className="space-y-6">
+                  <div className="flex items-center justify-between border-b border-warm-200 pb-3">
+                    <div>
+                      <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-widest block">
+                        Programs & Impact
+                      </span>
+                      <h2 className="font-serif text-2xl sm:text-3xl text-ink font-normal mt-0.5">
+                        {isWIE ? 'Mentorship Circles & Outreach Drives' : 'Strategic Chapter Initiatives'}
+                      </h2>
+                    </div>
+                    <span className="font-mono text-xs text-warm-400">
+                      {chapterInitiatives.length} Initiatives
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {chapterInitiatives.map((init: any) => (
+                      <InitiativeCard
+                        key={init.id || init.slug}
+                        title={init.title}
+                        slug={init.slug}
+                        description={init.description}
+                        status={init.status}
+                        targetAudience={init.targetAudience}
+                        iconName={init.iconName}
+                        accentColor={chapter.accentColor || undefined}
+                        actionHref="/join"
+                        actionText="Join Initiative →"
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
 
               {/* Chapter Team Section */}
               {chapterMemberships.length > 0 && (
@@ -171,6 +358,7 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
                         role={m.role?.title || m.person?.role || 'Executive Member'}
                         department={m.person?.department}
                         imageUrl={m.person?.imageUrl}
+                        imageSrc={m.person?.imageSrc}
                         linkedIn={m.person?.linkedIn}
                         github={m.person?.github}
                         email={m.person?.email}
@@ -230,7 +418,7 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
                         Institutional Record
                       </span>
                       <h2 className="font-serif text-2xl sm:text-3xl text-ink font-normal mt-0.5">
-                        Chapter Achievements
+                        Chapter Achievements & Honors
                       </h2>
                     </div>
                   </div>
@@ -288,7 +476,7 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
                 </section>
               )}
 
-              {/* Chapter Galleries */}
+              {/* Chapter Photo Galleries */}
               {chapterGalleries.length > 0 && (
                 <section className="space-y-6">
                   <div className="border-b border-warm-200 pb-3">
@@ -350,7 +538,7 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
                   )}
                   {chapter.establishedYear && (
                     <div>
-                      <span className="text-warm-400 block uppercase">Established Year</span>
+                      <span className="text-warm-400 block uppercase">Chartered Year</span>
                       <span className="text-ink font-semibold text-sm">{chapter.establishedYear}</span>
                     </div>
                   )}
@@ -376,6 +564,7 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
                     role={chapter.leaderRole || chapter.leader.role || 'Chapter Chair'}
                     department={chapter.leader.department}
                     imageUrl={chapter.leader.imageUrl}
+                    imageSrc={chapter.leader.imageSrc}
                     linkedIn={chapter.leader.linkedIn}
                     github={chapter.leader.github}
                     email={chapter.leader.email}
@@ -435,4 +624,3 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
     </>
   );
 }
-

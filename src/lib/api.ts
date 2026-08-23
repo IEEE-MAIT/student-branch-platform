@@ -16,6 +16,8 @@ import {
   GALLERY_ALBUMS_DATA,
   ACHIEVEMENTS_DATA,
   PEOPLE_DATA,
+  PROJECTS_DATA,
+  INITIATIVES_DATA,
 } from './data';
 import { prisma } from './db';
 
@@ -102,6 +104,8 @@ export async function getDynamicChapterBySlug(slug: string) {
         achievements: { orderBy: { year: 'desc' } },
         stories: { orderBy: { date: 'desc' } },
         galleries: { orderBy: { date: 'desc' } },
+        projects: { orderBy: { year: 'desc' } },
+        initiatives: true,
       },
     });
     if (dbChapter) return dbChapter;
@@ -293,4 +297,77 @@ export async function getDynamicResources() {
     console.warn('Failed to fetch resources from DB', e);
     return [];
   }
+}
+
+export async function getDynamicProjects(chapterIdOrSlug?: string) {
+  if (typeof window !== 'undefined') {
+    if (!chapterIdOrSlug) return PROJECTS_DATA;
+    return PROJECTS_DATA.filter(
+      (p) => p.chapterId === chapterIdOrSlug || p.chapterSlug === chapterIdOrSlug
+    );
+  }
+  try {
+    const whereClause: any = {};
+    if (chapterIdOrSlug) {
+      whereClause.OR = [
+        { chapterId: chapterIdOrSlug },
+        { chapter: { slug: chapterIdOrSlug } },
+      ];
+    }
+    const dbProjects = await prisma.project.findMany({
+      where: whereClause,
+      orderBy: { year: 'desc' },
+      include: { chapter: true },
+    });
+    if (dbProjects && dbProjects.length > 0) return dbProjects;
+  } catch (e) {
+    console.warn('Failed to fetch projects from DB', e);
+  }
+  if (!chapterIdOrSlug) return PROJECTS_DATA;
+  return PROJECTS_DATA.filter(
+    (p) => p.chapterId === chapterIdOrSlug || p.chapterSlug === chapterIdOrSlug
+  );
+}
+
+export async function getDynamicProjectBySlug(slug: string) {
+  if (typeof window !== 'undefined') return PROJECTS_DATA.find((p) => p.slug === slug) || null;
+  try {
+    const dbProject = await prisma.project.findUnique({
+      where: { slug },
+      include: { chapter: true },
+    });
+    if (dbProject) return dbProject;
+  } catch (e) {
+    console.warn(`Failed to fetch project ${slug} from DB`, e);
+  }
+  return PROJECTS_DATA.find((p) => p.slug === slug) || null;
+}
+
+export async function getDynamicInitiatives(chapterIdOrSlug?: string) {
+  if (typeof window !== 'undefined') {
+    if (!chapterIdOrSlug) return INITIATIVES_DATA;
+    return INITIATIVES_DATA.filter(
+      (i) => i.chapterId === chapterIdOrSlug || i.chapterSlug === chapterIdOrSlug
+    );
+  }
+  try {
+    const whereClause: any = {};
+    if (chapterIdOrSlug) {
+      whereClause.OR = [
+        { chapterId: chapterIdOrSlug },
+        { chapter: { slug: chapterIdOrSlug } },
+      ];
+    }
+    const dbInitiatives = await prisma.initiative.findMany({
+      where: whereClause,
+      include: { chapter: true },
+    });
+    if (dbInitiatives && dbInitiatives.length > 0) return dbInitiatives;
+  } catch (e) {
+    console.warn('Failed to fetch initiatives from DB', e);
+  }
+  if (!chapterIdOrSlug) return INITIATIVES_DATA;
+  return INITIATIVES_DATA.filter(
+    (i) => i.chapterId === chapterIdOrSlug || i.chapterSlug === chapterIdOrSlug
+  );
 }

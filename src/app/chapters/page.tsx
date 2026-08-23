@@ -15,22 +15,27 @@ import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { StatMetric } from '@/components/content/StatMetric';
 import { ChapterFilterGrid } from '@/components/content/ChapterFilterGrid';
 import { Button } from '@/components/ui/Button';
-import { getDynamicChapters } from '@/lib/api';
+import { getDynamicChapters, getDynamicProjects, getDynamicInitiatives } from '@/lib/api';
 
 export const metadata = {
-  title: 'Chapters & Affinity Groups | IEEE MAIT Student Branch',
-  description: 'Explore active IEEE MAIT chapters including WIE Affinity Group and IEEE EDS Chapter. Learn how specialized technical societies accelerate engineering careers.',
+  title: 'Communities & Chapters | IEEE MAIT Student Branch',
+  description: 'Explore the IEEE MAIT Student Branch ecosystem including the Parent Branch, IEEE EDS Chapter, and IEEE WIE Affinity Group.',
 };
 
 export const revalidate = 60; // ISR Cache
 
 export default async function ChaptersPage() {
-  const chaptersList = await getDynamicChapters();
+  const [chaptersList, allProjects, allInitiatives] = await Promise.all([
+    getDynamicChapters(),
+    getDynamicProjects(),
+    getDynamicInitiatives(),
+  ]);
 
   // Aggregate statistics across units
   const totalUnits = chaptersList.length;
-  const totalMembers = chaptersList.reduce((acc: number, ch: any) => acc + (Number(ch.memberCount) || 0), 0);
-  const totalEvents = chaptersList.reduce((acc: number, ch: any) => acc + (Number(ch.eventCount) || 0), 0);
+  const totalMembers = chaptersList.reduce((acc: number, ch: any) => acc + (Number(String(ch.memberCount).replace(/\D/g, '')) || 0), 0);
+  const totalProjects = allProjects.length;
+  const totalInitiatives = allInitiatives.length;
 
   const formattedChapters = chaptersList.map((ch: any) => ({
     name: ch.name,
@@ -58,23 +63,23 @@ export default async function ChaptersPage() {
           <Breadcrumb
             items={[
               { label: 'Home', href: '/' },
-              { label: 'Chapters & Affinity Groups' },
+              { label: 'Communities & Chapters' },
             ]}
           />
 
           <SectionHeading
-            category="Organizational Structure"
-            title="Chapters & Affinity Groups"
-            subtitle="IEEE MAIT supports specialized technical societies and affinity groups for targeted domain expertise, global networking, and student leadership."
+            category="Organizational Ecosystem"
+            title="Communities & Chartered Units"
+            subtitle="The IEEE MAIT ecosystem encompasses our Parent Student Branch along with specialized technical chapters and diversity affinity groups."
           />
 
           {/* Quick Metrics Bar */}
           <div className="border-y border-warm-200 bg-warm-100/40 py-6 mb-12">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 md:divide-x divide-warm-200">
-              <StatMetric label="Active Units" value={`${totalUnits}`} description="Chapters & Affinity Groups" />
-              <StatMetric label="Affiliated Members" value={`${totalMembers}+`} description="Across Specialized Domains" />
-              <StatMetric label="Technical Events" value={`${totalEvents}+`} description="Workshops, Talks & Symposia" />
-              <StatMetric label="Global Affiliation" value="IEEE R10" description="Delhi Section Charter" />
+              <StatMetric label="Chartered Units" value={`${totalUnits}`} description="Parent SB, Chapters & AGs" />
+              <StatMetric label="Active Members" value={`${totalMembers || 150}+`} description="Across All Departments" />
+              <StatMetric label="Hardware & Software" value={`${totalProjects}+`} description="Student Project Builds" />
+              <StatMetric label="Active Programs" value={`${totalInitiatives}+`} description="Mentorship & Outreach Drives" />
             </div>
           </div>
 

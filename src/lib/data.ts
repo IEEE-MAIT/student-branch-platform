@@ -206,6 +206,41 @@ export interface GalleryAlbum {
 }
 
 /**
+ * Represents a student technical project, hardware build, or software showcase.
+ */
+export interface ProjectItem {
+  id: string;
+  title: string;
+  slug: string;
+  summary: string;
+  description?: string;
+  githubUrl?: string;
+  demoUrl?: string;
+  coverImage?: string;
+  chapterId?: string;
+  chapterSlug?: string;
+  year: string;
+  tags: string[];
+  featured?: boolean;
+}
+
+/**
+ * Represents a strategic long-term initiative, mentorship program, or outreach drive.
+ */
+export interface InitiativeItem {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  status: 'Active' | 'Upcoming' | 'Completed' | string;
+  chapterId?: string;
+  chapterSlug?: string;
+  iconName?: string;
+  targetAudience?: string;
+  featured?: boolean;
+}
+
+/**
  * Represents a technical article, event post-mortem report, or student essay.
  */
 export interface StoryArticle {
@@ -600,3 +635,141 @@ export const STORIES_DATA: Record<string, StoryArticle> = {
     ],
   },
 };
+
+/**
+ * Fallback Technical Projects Store (Hardware, VLSI, Embedded Systems, and Web)
+ */
+export const PROJECTS_DATA: ProjectItem[] = [
+  {
+    id: 'proj-1',
+    title: 'Autonomous Solar-Powered Quadruped Rover',
+    slug: 'autonomous-solar-powered-quadruped-rover',
+    summary: 'A 12-DOF autonomous quadruped rover equipped with custom STM32 motor controllers, ultrasonic telemetry, and solar charging circuitry.',
+    description: 'Designed and manufactured by IEEE EDS student members. Features custom 4-layer power distribution PCBs routed in KiCad, inverse kinematics algorithms running on STM32F4, and real-time obstacle avoidance telemetry over 2.4GHz ISM band.',
+    githubUrl: 'https://github.com/IEEE-MAIT/quadruped-rover',
+    demoUrl: 'https://youtube.com',
+    chapterId: 'eds',
+    chapterSlug: 'eds',
+    year: '2025',
+    tags: ['KiCad PCB', 'STM32', 'Robotics', 'Embedded C', 'Hardware'],
+    featured: true,
+  },
+  {
+    id: 'proj-2',
+    title: 'Edge-AI Industrial Acoustic Anomaly Detector',
+    slug: 'edge-ai-acoustic-anomaly-detector',
+    summary: 'Low-power micro-sensor node running quantized 8-bit convolutional neural networks for early detection of mechanical bearing degradation.',
+    description: 'Developed during the EDS Machine Learning Hardware Track. Leverages an ESP32-S3 microcontroller paired with an I2S MEMS microphone, running TensorFlow Lite Micro models with sub-50ms inference latency.',
+    githubUrl: 'https://github.com/IEEE-MAIT/edge-ai-sensor',
+    chapterId: 'eds',
+    chapterSlug: 'eds',
+    year: '2026',
+    tags: ['Edge AI', 'TensorFlow Lite', 'ESP32-S3', 'TinyML', 'Sensors'],
+    featured: true,
+  },
+  {
+    id: 'proj-3',
+    title: 'Custom 32-Bit RISC-V RV32I Pipelined Soft-Core',
+    slug: 'riscv-rv32i-pipelined-soft-core',
+    summary: 'A 5-stage pipelined RISC-V processor architecture modeled in Verilog HDL with forwarding units and branch hazard detection.',
+    description: 'Designed as an educational silicon architecture project by EDS Chapter students. Tested on Xilinx Artix-7 FPGAs running custom bare-metal C programs and memory-mapped UART peripherals.',
+    githubUrl: 'https://github.com/IEEE-MAIT/riscv-rv32i-core',
+    chapterId: 'eds',
+    chapterSlug: 'eds',
+    year: '2025',
+    tags: ['Verilog HDL', 'FPGA', 'Computer Architecture', 'VLSI'],
+    featured: false,
+  },
+  {
+    id: 'proj-4',
+    title: 'IEEE MAIT Institutional Digital Platform & Archive',
+    slug: 'ieee-mait-digital-platform',
+    summary: 'Open-source Edge-SSR institutional platform preserving branch memory, academic year archives, and interactive chapter sub-portals.',
+    description: 'Built with Next.js App Router, Tailwind CSS, PostgreSQL, and Prisma ORM with Edge Acceleration for global sub-100ms response times.',
+    githubUrl: 'https://github.com/IEEE-MAIT/student-branch-platform',
+    demoUrl: 'https://ieeemait.com',
+    chapterId: 'sb',
+    chapterSlug: 'sb',
+    year: '2026',
+    tags: ['Next.js', 'TypeScript', 'PostgreSQL', 'Prisma', 'Edge SSR'],
+    featured: true,
+  },
+];
+
+/**
+ * Fallback Strategic Initiatives & Programs Store (WIE, EDS, and Parent SB)
+ */
+export const INITIATIVES_DATA: InitiativeItem[] = [
+  {
+    id: 'init-1',
+    title: 'STEM-Forward Mentorship Circle',
+    slug: 'stem-forward-mentorship-circle',
+    description: 'Structured 1-on-1 mentorship connecting senior female engineering students with 1st & 2nd year undergraduates to provide academic guidance, technical roadmap navigation, and project review.',
+    status: 'Active',
+    chapterId: 'wie',
+    chapterSlug: 'wie',
+    iconName: 'Users',
+    targetAudience: '1st & 2nd Year Women in STEM',
+    featured: true,
+  },
+  {
+    id: 'init-2',
+    title: 'Women in Tech Leadership & Research Panels',
+    slug: 'women-in-tech-leadership-panels',
+    description: 'Bi-annual panel series featuring distinguished women engineers, researchers, and IEEE Senior Members sharing career insights, research methodologies, and leadership lessons.',
+    status: 'Active',
+    chapterId: 'wie',
+    chapterSlug: 'wie',
+    iconName: 'Sparkles',
+    targetAudience: 'All Undergraduate Students',
+    featured: true,
+  },
+  {
+    id: 'init-3',
+    title: 'Travel Grant & Fellowship Advisory Cell',
+    slug: 'travel-grant-fellowship-advisory',
+    description: 'Dedicated support program assisting student researchers in drafting applications for IEEE conference travel grants, section awards, and international student paper competitions.',
+    status: 'Active',
+    chapterId: 'wie',
+    chapterSlug: 'wie',
+    iconName: 'Award',
+    targetAudience: 'Student Researchers & Authors',
+    featured: true,
+  },
+  {
+    id: 'init-4',
+    title: 'High-School & Community Technical Outreach',
+    slug: 'high-school-community-outreach',
+    description: 'Volunteer workshops organized by WIE student members at local high schools to spark interest in robotics, electronics, and coding among young female students.',
+    status: 'Upcoming',
+    chapterId: 'wie',
+    chapterSlug: 'wie',
+    iconName: 'Globe',
+    targetAudience: 'High School Students & Educators',
+    featured: false,
+  },
+  {
+    id: 'init-5',
+    title: 'KiCad Hardware PCB Certification Track',
+    slug: 'kicad-pcb-certification-track',
+    description: 'Hands-on 6-week hardware design curriculum guiding students from initial schematic capture to 4-layer PCB layout, Gerber generation, and SMD soldering.',
+    status: 'Active',
+    chapterId: 'eds',
+    chapterSlug: 'eds',
+    iconName: 'Cpu',
+    targetAudience: 'ECE, EEE & Hardware Enthusiasts',
+    featured: true,
+  },
+  {
+    id: 'init-6',
+    title: 'VLSI & Semiconductor Design Bootcamp',
+    slug: 'vlsi-semiconductor-bootcamp',
+    description: 'Comprehensive technical workshop covering digital CMOS layout, Verilog simulation, standard cell libraries, and ASIC synthesis flows.',
+    status: 'Active',
+    chapterId: 'eds',
+    chapterSlug: 'eds',
+    iconName: 'Layers',
+    targetAudience: 'VLSI & Microelectronics Aspirants',
+    featured: true,
+  },
+];

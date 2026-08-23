@@ -5,7 +5,15 @@ import { PrismaNeon } from '@prisma/adapter-neon';
 import ws from 'ws';
 import * as dotenv from 'dotenv';
 import { resolve } from 'path';
-import { EVENTS_DATA, ACHIEVEMENTS_DATA, CHAPTERS_DATA, STORIES_DATA, GALLERY_ALBUMS_DATA } from '../src/lib/data';
+import {
+  EVENTS_DATA,
+  ACHIEVEMENTS_DATA,
+  CHAPTERS_DATA,
+  STORIES_DATA,
+  GALLERY_ALBUMS_DATA,
+  PROJECTS_DATA,
+  INITIATIVES_DATA,
+} from '../src/lib/data';
 import { OFFICERS_STORE } from '../src/lib/officers';
 
 // Load variables from .env and .dev.vars
@@ -204,6 +212,60 @@ async function seed() {
         where: { id: person.id },
         update: {},
         create: person
+      });
+    }
+
+    console.log('Seeding Projects...');
+    for (const proj of PROJECTS_DATA) {
+      await prisma.project.upsert({
+        where: { slug: proj.slug },
+        update: {
+          title: proj.title,
+          summary: proj.summary,
+          description: proj.description || null,
+          githubUrl: proj.githubUrl || null,
+          demoUrl: proj.demoUrl || null,
+          year: proj.year,
+          tags: proj.tags,
+          chapterId: proj.chapterId || null,
+        },
+        create: {
+          id: proj.id,
+          title: proj.title,
+          slug: proj.slug,
+          summary: proj.summary,
+          description: proj.description || null,
+          githubUrl: proj.githubUrl || null,
+          demoUrl: proj.demoUrl || null,
+          year: proj.year,
+          tags: proj.tags,
+          chapterId: proj.chapterId || null,
+        },
+      });
+    }
+
+    console.log('Seeding Initiatives...');
+    for (const init of INITIATIVES_DATA) {
+      await prisma.initiative.upsert({
+        where: { slug: init.slug },
+        update: {
+          title: init.title,
+          description: init.description,
+          status: init.status,
+          chapterId: init.chapterId || null,
+          iconName: init.iconName || null,
+          targetAudience: init.targetAudience || null,
+        },
+        create: {
+          id: init.id,
+          title: init.title,
+          slug: init.slug,
+          description: init.description,
+          status: init.status,
+          chapterId: init.chapterId || null,
+          iconName: init.iconName || null,
+          targetAudience: init.targetAudience || null,
+        },
       });
     }
 

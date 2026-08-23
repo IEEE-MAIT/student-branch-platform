@@ -42,6 +42,8 @@ export const ChapterHero: React.FC<ChapterHeroProps> = ({
       ? '/eds_mait_logo.png'
       : slug === 'wie'
       ? '/wie_ag_mait_logo.png'
+      : slug === 'sb'
+      ? '/main_student_branch_logo.png'
       : null);
 
   return (

@@ -58,20 +58,24 @@ export const ChapterPanel: React.FC<ChapterPanelProps> = ({
 }) => {
   const isAffinityGroup = type.toLowerCase().includes('affinity') || slug === 'wie';
   
-  // Resolve logo source with fallback to existing static logos for wie and eds
+  // Resolve logo source with fallback to existing static logos for wie, eds, and sb
   const resolvedLogo =
     logoUrl ||
     (slug === 'eds'
       ? '/eds_mait_logo.png'
       : slug === 'wie'
       ? '/wie_ag_mait_logo.png'
+      : slug === 'sb'
+      ? '/main_student_branch_logo.png'
       : null);
 
   const ctaLabel = isAffinityGroup
-    ? 'Join WIE'
+    ? 'Join WIE →'
     : slug === 'eds'
-    ? 'Join EDS'
-    : 'Explore Chapter';
+    ? 'Join EDS →'
+    : slug === 'sb'
+    ? 'Join Branch →'
+    : 'Explore Unit →';
 
   return (
     <div
