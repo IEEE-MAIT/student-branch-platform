@@ -30,6 +30,7 @@ export default function AdminPeoplePage() {
     };
   });
   const [filterSession, setFilterSession] = useState('All');
+  const [filterCategory, setFilterCategory] = useState('All');
   const [imageUrl, setImageUrl] = useState('');
   const [bio, setBio] = useState('');
   const [linkedin, setLinkedin] = useState('');
@@ -188,11 +189,55 @@ export default function AdminPeoplePage() {
     }
   };
 
+  const availableCategories = Array.from(
+    new Set(
+      people
+        .map((p: any) => p.category)
+        .filter((cat: any) => typeof cat === 'string' && cat.trim().length > 0)
+    )
+  );
+
   const filteredPeople = people.filter((p: any) => {
-    if (filterSession === 'All') return true;
-    const pYear = (p.academicYear || '2025-26').replace('–', '-');
-    const normalizedFilter = filterSession.replace('–', '-');
-    return pYear === normalizedFilter;
+    // 1. Session Filter
+    if (filterSession !== 'All') {
+      const pYear = (p.academicYear || '2025-26').replace('–', '-');
+      const normalizedFilter = filterSession.replace('–', '-');
+      if (pYear !== normalizedFilter) return false;
+    }
+
+    // 2. Category Filter
+    if (filterCategory !== 'All') {
+      const pCat = (p.category || '').toLowerCase().trim();
+      const target = filterCategory.toLowerCase().trim();
+
+      if (filterCategory === 'Senior Executive Committee') {
+        const matchesSEC = pCat.includes('senior executive') || pCat === 'sec' || pCat.includes('senior executive committee');
+        if (!matchesSEC) return false;
+      } else if (filterCategory === 'EDS Chapter') {
+        const matchesEDS = pCat.includes('eds');
+        if (!matchesEDS) return false;
+      } else if (filterCategory === 'Affinity Group') {
+        const matchesWIE = pCat.includes('affinity') || pCat.includes('wie');
+        if (!matchesWIE) return false;
+      } else if (filterCategory === 'Operational Leads') {
+        const matchesOp = pCat.includes('operational') || pCat.includes('lead') || pCat === 'web';
+        if (!matchesOp) return false;
+      } else if (filterCategory === 'Counsellor / Mentor') {
+        const matchesCounsellor = pCat.includes('counsellor') || pCat.includes('mentor') || pCat.includes('counselor') || pCat.includes('faculty');
+        if (!matchesCounsellor) return false;
+      } else {
+        if (pCat !== target) return false;
+      }
+    }
+
+    return true;
+  });
+
+  const sortedPeople = [...filteredPeople].sort((a: any, b: any) => {
+    const orderA = typeof a.hierarchy === 'number' ? a.hierarchy : parseInt(String(a.hierarchy || '999'), 10) || 999;
+    const orderB = typeof b.hierarchy === 'number' ? b.hierarchy : parseInt(String(b.hierarchy || '999'), 10) || 999;
+    if (orderA !== orderB) return orderA - orderB;
+    return (a.name || '').localeCompare(b.name || '');
   });
 
   return (
@@ -452,24 +497,104 @@ export default function AdminPeoplePage() {
               Leadership Roster ({filteredPeople.length})
             </h3>
             <p className="font-mono text-xs text-warm-400">
-              Viewing {filterSession === 'All' ? 'all sessions' : `session ${filterSession.replace('-', '–')}`} records
+              Viewing {filterSession === 'All' ? 'all sessions' : `session ${filterSession.replace('-', '–')}`} · {filterCategory === 'All' ? 'all categories' : filterCategory}
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <label className="font-mono text-xs text-warm-400">Filter Session:</label>
-            <select
-              value={filterSession}
-              onChange={(e) => setFilterSession(e.target.value)}
-              className="px-3 py-1.5 border border-warm-200 rounded-[2px] font-mono text-xs bg-white text-ink"
-            >
-              <option value="All">All Sessions</option>
-              {default20Years.map((y) => (
-                <option key={y.slug} value={y.slug}>
-                  {y.label} {y.isCurrent ? '(Current)' : ''}
-                </option>
-              ))}
-            </select>
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Category Dropdown */}
+            <div className="flex items-center gap-2">
+              <label className="font-mono text-xs text-warm-400">Category:</label>
+              <select
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+                className="px-3 py-1.5 border border-warm-200 rounded-[2px] font-mono text-xs bg-white text-ink"
+              >
+                <option value="All">All Categories</option>
+                <option value="Senior Executive Committee">Senior Executive Committee (SEC)</option>
+                <option value="EDS Chapter">EDS Chapter</option>
+                <option value="Affinity Group">Affinity Group (WIE)</option>
+                <option value="Operational Leads">Operational Leads</option>
+                <option value="Counsellor / Mentor">Counsellor / Mentor</option>
+                {availableCategories
+                  .filter(
+                    (c) =>
+                      ![
+                        'Senior Executive Committee',
+                        'EDS Chapter',
+                        'Affinity Group',
+                        'Operational Leads',
+                        'Counsellor / Mentor',
+                        'SEC',
+                        'Counsellor',
+                      ].includes(c)
+                  )
+                  .map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            {/* Session Dropdown */}
+            <div className="flex items-center gap-2">
+              <label className="font-mono text-xs text-warm-400">Session:</label>
+              <select
+                value={filterSession}
+                onChange={(e) => setFilterSession(e.target.value)}
+                className="px-3 py-1.5 border border-warm-200 rounded-[2px] font-mono text-xs bg-white text-ink"
+              >
+                <option value="All">All Sessions</option>
+                {default20Years.map((y) => (
+                  <option key={y.slug} value={y.slug}>
+                    {y.label} {y.isCurrent ? '(Current)' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Reset Filters */}
+            {(filterCategory !== 'All' || filterSession !== 'All') && (
+              <button
+                type="button"
+                onClick={() => {
+                  setFilterCategory('All');
+                  setFilterSession('All');
+                }}
+                className="font-mono text-[11px] text-ieee-blue hover:underline cursor-pointer"
+              >
+                Reset Filters
+              </button>
+            )}
           </div>
+        </div>
+
+        {/* Quick Filter Category Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+          {[
+            { label: 'All', value: 'All' },
+            { label: 'SEC', value: 'Senior Executive Committee' },
+            { label: 'EDS Chapter', value: 'EDS Chapter' },
+            { label: 'WIE Affinity Group', value: 'Affinity Group' },
+            { label: 'Operational Leads', value: 'Operational Leads' },
+            { label: 'Counsellors & Mentors', value: 'Counsellor / Mentor' },
+          ].map((cat) => {
+            const isSelected = filterCategory === cat.value;
+            return (
+              <button
+                key={cat.value}
+                type="button"
+                onClick={() => setFilterCategory(cat.value)}
+                className={`font-mono text-[11px] px-2.5 py-1 rounded-[2px] border transition-colors cursor-pointer whitespace-nowrap ${
+                  isSelected
+                    ? 'bg-ieee-blue text-white border-ieee-blue font-semibold'
+                    : 'bg-warm-100/60 text-warm-400 border-warm-200 hover:text-ink hover:border-warm-300'
+                }`}
+              >
+                {cat.label}
+              </button>
+            );
+          })}
         </div>
 
         {loading ? (
@@ -479,7 +604,7 @@ export default function AdminPeoplePage() {
             <table className="w-full text-left font-sans text-xs">
               <thead className="bg-warm-100/60 font-mono text-[10px] uppercase text-warm-400 border-b border-warm-200">
                 <tr>
-                  <th className="p-3">Order</th>
+                  <th className="p-3">S.No</th>
                   <th className="p-3">Name</th>
                   <th className="p-3">Role</th>
                   <th className="p-3">Category</th>
@@ -488,9 +613,9 @@ export default function AdminPeoplePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-warm-200">
-                {filteredPeople.map((p: any) => (
+                {sortedPeople.map((p: any, idx: number) => (
                   <tr key={p.id} className={`hover:bg-warm-100/30 transition-colors ${editingId === p.id ? 'bg-ieee-blue/5 font-medium' : ''}`}>
-                    <td className="p-3 font-mono text-xs font-bold text-warm-400">{p.hierarchy}</td>
+                    <td className="p-3 font-mono text-xs font-semibold text-warm-400">{idx + 1}</td>
                     <td className="p-3 font-medium text-ink">{p.name}</td>
                     <td className="p-3 font-mono text-xs text-ieee-blue">{p.role}</td>
                     <td className="p-3 font-mono text-[11px] text-warm-400">{p.category}</td>
@@ -518,7 +643,9 @@ export default function AdminPeoplePage() {
                 {filteredPeople.length === 0 && (
                   <tr>
                     <td colSpan={6} className="p-6 text-center font-mono text-xs text-warm-400">
-                      No team members found for session {filterSession.replace('-', '–')}.
+                      No team members found matching {filterCategory !== 'All' ? `category "${filterCategory}"` : ''}
+                      {filterCategory !== 'All' && filterSession !== 'All' ? ' and ' : ''}
+                      {filterSession !== 'All' ? `session ${filterSession.replace('-', '–')}` : ''}.
                     </td>
                   </tr>
                 )}
