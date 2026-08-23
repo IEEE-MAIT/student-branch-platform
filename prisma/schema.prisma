@@ -111,8 +111,18 @@ model Chapter {
   establishedYear String?
   description     String?
   mission         String?
+  // New enrichment fields
+  tagline         String?   // One-liner hook, e.g. "Empowering Women in Technology"
+  logoUrl         String?   // Cloudinary URL; replaces hardcoded slug check in ChapterPanel
+  coverImageUrl   String?   // Hero image for chapter detail page
+  accentColor     String?   // Chapter brand hex, e.g. "#7C3AED" for WIE purple
+  instagramUrl    String?   // Chapter-specific Instagram profile URL
+  linkedinUrl     String?   // Chapter-specific LinkedIn page URL
+  githubUrl       String?   // Chapter GitHub org URL
+  // Leadership
   leaderName      String?
   leaderRole      String?
+  leaderId        String?   // Optional FK to Person (supplements leaderName/leaderRole)
   memberCount     Int                      @default(0)
   eventCount      Int                      @default(0)
   events          Event[]
@@ -120,6 +130,7 @@ model Chapter {
   stories         Story[]
   galleries       Gallery[]
   memberships     OrganizationMembership[]
+  leader          Person?                  @relation("ChapterLeader", fields: [leaderId], references: [id], onDelete: SetNull)
 
   @@map("chapters")
 }
@@ -210,6 +221,7 @@ model Person {
   memberships  OrganizationMembership[]
   stories      Story[]
   achievements AchievementPerson[]
+  ledChapters  Chapter[]                @relation("ChapterLeader") // back-relation for leaderId FK
 
   @@map("people")
 }

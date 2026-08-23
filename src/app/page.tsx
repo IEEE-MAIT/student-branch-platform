@@ -227,13 +227,28 @@ export default async function HomePage() {
                   name={chapter.name}
                   slug={chapter.slug}
                   type={chapter.type}
+                  tagline={chapter.tagline}
+                  description={chapter.description}
+                  logoUrl={chapter.logoUrl}
+                  accentColor={chapter.accentColor}
+                  instagramUrl={chapter.instagramUrl}
+                  linkedinUrl={chapter.linkedinUrl}
+                  githubUrl={chapter.githubUrl}
                   parentSociety={chapter.parentSociety}
                   establishedYear={chapter.establishedYear}
-                  description={chapter.description}
                   memberCount={chapter.memberCount}
                   eventCount={chapter.eventCount}
                 />
               ))}
+            </div>
+
+            <div className="pt-8 flex justify-between items-center border-t border-warm-200 mt-8">
+              <Link href="/chapters" className="text-xs font-mono text-ieee-blue font-semibold hover:underline">
+                View All Chapters & Affinity Groups →
+              </Link>
+              <span className="font-mono text-xs text-warm-400">
+                {chaptersList.length} Active Units
+              </span>
             </div>
           </Container>
         </section>

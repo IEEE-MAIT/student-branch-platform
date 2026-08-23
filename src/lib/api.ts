@@ -90,12 +90,39 @@ export async function getDynamicAchievementById(id: string) {
 export async function getDynamicChapterBySlug(slug: string) {
   if (typeof window !== 'undefined') return CHAPTERS_DATA[slug] || null;
   try {
-    const dbChapter = await prisma.chapter.findUnique({ where: { slug } });
+    const dbChapter = await prisma.chapter.findUnique({
+      where: { slug },
+      include: {
+        leader: true,
+        events: { orderBy: { date: 'desc' } },
+        achievements: { orderBy: { year: 'desc' } },
+        stories: { orderBy: { date: 'desc' } },
+        galleries: { orderBy: { date: 'desc' } },
+      },
+    });
     if (dbChapter) return dbChapter;
   } catch (e) {
     console.warn(`Failed to fetch chapter ${slug} from DB`, e);
   }
   return CHAPTERS_DATA[slug] || null;
+}
+
+export async function getDynamicChapterMemberships(chapterId: string): Promise<any[]> {
+  if (typeof window !== 'undefined') return [];
+  try {
+    return await prisma.organizationMembership.findMany({
+      where: { chapterId, isCurrent: true },
+      include: {
+        person: true,
+        role: true,
+        academicYear: true,
+      },
+      orderBy: { sortOrder: 'asc' },
+    });
+  } catch (e) {
+    console.warn(`Failed to fetch memberships for chapter ${chapterId}`, e);
+    return [];
+  }
 }
 
 export async function getDynamicStoryBySlug(slug: string) {
