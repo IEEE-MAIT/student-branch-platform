@@ -34,6 +34,22 @@ export interface PersonCardProps {
   hierarchy?: 'mentor' | 'featured' | 'standard' | 'compact' | number | string;
 }
 
+function formatExternalUrl(url?: string | null): string | undefined {
+  if (!url || typeof url !== 'string') return undefined;
+  let clean = url
+    .replace(/&#x2F;/g, '/')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'")
+    .trim();
+  if (!clean) return undefined;
+  if (/^(javascript|data|vbscript|file):/i.test(clean)) return undefined;
+  if (!/^https?:\/\//i.test(clean) && !clean.startsWith('/')) {
+    clean = `https://${clean}`;
+  }
+  return clean;
+}
+
 /**
  * Hierarchical Person & Leadership Card Component.
  * Encodes organizational hierarchy into visual portrait scale. Uses sharp 2px rectangular frames.
@@ -58,6 +74,8 @@ export const PersonCard: React.FC<PersonCardProps> = ({
   const isMentor = category === 'Counsellor / Mentor' || category === 'Counsellor' || scale === 'mentor';
   const isFeatured = scale === 'featured' || scale === 1 || scale === 2;
   const isCompact = scale === 'compact';
+  const formattedLinkedIn = formatExternalUrl(linkedIn);
+  const formattedGithub = formatExternalUrl(github);
 
   if (isCompact) {
     return (
@@ -124,11 +142,11 @@ export const PersonCard: React.FC<PersonCardProps> = ({
           )}
         </div>
 
-        {(linkedIn || github || email) && (
+        {(formattedLinkedIn || formattedGithub || email) && (
           <div className="pt-3 sm:pt-4 mt-3 sm:mt-5 border-t border-warm-200/50 flex items-center gap-3 sm:gap-4 flex-wrap opacity-100 lg:opacity-90 group-hover:opacity-100 transition-opacity duration-300">
-            {linkedIn && (
+            {formattedLinkedIn && (
               <a
-                href={linkedIn}
+                href={formattedLinkedIn}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs text-ieee-blue hover:text-ieee-dark transition-all duration-300 hover:-translate-y-0.5 font-medium"
@@ -139,9 +157,9 @@ export const PersonCard: React.FC<PersonCardProps> = ({
                 <span>LinkedIn</span>
               </a>
             )}
-            {github && (
+            {formattedGithub && (
               <a
-                href={github}
+                href={formattedGithub}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs text-warm-500 hover:text-ink transition-all duration-300 hover:-translate-y-0.5 font-medium"
@@ -154,7 +172,7 @@ export const PersonCard: React.FC<PersonCardProps> = ({
             )}
             {email && (
               <a
-                href={`mailto:${email}`}
+                href={`mailto:${email.replace(/^mailto:/i, '')}`}
                 className="inline-flex items-center gap-1.5 text-xs text-warm-500 hover:text-ink transition-all duration-300 hover:-translate-y-0.5 font-medium"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -33,17 +33,36 @@ export function sanitizeText(input: string, maxLength: number = 2000): string {
 }
 
 /**
- * Validates and sanitizes external URLs to prevent `javascript:` and `data:` URI scheme injection attacks.
+ * Validates and sanitizes external or internal URLs to prevent `javascript:` and `data:` URI scheme injection attacks.
+ * Automatically handles protocol normalization (e.g. prepending `https://` for external domains) and entity unescaping.
  */
-export function validateSafeUrl(url: string | undefined): string | null {
+export function validateSafeUrl(url: string | undefined | null): string | null {
   if (!url || typeof url !== 'string') return null;
-  const trimmed = url.trim();
+  
+  // Unescape any HTML entities that might have been erroneously stored
+  let trimmed = url
+    .replace(/&#x2F;/g, '/')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'")
+    .trim();
 
-  // Allow relative path links starting with '/'
+  if (!trimmed) return null;
+
+  // Block dangerous schemes immediately
+  if (/^(javascript|data|vbscript|file):/i.test(trimmed)) {
+    return null;
+  }
+
+  // Allow relative internal paths starting with single '/'
   if (trimmed.startsWith('/')) {
-    // Prevent protocol-relative URL exploits (e.g., '//attacker.com')
-    if (trimmed.startsWith('//')) return null;
+    if (trimmed.startsWith('//')) return null; // Block protocol-relative bypasses
     return trimmed;
+  }
+
+  // Prepend https:// if protocol is missing (e.g. linkedin.com/in/... or www.linkedin.com/...)
+  if (!/^https?:\/\//i.test(trimmed)) {
+    trimmed = `https://${trimmed}`;
   }
 
   try {
@@ -59,6 +78,11 @@ export function validateSafeUrl(url: string | undefined): string | null {
 
   return null;
 }
+
+/**
+ * Alias for validateSafeUrl for URL sanitization.
+ */
+export const sanitizeUrl = validateSafeUrl;
 
 /**
  * Performs timing-safe comparison of strings to prevent side-channel timing attacks.

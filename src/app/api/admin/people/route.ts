@@ -4,7 +4,7 @@ import { verifyJWT } from '@/lib/jwt';
 import { hasPermission } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { recordAuditLog } from '@/lib/auditLog';
-import { sanitizeText } from '@/lib/security';
+import { sanitizeText, validateSafeUrl } from '@/lib/security';
 
 export async function GET() {
   try {
@@ -35,7 +35,8 @@ export async function POST(req: Request) {
     // Sanitize inputs
     const safeName = sanitizeText(name, 100);
     const safeBio = bio ? sanitizeText(bio, 1000) : null;
-    const safeLinkedin = linkedin ? sanitizeText(linkedin, 200) : null;
+    const safeLinkedin = linkedin ? validateSafeUrl(linkedin) : null;
+    const safeImageUrl = imageUrl ? validateSafeUrl(imageUrl) : null;
     const safeDepartment = department ? sanitizeText(department, 100) : '';
     const safeAcademicYear = academicYear ? sanitizeText(academicYear, 50) : '2025-26';
 
@@ -119,7 +120,7 @@ export async function POST(req: Request) {
         academicYear: safeAcademicYear,
         department: safeDepartment,
         hierarchy: Number(hierarchy) || 10,
-        imageUrl,
+        imageUrl: safeImageUrl,
         bio: safeBio,
         linkedIn: safeLinkedin,
         memberships: {
