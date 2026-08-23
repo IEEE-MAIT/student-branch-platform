@@ -9,22 +9,26 @@ import {
   getDynamicStories, 
   getDynamicPeople, 
   getDynamicGalleries, 
-  getDynamicResources 
+  getDynamicResources,
+  getDynamicProjects,
+  getDynamicInitiatives,
 } from '@/lib/api';
-import { prisma } from '@/lib/db';
 
 /**
  * Site-Wide Omni-Search Platform (Server Component)
- * Fetches all searchable content from the database and passes it to the client for instant deferred filtering. */
+ * Fetches all searchable content from the database and passes it to the client for instant deferred filtering.
+ */
 export default async function SearchPage() {
-  const [events, achievements, chapters, stories, people, galleries, resources] = await Promise.all([
+  const [events, achievements, chapters, stories, people, galleries, resources, projects, initiatives] = await Promise.all([
     getDynamicEvents(),
     getDynamicAchievements(),
     getDynamicChapters(),
     getDynamicStories(),
     getDynamicPeople(),
     getDynamicGalleries(),
-    getDynamicResources()
+    getDynamicResources(),
+    getDynamicProjects(),
+    getDynamicInitiatives(),
   ]);
 
   return (
@@ -38,6 +42,8 @@ export default async function SearchPage() {
         people={people}
         galleries={galleries}
         resources={resources}
+        projects={projects}
+        initiatives={initiatives}
       />
       <Footer />
     </>

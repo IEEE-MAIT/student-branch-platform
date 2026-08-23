@@ -84,6 +84,16 @@ h1, h2, h3, h4, .font-serif-heading {
   animation: page-enter 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Accessibility Focus Rings */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #00629B;
+  outline-offset: 2px;
+}
+
 /* Accessibility: Respect user's reduced-motion preference (Section 51 of design spec) */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

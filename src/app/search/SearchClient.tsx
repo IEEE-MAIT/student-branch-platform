@@ -5,6 +5,8 @@ import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { EventPreview } from '@/components/content/EventPreview';
 import { AchievementRow } from '@/components/content/AchievementRow';
+import { ProjectCard } from '@/components/content/ProjectCard';
+import { InitiativeCard } from '@/components/content/InitiativeCard';
 import Link from '@/components/ui/AppLink';
 
 export const STATIC_PAGES = [
@@ -12,13 +14,14 @@ export const STATIC_PAGES = [
   { title: 'About IEEE MAIT', description: 'Learn about our history, mission, and impact', url: '/about' },
   { title: 'Join IEEE MAIT', description: "Become a member of the world's largest technical professional organization", url: '/join' },
   { title: 'Contact Us', description: 'Get in touch with the IEEE MAIT executive committee', url: '/contact' },
-  { title: 'Events', description: 'Browse upcoming and past technical workshops and hackathons', url: '/events' },
-  { title: 'Achievements', description: 'Explore awards and recognitions earned by our branch', url: '/achievements' },
-  { title: 'Chapters & AGs', description: 'Discover our specialized technical societies and affinity groups', url: '/chapters' },
+  { title: 'Events & Workshops', description: 'Browse upcoming and past technical workshops and hackathons', url: '/events' },
+  { title: 'Achievements Ledger', description: 'Explore awards and recognitions earned by our branch', url: '/achievements' },
+  { title: 'Communities & Chapters', description: 'Discover our specialized technical societies and affinity groups', url: '/chapters' },
   { title: 'Stories & Reports', description: 'Read articles, reports, and insights from our community', url: '/stories' },
-  { title: 'Photo Gallery', description: 'View memories from our past events and initiatives', url: '/gallery' },
-  { title: 'People & Leadership', description: 'Meet the executive committee and active members', url: '/people' },
-  { title: 'Resources', description: 'Access branch documents, newsletters, and annual reports', url: '/resources' },
+  { title: 'Photo Gallery', description: 'View visual archives from our past events and initiatives', url: '/gallery' },
+  { title: 'People & Leadership', description: 'Meet the executive committee, branch counselors, and active members', url: '/people' },
+  { title: 'Leadership Archive', description: 'Historical leadership rosters organized by academic year', url: '/people/archive' },
+  { title: 'Resources', description: 'Access branch newsletters, slide decks, and annual activity reports', url: '/resources' },
 ];
 
 interface SearchClientProps {
@@ -29,6 +32,8 @@ interface SearchClientProps {
   people: any[];
   galleries: any[];
   resources: any[];
+  projects?: any[];
+  initiatives?: any[];
 }
 
 export const SearchClient: React.FC<SearchClientProps> = ({
@@ -38,27 +43,117 @@ export const SearchClient: React.FC<SearchClientProps> = ({
   stories: initialStories,
   people: initialPeople,
   galleries: initialGalleries,
-  resources: initialResources
+  resources: initialResources,
+  projects: initialProjects = [],
+  initiatives: initialInitiatives = [],
 }) => {
   const [query, setQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState<string>('ALL');
   const deferredQuery = useDeferredValue(query);
   const isStale = query !== deferredQuery;
 
   const searchResults = useMemo(() => {
-    if (!deferredQuery.trim()) return { pages: [], events: [], achievements: [], chapters: [], stories: [], people: [], galleries: [], resources: [] };
+    if (!deferredQuery.trim()) {
+      return {
+        pages: [],
+        events: [],
+        achievements: [],
+        chapters: [],
+        stories: [],
+        people: [],
+        galleries: [],
+        resources: [],
+        projects: [],
+        initiatives: [],
+      };
+    }
     const q = deferredQuery.toLowerCase();
 
-    const pages = STATIC_PAGES.filter(p => p.title.toLowerCase().includes(q) || p.description.toLowerCase().includes(q));
-    const events = initialEvents.filter(e => e.title?.toLowerCase().includes(q) || e.description?.toLowerCase().includes(q) || e.venue?.toLowerCase().includes(q));
-    const achievements = initialAchievements.filter(a => a.title?.toLowerCase().includes(q) || a.conferredBy?.toLowerCase().includes(q) || a.year?.includes(q));
-    const chapters = initialChapters.filter(c => c.name?.toLowerCase().includes(q) || c.description?.toLowerCase().includes(q));
-    const stories = initialStories.filter(s => s.title?.toLowerCase().includes(q) || s.excerpt?.toLowerCase().includes(q));
-    const people = initialPeople.filter(p => p.name?.toLowerCase().includes(q) || p.role?.toLowerCase().includes(q) || p.department?.toLowerCase().includes(q));
-    const galleries = initialGalleries.filter(g => g.title?.toLowerCase().includes(q) || g.category?.toLowerCase().includes(q));
-    const resources = initialResources.filter(r => r.title?.toLowerCase().includes(q) || r.type?.toLowerCase().includes(q));
+    const pages = STATIC_PAGES.filter(
+      (p) => p.title.toLowerCase().includes(q) || p.description.toLowerCase().includes(q)
+    );
+    const events = initialEvents.filter(
+      (e) =>
+        e.title?.toLowerCase().includes(q) ||
+        e.description?.toLowerCase().includes(q) ||
+        e.venue?.toLowerCase().includes(q) ||
+        e.category?.toLowerCase().includes(q) ||
+        e.unit?.toLowerCase().includes(q)
+    );
+    const achievements = initialAchievements.filter(
+      (a) =>
+        a.title?.toLowerCase().includes(q) ||
+        a.conferredBy?.toLowerCase().includes(q) ||
+        a.year?.includes(q) ||
+        a.unitOrTeam?.toLowerCase().includes(q) ||
+        a.category?.toLowerCase().includes(q)
+    );
+    const chapters = initialChapters.filter(
+      (c) =>
+        c.name?.toLowerCase().includes(q) ||
+        c.description?.toLowerCase().includes(q) ||
+        c.tagline?.toLowerCase().includes(q)
+    );
+    const stories = initialStories.filter(
+      (s) =>
+        s.title?.toLowerCase().includes(q) ||
+        s.excerpt?.toLowerCase().includes(q) ||
+        s.author?.toLowerCase().includes(q)
+    );
+    const people = initialPeople.filter(
+      (p) =>
+        p.name?.toLowerCase().includes(q) ||
+        p.role?.toLowerCase().includes(q) ||
+        p.department?.toLowerCase().includes(q) ||
+        p.category?.toLowerCase().includes(q)
+    );
+    const galleries = initialGalleries.filter(
+      (g) => g.title?.toLowerCase().includes(q) || g.category?.toLowerCase().includes(q)
+    );
+    const resources = initialResources.filter(
+      (r) =>
+        r.title?.toLowerCase().includes(q) ||
+        r.type?.toLowerCase().includes(q) ||
+        r.description?.toLowerCase().includes(q)
+    );
+    const projects = initialProjects.filter(
+      (p) =>
+        p.title?.toLowerCase().includes(q) ||
+        p.summary?.toLowerCase().includes(q) ||
+        p.description?.toLowerCase().includes(q) ||
+        (Array.isArray(p.tags) && p.tags.some((t: string) => t.toLowerCase().includes(q)))
+    );
+    const initiatives = initialInitiatives.filter(
+      (i) =>
+        i.title?.toLowerCase().includes(q) ||
+        i.description?.toLowerCase().includes(q) ||
+        i.targetAudience?.toLowerCase().includes(q)
+    );
 
-    return { pages, events, achievements, chapters, stories, people, galleries, resources };
-  }, [deferredQuery, initialEvents, initialAchievements, initialChapters, initialStories, initialPeople, initialGalleries, initialResources]);
+    return {
+      pages,
+      events,
+      achievements,
+      chapters,
+      stories,
+      people,
+      galleries,
+      resources,
+      projects,
+      initiatives,
+    };
+  }, [
+    deferredQuery,
+    initialEvents,
+    initialAchievements,
+    initialChapters,
+    initialStories,
+    initialPeople,
+    initialGalleries,
+    initialResources,
+    initialProjects,
+    initialInitiatives,
+  ]);
 
   const totalResults =
     searchResults.pages.length +
@@ -68,38 +163,41 @@ export const SearchClient: React.FC<SearchClientProps> = ({
     searchResults.stories.length +
     searchResults.people.length +
     searchResults.galleries.length +
-    searchResults.resources.length;
+    searchResults.resources.length +
+    searchResults.projects.length +
+    searchResults.initiatives.length;
 
   return (
-    <main className="flex-1 py-16 sm:py-24 bg-warm-50/50 min-h-screen">
+    <main className="flex-1 py-16 sm:py-24 bg-white min-h-screen page-enter">
       <Container size="default">
         <SectionHeading
-          category="Search Platform"
-          title="Omni-Search"
-          subtitle="Search across everything: events, people, pages, resources, and more."
+          category="Site-Wide Index"
+          title="Omni-Search Platform"
+          subtitle="Instant cross-platform search across technical events, chapter sub-portals, leadership records, hardware projects, and research publications."
         />
 
-        <div className="max-w-3xl mb-12 relative z-10 group">
+        <div className="max-w-3xl mb-10 relative z-10 group">
           <div className="relative flex items-center">
-            <div className="absolute left-5 text-warm-400 group-focus-within:text-ieee-blue transition-colors">
+            <div className="absolute left-4 text-warm-400 group-focus-within:text-ieee-blue transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
-            
+
             <input
               type="text"
               autoFocus
               value={query}
-              onChange={e => setQuery(e.target.value)}
-              placeholder="Search anything..."
-              className="w-full pl-14 pr-16 py-4 text-lg border border-warm-300/60 bg-white rounded-lg focus:outline-none focus:ring-4 focus:ring-ieee-blue/15 focus:border-ieee-blue font-sans shadow-sm transition-all text-ink placeholder:text-warm-300"
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search events, hardware projects, awards, people, or resources..."
+              className="w-full pl-12 pr-14 py-3.5 text-base border border-warm-300/80 bg-white rounded-[2px] focus:outline-hidden focus:border-ieee-blue focus:ring-1 focus:ring-ieee-blue font-sans shadow-xs transition-all text-ink placeholder:text-warm-400"
             />
 
             {query && (
               <button
                 onClick={() => setQuery('')}
-                className="absolute right-4 p-1.5 rounded-full text-warm-400 hover:text-ink hover:bg-warm-100 transition-colors focus:outline-none focus:ring-2 focus:ring-ieee-blue"
+                className="absolute right-3 p-1 rounded-full text-warm-400 hover:text-ink hover:bg-warm-100 transition-colors"
+                aria-label="Clear search query"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -107,66 +205,82 @@ export const SearchClient: React.FC<SearchClientProps> = ({
               </button>
             )}
           </div>
-          
+
           <div className="flex items-center justify-between mt-3 px-1">
             <p className="text-xs font-mono text-warm-400">
               {query.trim() && (
                 <span>
-                  Found <span className="font-bold text-ink">{totalResults}</span> result{totalResults !== 1 ? 's' : ''} for &quot;<span className="text-ieee-blue">{deferredQuery}</span>&quot;
+                  Found <strong className="text-ink">{totalResults}</strong> result{totalResults !== 1 ? 's' : ''} for &quot;<span className="text-ieee-blue font-semibold">{deferredQuery}</span>&quot;
                 </span>
               )}
             </p>
             {!query && (
               <p className="text-xs font-mono text-warm-300 hidden sm:block">
-                Pro tip: You can press <kbd className="px-1.5 py-0.5 bg-white border border-warm-200 rounded font-sans font-medium mx-0.5">⌘K</kbd> to jump here anytime.
+                Press <kbd className="px-1.5 py-0.5 bg-warm-100 border border-warm-200 rounded font-sans text-[11px] mx-0.5">⌘K</kbd> / <kbd className="px-1.5 py-0.5 bg-warm-100 border border-warm-200 rounded font-sans text-[11px] mx-0.5">Ctrl+K</kbd> to jump here anytime.
               </p>
             )}
           </div>
         </div>
 
+        {/* Results Container */}
         <div className={`transition-opacity duration-200 ${isStale ? 'opacity-50' : 'opacity-100'}`}>
           {deferredQuery.trim() ? (
             <div className="space-y-12">
-              
-              {/* Pages Results */}
-              {searchResults.pages.length > 0 && (
+              {totalResults === 0 && (
+                <div className="p-12 text-center border border-warm-200 bg-warm-50/40 rounded-[2px] space-y-2">
+                  <p className="font-serif text-xl text-ink font-normal">No results found</p>
+                  <p className="text-xs text-warm-400 font-sans">
+                    We could not find any records matching &quot;{deferredQuery}&quot;. Try searching with broader keywords.
+                  </p>
+                </div>
+              )}
+
+              {/* Projects & Hardware Builds */}
+              {searchResults.projects.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
-                    <h3 className="font-serif text-2xl text-ink">Pages</h3>
-                    <span className="bg-ieee-subtle text-ieee-blue px-2.5 py-0.5 rounded-full text-xs font-bold font-mono">
-                      {searchResults.pages.length}
+                    <h3 className="font-serif text-2xl text-ink font-normal">Technical Projects</h3>
+                    <span className="bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px] text-xs font-bold font-mono">
+                      {searchResults.projects.length}
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {searchResults.pages.map((p: any) => (
-                      <Link 
-                        key={p.url} 
-                        href={p.url}
-                        className="group p-5 border border-warm-200 bg-white rounded-lg shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-ieee-blue/30 transition-all duration-300"
-                      >
-                        <h4 className="font-serif text-lg text-ink group-hover:text-ieee-blue transition-colors mb-1">{p.title}</h4>
-                        <p className="text-xs text-warm-400">{p.description}</p>
-                      </Link>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {searchResults.projects.map((proj: any) => (
+                      <ProjectCard
+                        key={proj.id || proj.slug}
+                        title={proj.title}
+                        slug={proj.slug}
+                        summary={proj.summary}
+                        description={proj.description}
+                        githubUrl={proj.githubUrl}
+                        demoUrl={proj.demoUrl}
+                        year={proj.year}
+                        tags={proj.tags}
+                      />
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* People Results */}
-              {searchResults.people.length > 0 && (
+              {/* Initiatives */}
+              {searchResults.initiatives.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
-                    <h3 className="font-serif text-2xl text-ink">People</h3>
-                    <span className="bg-ieee-subtle text-ieee-blue px-2.5 py-0.5 rounded-full text-xs font-bold font-mono">
-                      {searchResults.people.length}
+                    <h3 className="font-serif text-2xl text-ink font-normal">Strategic Initiatives</h3>
+                    <span className="bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px] text-xs font-bold font-mono">
+                      {searchResults.initiatives.length}
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {searchResults.people.map((p: any) => (
-                      <div key={p.id} className="p-4 border border-warm-200 bg-white rounded-lg shadow-sm">
-                        <h4 className="font-serif text-lg text-ink mb-1">{p.name}</h4>
-                        <p className="font-mono text-[11px] text-ieee-blue uppercase tracking-wider">{p.role}</p>
-                      </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {searchResults.initiatives.map((init: any) => (
+                      <InitiativeCard
+                        key={init.id || init.slug}
+                        title={init.title}
+                        slug={init.slug}
+                        description={init.description}
+                        status={init.status}
+                        targetAudience={init.targetAudience}
+                      />
                     ))}
                   </div>
                 </div>
@@ -176,12 +290,12 @@ export const SearchClient: React.FC<SearchClientProps> = ({
               {searchResults.events.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
-                    <h3 className="font-serif text-2xl text-ink">Events</h3>
-                    <span className="bg-ieee-subtle text-ieee-blue px-2.5 py-0.5 rounded-full text-xs font-bold font-mono">
+                    <h3 className="font-serif text-2xl text-ink font-normal">Events & Workshops</h3>
+                    <span className="bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px] text-xs font-bold font-mono">
                       {searchResults.events.length}
                     </span>
                   </div>
-                  <div className="border border-warm-200 bg-white rounded-lg overflow-hidden divide-y divide-warm-200 shadow-sm">
+                  <div className="border border-warm-200 bg-white rounded-[2px] divide-y divide-warm-200">
                     {searchResults.events.map((event: any) => (
                       <EventPreview
                         key={event.id}
@@ -197,16 +311,49 @@ export const SearchClient: React.FC<SearchClientProps> = ({
                 </div>
               )}
 
+              {/* People Results */}
+              {searchResults.people.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
+                    <h3 className="font-serif text-2xl text-ink font-normal">People & Leadership</h3>
+                    <span className="bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px] text-xs font-bold font-mono">
+                      {searchResults.people.length}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {searchResults.people.map((p: any) => (
+                      <Link
+                        key={p.id}
+                        href="/people"
+                        className="p-4 border border-warm-200 bg-white rounded-[2px] hover:border-ieee-blue/40 transition-colors block group"
+                      >
+                        <h4 className="font-serif text-lg text-ink group-hover:text-ieee-blue transition-colors font-normal">
+                          {p.name}
+                        </h4>
+                        <p className="font-mono text-[11px] text-ieee-blue uppercase tracking-wider mt-0.5">
+                          {p.role}
+                        </p>
+                        {p.department && (
+                          <p className="text-xs text-warm-400 font-sans mt-1">
+                            {p.department}
+                          </p>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Achievements Results */}
               {searchResults.achievements.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
-                    <h3 className="font-serif text-2xl text-ink">Achievements</h3>
-                    <span className="bg-ieee-subtle text-ieee-blue px-2.5 py-0.5 rounded-full text-xs font-bold font-mono">
+                    <h3 className="font-serif text-2xl text-ink font-normal">Achievements</h3>
+                    <span className="bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px] text-xs font-bold font-mono">
                       {searchResults.achievements.length}
                     </span>
                   </div>
-                  <div className="border-t border-warm-200 bg-white shadow-sm rounded-lg overflow-hidden">
+                  <div className="border-t border-warm-200 bg-white rounded-[2px]">
                     {searchResults.achievements.map((item: any) => (
                       <AchievementRow
                         key={item.id}
@@ -226,21 +373,27 @@ export const SearchClient: React.FC<SearchClientProps> = ({
               {searchResults.chapters.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
-                    <h3 className="font-serif text-2xl text-ink">Chapters & AGs</h3>
-                    <span className="bg-ieee-subtle text-ieee-blue px-2.5 py-0.5 rounded-full text-xs font-bold font-mono">
+                    <h3 className="font-serif text-2xl text-ink font-normal">Communities & Chapters</h3>
+                    <span className="bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px] text-xs font-bold font-mono">
                       {searchResults.chapters.length}
                     </span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {searchResults.chapters.map((ch: any) => (
-                      <Link 
-                        key={ch.id} 
+                      <Link
+                        key={ch.id || ch.slug}
                         href={`/chapters/${ch.slug}`}
-                        className="group p-5 border border-warm-200 bg-white rounded-lg shadow-sm hover:shadow-md hover:-translate-y-1 transition-all"
+                        className="group p-5 border border-warm-200 bg-white rounded-[2px] hover:border-ieee-blue/40 transition-all block"
                       >
-                        <span className="font-mono text-[11px] font-semibold tracking-wider text-ieee-blue uppercase block mb-1">{ch.type}</span>
-                        <h4 className="font-serif text-xl text-ink group-hover:text-ieee-blue transition-colors mb-1">{ch.name}</h4>
-                        <p className="text-xs text-warm-400 line-clamp-2">{ch.description}</p>
+                        <span className="font-mono text-[11px] font-semibold tracking-wider text-ieee-blue uppercase block mb-1">
+                          {ch.type}
+                        </span>
+                        <h4 className="font-serif text-xl text-ink group-hover:text-ieee-blue transition-colors font-normal">
+                          {ch.name}
+                        </h4>
+                        <p className="text-xs text-warm-400 line-clamp-2 mt-1 font-sans">
+                          {ch.description || ch.tagline}
+                        </p>
                       </Link>
                     ))}
                   </div>
@@ -251,49 +404,29 @@ export const SearchClient: React.FC<SearchClientProps> = ({
               {searchResults.stories.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
-                    <h3 className="font-serif text-2xl text-ink">Stories</h3>
-                    <span className="bg-ieee-subtle text-ieee-blue px-2.5 py-0.5 rounded-full text-xs font-bold font-mono">
+                    <h3 className="font-serif text-2xl text-ink font-normal">Stories & Reports</h3>
+                    <span className="bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px] text-xs font-bold font-mono">
                       {searchResults.stories.length}
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {searchResults.stories.map((s: any) => (
-                      <Link 
-                        key={s.id} 
-                        href={`/stories/${s.slug}`}
-                        className="group p-5 border border-warm-200 bg-white rounded-lg shadow-sm hover:shadow-md hover:-translate-y-1 transition-all"
+                  <div className="divide-y divide-warm-200 border border-warm-200 rounded-[2px] bg-white">
+                    {searchResults.stories.map((story: any) => (
+                      <Link
+                        key={story.id || story.slug}
+                        href={`/stories/${story.slug}`}
+                        className="p-5 hover:bg-warm-50/50 transition-colors block group"
                       >
-                        <div className="flex items-center gap-2 mb-1 font-mono text-[10px] uppercase tracking-wider">
-                          <span className="text-ieee-blue">{s.unit}</span>
-                          <span className="text-warm-300">•</span>
-                          <span className="text-warm-400">{s.publishedDate || s.date}</span>
-                        </div>
-                        <h4 className="font-serif text-lg text-ink group-hover:text-ieee-blue transition-colors mb-1">{s.title}</h4>
-                        <p className="text-xs text-warm-400 line-clamp-2">{s.excerpt}</p>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Galleries Results */}
-              {searchResults.galleries.length > 0 && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
-                    <h3 className="font-serif text-2xl text-ink">Galleries</h3>
-                    <span className="bg-ieee-subtle text-ieee-blue px-2.5 py-0.5 rounded-full text-xs font-bold font-mono">
-                      {searchResults.galleries.length}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {searchResults.galleries.map((g: any) => (
-                      <Link 
-                        key={g.id} 
-                        href={`/gallery/${g.slug}`}
-                        className="group p-4 border border-warm-200 bg-white rounded-lg shadow-sm hover:shadow-md hover:-translate-y-1 transition-all"
-                      >
-                        <h4 className="font-serif text-lg text-ink group-hover:text-ieee-blue transition-colors mb-1">{g.title}</h4>
-                        <p className="font-mono text-[10px] text-warm-400 uppercase tracking-wider">{g.category}</p>
+                        <span className="font-mono text-[11px] text-warm-400 block mb-1">
+                          {story.date || story.publishedDate} · {story.type || story.category}
+                        </span>
+                        <h4 className="font-serif text-lg text-ink group-hover:text-ieee-blue transition-colors font-normal">
+                          {story.title}
+                        </h4>
+                        {story.excerpt && (
+                          <p className="text-xs text-warm-400 font-sans mt-1 line-clamp-2">
+                            {story.excerpt}
+                          </p>
+                        )}
                       </Link>
                     ))}
                   </div>
@@ -304,62 +437,96 @@ export const SearchClient: React.FC<SearchClientProps> = ({
               {searchResults.resources.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
-                    <h3 className="font-serif text-2xl text-ink">Resources</h3>
-                    <span className="bg-ieee-subtle text-ieee-blue px-2.5 py-0.5 rounded-full text-xs font-bold font-mono">
+                    <h3 className="font-serif text-2xl text-ink font-normal">Resources & Documents</h3>
+                    <span className="bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px] text-xs font-bold font-mono">
                       {searchResults.resources.length}
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="divide-y divide-warm-200 border border-warm-200 rounded-[2px] bg-white">
                     {searchResults.resources.map((r: any) => (
-                      <a 
-                        key={r.id} 
-                        href={r.fileUrl || '#'}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="group p-5 border border-warm-200 bg-white rounded-lg shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex items-center justify-between"
-                      >
+                      <div key={r.id} className="p-5 flex items-center justify-between gap-4">
                         <div>
-                          <h4 className="font-serif text-lg text-ink group-hover:text-ieee-blue transition-colors mb-1">{r.title}</h4>
-                          <p className="font-mono text-[10px] text-warm-400 uppercase tracking-wider">{r.type} · {r.publishedDate}</p>
+                          <span className="font-mono text-[11px] text-ieee-blue uppercase block mb-0.5">
+                            {r.type}
+                          </span>
+                          <h4 className="font-serif text-lg text-ink font-normal">{r.title}</h4>
+                          {r.description && (
+                            <p className="text-xs text-warm-400 font-sans mt-0.5">{r.description}</p>
+                          )}
                         </div>
-                        <svg className="w-5 h-5 text-warm-300 group-hover:text-ieee-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                      </a>
+                        <Link
+                          href="/resources"
+                          className="font-mono text-xs text-ieee-blue hover:underline font-semibold shrink-0"
+                        >
+                          View Resource →
+                        </Link>
+                      </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {totalResults === 0 && (
-                <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <div className="w-20 h-20 bg-warm-100 rounded-full flex items-center justify-center mb-6 text-warm-300">
-                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+              {/* Static Pages */}
+              {searchResults.pages.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
+                    <h3 className="font-serif text-2xl text-ink font-normal">Site Sections</h3>
+                    <span className="bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px] text-xs font-bold font-mono">
+                      {searchResults.pages.length}
+                    </span>
                   </div>
-                  <h3 className="font-serif text-2xl text-ink mb-2">No matching records found</h3>
-                  <p className="text-warm-400 font-sans max-w-md">
-                    We couldn't find anything matching &quot;<span className="text-ink font-semibold">{deferredQuery}</span>&quot;. Try adjusting your search or explore our popular topics like <button onClick={()=>{setQuery('Workshop')}} className="text-ieee-blue hover:underline">Workshops</button>, <button onClick={()=>{setQuery('WIE')}} className="text-ieee-blue hover:underline">WIE</button>, or <button onClick={()=>{setQuery('2025')}} className="text-ieee-blue hover:underline">2025</button>.
-                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {searchResults.pages.map((p: any) => (
+                      <Link
+                        key={p.url}
+                        href={p.url}
+                        className="group p-5 border border-warm-200 bg-white rounded-[2px] hover:border-ieee-blue/40 transition-all block"
+                      >
+                        <h4 className="font-serif text-lg text-ink group-hover:text-ieee-blue transition-colors font-normal">
+                          {p.title}
+                        </h4>
+                        <p className="text-xs text-warm-400 font-sans mt-1">{p.description}</p>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-24 text-center border-t border-warm-200 border-dashed mt-8">
-              <div className="w-16 h-16 bg-ieee-subtle rounded-full flex items-center justify-center mb-6 text-ieee-blue opacity-80">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                </svg>
+            /* Default Search Discovery Grid when input is empty */
+            <div className="space-y-8 pt-4">
+              <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-widest block">
+                Quick Category Discovery
+              </span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {[
+                  { title: 'Events Archive', href: '/events', count: `${initialEvents.length} Recorded` },
+                  { title: 'Technical Projects', href: '/chapters/eds', count: `${initialProjects.length} Hardware Builds` },
+                  { title: 'Achievements Ledger', href: '/achievements', count: `${initialAchievements.length} Honors` },
+                  { title: 'Leadership Rosters', href: '/people', count: `${initialPeople.length} Officers` },
+                  { title: 'Communities & Chapters', href: '/chapters', count: `${initialChapters.length} Units` },
+                  { title: 'Stories & Reports', href: '/stories', count: `${initialStories.length} Articles` },
+                  { title: 'Photo Galleries', href: '/gallery', count: `${initialGalleries.length} Albums` },
+                  { title: 'Digital Resources', href: '/resources', count: `${initialResources.length} Documents` },
+                ].map((cat, idx) => (
+                  <Link
+                    key={idx}
+                    href={cat.href}
+                    className="p-5 border border-warm-200 bg-white rounded-[2px] hover:border-ieee-blue/40 hover:-translate-y-0.5 transition-all block group"
+                  >
+                    <h4 className="font-serif text-base text-ink group-hover:text-ieee-blue transition-colors font-normal">
+                      {cat.title}
+                    </h4>
+                    <span className="font-mono text-[11px] text-warm-400 block mt-1">
+                      {cat.count}
+                    </span>
+                  </Link>
+                ))}
               </div>
-              <h3 className="font-serif text-2xl text-ink mb-2">Explore the Student Branch</h3>
-              <p className="text-warm-400 font-sans max-w-md">
-                Search across all our events, achievements, people, stories, galleries, resources, and static pages!
-              </p>
             </div>
           )}
         </div>
       </Container>
     </main>
   );
-}
+};

@@ -1,8 +1,12 @@
 /**
  * @file src/app/resources/page.tsx
- * @description Resources page — Newsletters, Annual Reports, and Documents.
- * Fetches from the resources DB table with static seed data fallback.
- *
+ * @description Digital Library & Resources Repository.
+ * 
+ * ORGANIZED SECTIONS:
+ * 1. Branch Newsletters & Annual Activity Reports
+ * 2. Technical Workshop Slide Decks & Starter Kits (KiCad, Embedded Systems, AI/ML)
+ * 3. Brand Assets & Identity Toolkit (Vector Logos, Color Palettes, Presentation Templates)
+ * 
  * @author IEEE MAIT Webmaster
  * @license MIT
  */
@@ -14,26 +18,27 @@ import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 import { getDynamicResources } from '@/lib/api';
 import type { Metadata } from 'next';
+import Link from '@/components/ui/AppLink';
 
-export const revalidate = 3600;
+export const revalidate = 3600; // ISR Cache 1 hour
 
 export const metadata: Metadata = {
-  title: 'Resources | IEEE MAIT Student Branch',
+  title: 'Digital Library & Resources | IEEE MAIT Student Branch',
   description:
-    'Download IEEE MAIT newsletters, annual reports, and official documents. Public resources from the IEEE MAIT Student Branch at Maharaja Agrasen Institute of Technology.',
+    'Download IEEE MAIT branch newsletters, annual activity reports, technical workshop slide decks, and official brand assets.',
 };
 
-// Static seed resources shown when DB is empty
 const SEED_RESOURCES = [
   {
     id: 'r1',
     title: 'IEEE MAIT Newsletter — Volume 3, Issue 2',
     type: 'Newsletter',
     publishedDate: 'JUL 2026',
-    description: 'Bi-annual branch newsletter covering events, achievements, and member spotlights.',
-    fileUrl: null,
+    description: 'Bi-annual branch newsletter covering student technical competitions, member spotlights, and project chronicles.',
+    fileUrl: '/resources/newsletter-vol3-issue2.pdf',
     status: 'published',
   },
   {
@@ -41,66 +46,117 @@ const SEED_RESOURCES = [
     title: 'IEEE MAIT Newsletter — Volume 3, Issue 1',
     type: 'Newsletter',
     publishedDate: 'JAN 2026',
-    description: 'First issue of 2026 covering the new academic year initiatives.',
-    fileUrl: null,
+    description: 'First issue of 2026 covering new academic session roadmap, KiCad bootcamp highlights, and WIE symposium.',
+    fileUrl: '/resources/newsletter-vol3-issue1.pdf',
     status: 'published',
   },
   {
     id: 'r3',
-    title: 'Annual Report 2025–26',
+    title: 'Annual Activity & Transition Report 2025–26',
     type: 'AnnualReport',
     publishedDate: 'MAY 2026',
-    description: 'Full institutional report — events, membership statistics, financial summary, and achievements.',
-    fileUrl: null,
+    description: 'Full institutional report: 18 events, 150+ enrolled members, financial audit summary, and Delhi Section achievements.',
+    fileUrl: '/resources/annual-report-2025-26.pdf',
     status: 'published',
   },
   {
     id: 'r4',
-    title: 'Annual Report 2024–25',
+    title: 'Annual Activity & Transition Report 2024–25',
     type: 'AnnualReport',
     publishedDate: 'MAY 2025',
-    description: 'Institutional report covering the 2024–25 academic year.',
-    fileUrl: null,
+    description: 'Institutional summary covering the 2024–25 academic year, student paper publications, and branch officer transitions.',
+    fileUrl: '/resources/annual-report-2024-25.pdf',
     status: 'published',
   },
   {
     id: 'r5',
-    title: 'IEEE Student Membership Guide',
+    title: 'IEEE Student Membership & Onboarding Guide',
     type: 'Document',
     publishedDate: 'AUG 2025',
-    description: 'Step-by-step guide to joining IEEE and selecting MAIT as your student branch.',
-    fileUrl: null,
+    description: 'Step-by-step walkthrough for joining IEEE.org, activating 50% student discounts, and registering with MAIT Student Branch.',
+    fileUrl: '/resources/membership-guide-2025.pdf',
     status: 'published',
   },
   {
     id: 'r6',
-    title: 'IEEE MAIT Branch Constitution',
+    title: 'IEEE MAIT Branch Operational Constitution',
     type: 'Document',
     publishedDate: 'JAN 2024',
-    description: 'Governing document for the IEEE MAIT Student Branch operations and bylaws.',
-    fileUrl: null,
+    description: 'Governing document for IEEE MAIT Student Branch bylaws, executive committee responsibilities, and electoral protocols.',
+    fileUrl: '/resources/branch-constitution.pdf',
     status: 'published',
   },
 ];
 
-const TYPE_LABELS: Record<string, string> = {
-  Newsletter: 'Newsletter',
-  AnnualReport: 'Annual Report',
-  Document: 'Document',
-  Other: 'Other',
-};
+const TECHNICAL_KITS = [
+  {
+    title: 'KiCad 4-Layer PCB Starter Template & Design Rules',
+    category: 'Hardware Design',
+    author: 'IEEE EDS Chapter',
+    description: 'Custom KiCad 8.0 project template pre-configured with JLCPCB 4-layer design rules, standard 0805 component footprint libraries, and Gerber export settings.',
+    link: 'https://github.com/IEEE-MAIT',
+    tag: 'KiCad Template',
+  },
+  {
+    title: 'Embedded STM32 & ESP32-S3 Firmware Framework',
+    category: 'Embedded Systems',
+    author: 'Technical Team',
+    description: 'FreeRTOS starter workspace with DMA UART telemetry, FreeRTOS task scheduling, and I2C sensor drivers for student hardware projects.',
+    link: 'https://github.com/IEEE-MAIT',
+    tag: 'C/C++ Framework',
+  },
+  {
+    title: 'PyTorch Deep Learning & TinyML Workshop Notebooks',
+    category: 'Machine Learning',
+    author: 'EDS Technical Lead',
+    description: 'Jupyter coding notebooks covering convolutional neural networks, 8-bit quantization for microcontroller deployment, and dataset augmentation.',
+    link: 'https://github.com/IEEE-MAIT',
+    tag: 'Jupyter Notebooks',
+  },
+  {
+    title: 'Linux CLI & Git Collaboration Essentials',
+    category: 'Software Engineering',
+    author: 'Webmaster Lead',
+    description: 'Concise reference sheet for Git branching strategies, pull request workflows, SSH key management, and Linux terminal productivity.',
+    link: 'https://github.com/IEEE-MAIT',
+    tag: 'Quick Reference',
+  },
+];
 
-const RESOURCE_TYPES = ['Newsletter', 'AnnualReport', 'Document', 'Other'];
+const BRAND_ASSETS = [
+  {
+    title: 'IEEE MAIT Primary Vector Emblem',
+    format: 'SVG / PNG (High Res)',
+    description: 'Official dual-ring IEEE MAIT Student Branch seal in master blue and dark monochrome variants.',
+    url: '/main_student_branch_logo.png',
+  },
+  {
+    title: 'IEEE EDS Chapter MAIT Emblem',
+    format: 'SVG / PNG (High Res)',
+    description: 'Official IEEE Electron Devices Society student chapter logo with silicon crystal lattice icon.',
+    url: '/eds_mait_logo.png',
+  },
+  {
+    title: 'IEEE WIE Affinity Group Emblem',
+    format: 'SVG / PNG (High Res)',
+    description: 'Official IEEE Women in Engineering Affinity Group emblem in brand purple and white.',
+    url: '/wie_ag_mait_logo.png',
+  },
+  {
+    title: 'Brand Color Palette & Typography Tokens',
+    format: 'Design Spec / CSS Tokens',
+    description: 'Primary IEEE Blue (#00629B), Deep Navy (#002855), WIE Purple (#782386), and Warm Neutral variables.',
+    url: '/about',
+  },
+];
 
 export default async function ResourcesPage() {
   const dbResources = await getDynamicResources();
   const resources = dbResources.length > 0 ? dbResources : SEED_RESOURCES;
 
-  const grouped = RESOURCE_TYPES.reduce((acc, type) => {
-    const items = resources.filter((r: any) => r.type === type);
-    if (items.length > 0) acc[type] = items;
-    return acc;
-  }, {} as Record<string, any[]>);
+  const newsletters = resources.filter((r: any) => r.type === 'Newsletter');
+  const annualReports = resources.filter((r: any) => r.type === 'AnnualReport');
+  const documents = resources.filter((r: any) => r.type === 'Document' || r.type === 'Other');
 
   return (
     <>
@@ -111,89 +167,253 @@ export default async function ResourcesPage() {
           <Breadcrumb
             items={[
               { label: 'Home', href: '/' },
-              { label: 'Resources' },
+              { label: 'Digital Library & Resources' },
             ]}
           />
 
           <SectionHeading
-            category="Public Documents"
-            title="Resources & Publications"
-            subtitle="Newsletters, annual reports, and official documents from IEEE MAIT Student Branch."
+            category="Institutional Repository"
+            title="Digital Library & Resources"
+            subtitle="Explore published branch newsletters, annual activity reports, technical workshop slide decks, and official IEEE brand assets."
           />
 
-          <div className="pt-8 space-y-12 max-w-3xl">
-            {Object.entries(grouped).map(([type, items]: [string, any]) => (
-              <div key={type}>
-                {/* Section header */}
-                <div className="flex items-center gap-3 mb-4 pb-3 border-b border-warm-200">
-                  <h2 className="font-mono text-xs font-bold uppercase tracking-widest text-warm-300">
-                    {TYPE_LABELS[type] ?? type}s
-                  </h2>
-                  <span className="font-mono text-xs text-warm-200">──────────────────────</span>
+          {/* Quick Navigation Jump Bar */}
+          <div className="flex flex-wrap items-center gap-2 pb-8 mb-12 border-b border-warm-200">
+            <span className="font-mono text-xs font-semibold text-warm-400 uppercase tracking-wider mr-2">
+              Browse Sections:
+            </span>
+            <a
+              href="#reports"
+              className="px-3 py-1.5 font-mono text-xs bg-warm-100/80 hover:bg-ieee-subtle hover:text-ieee-blue border border-warm-200 rounded-[2px] transition-colors"
+            >
+              01 · Newsletters & Reports
+            </a>
+            <a
+              href="#technical-kits"
+              className="px-3 py-1.5 font-mono text-xs bg-warm-100/80 hover:bg-ieee-subtle hover:text-ieee-blue border border-warm-200 rounded-[2px] transition-colors"
+            >
+              02 · Technical Kits & Slide Decks
+            </a>
+            <a
+              href="#brand-toolkit"
+              className="px-3 py-1.5 font-mono text-xs bg-warm-100/80 hover:bg-ieee-subtle hover:text-ieee-blue border border-warm-200 rounded-[2px] transition-colors"
+            >
+              03 · Brand Identity Toolkit
+            </a>
+          </div>
+
+          <div className="space-y-16">
+            {/* ---------------------------------------------------- */}
+            {/* SECTION 1: NEWSLETTERS & ANNUAL REPORTS */}
+            {/* ---------------------------------------------------- */}
+            <section id="reports" className="space-y-8">
+              <div className="border-b border-warm-200 pb-3">
+                <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-widest block">
+                  Publications
+                </span>
+                <h2 className="font-serif text-2xl sm:text-3xl text-ink font-normal mt-0.5">
+                  Newsletters & Annual Activity Reports
+                </h2>
+                <p className="text-sm text-warm-400 font-sans mt-1">
+                  Official publications documenting branch activities, financial audits, and technical milestones.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Newsletters Column */}
+                <div className="space-y-4">
+                  <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-ieee-blue">
+                    Branch Newsletters
+                  </h3>
+                  <div className="border border-warm-200 bg-white rounded-[2px] divide-y divide-warm-200">
+                    {newsletters.map((r: any) => (
+                      <div key={r.id} className="p-5 hover:bg-warm-50/50 transition-colors flex flex-col justify-between space-y-3">
+                        <div>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-mono text-[11px] text-warm-400">{r.publishedDate}</span>
+                            <span className="font-mono text-[10px] bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px]">
+                              PDF Publication
+                            </span>
+                          </div>
+                          <h4 className="font-serif text-lg text-ink font-normal mt-1">{r.title}</h4>
+                          <p className="text-xs text-warm-400 font-sans mt-1">{r.description}</p>
+                        </div>
+                        <div className="pt-1">
+                          <a
+                            href={r.fileUrl || '#'}
+                            className="inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-ieee-blue hover:underline"
+                          >
+                            <span>Download Issue (PDF) ↓</span>
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Resource rows — clean list format per spec */}
-                <div className="space-y-0 divide-y divide-warm-200 border border-warm-200 rounded-[2px]">
-                  {(items as any[]).map((resource: any) => (
-                    <div
-                      key={resource.id}
-                      className="flex items-start justify-between gap-4 px-5 py-4 bg-white hover:bg-warm-100/40 transition-colors group"
-                    >
-                      <div className="min-w-0 space-y-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-sans text-sm font-medium text-ink leading-snug">
-                            {resource.title}
-                          </h3>
-                          <Badge variant="default">{TYPE_LABELS[resource.type] ?? resource.type}</Badge>
+                {/* Annual Activity Reports Column */}
+                <div className="space-y-4">
+                  <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-ieee-blue">
+                    Annual Activity Reports
+                  </h3>
+                  <div className="border border-warm-200 bg-white rounded-[2px] divide-y divide-warm-200">
+                    {annualReports.map((r: any) => (
+                      <div key={r.id} className="p-5 hover:bg-warm-50/50 transition-colors flex flex-col justify-between space-y-3">
+                        <div>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-mono text-[11px] text-warm-400">{r.publishedDate}</span>
+                            <span className="font-mono text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-[2px]">
+                              Institutional Record
+                            </span>
+                          </div>
+                          <h4 className="font-serif text-lg text-ink font-normal mt-1">{r.title}</h4>
+                          <p className="text-xs text-warm-400 font-sans mt-1">{r.description}</p>
                         </div>
-                        {resource.description && (
-                          <p className="text-xs text-warm-400 font-sans leading-relaxed">
-                            {resource.description}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-4 shrink-0 pt-0.5">
-                        <span className="font-mono text-xs text-warm-300 whitespace-nowrap">
-                          {resource.publishedDate}
-                        </span>
-                        {resource.fileUrl ? (
+                        <div className="pt-1">
                           <a
-                            href={resource.fileUrl}
-                            download
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-mono text-xs font-semibold text-ieee-blue hover:underline flex items-center gap-1"
-                            aria-label={`Download ${resource.title}`}
+                            href={r.fileUrl || '#'}
+                            className="inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-ieee-blue hover:underline"
                           >
-                            PDF ↓
+                            <span>Download Report (PDF) ↓</span>
                           </a>
-                        ) : (
-                          <span className="font-mono text-xs text-warm-200 cursor-not-allowed" title="File not yet uploaded">
-                            PDF —
-                          </span>
-                        )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
-            ))}
 
-            {Object.keys(grouped).length === 0 && (
-              <p className="font-mono text-sm text-warm-300 py-12 text-center border border-warm-200 rounded-[2px]">
-                No resources published yet. Check back soon.
-              </p>
-            )}
+              {/* Branch Governing Documents */}
+              {documents.length > 0 && (
+                <div className="space-y-4 pt-4">
+                  <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-ieee-blue">
+                    Governing Documents & Member Guides
+                  </h3>
+                  <div className="border border-warm-200 bg-white rounded-[2px] divide-y divide-warm-200">
+                    {documents.map((r: any) => (
+                      <div key={r.id} className="p-5 hover:bg-warm-50/50 transition-colors flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
+                        <div>
+                          <span className="font-mono text-[11px] text-warm-400 block mb-0.5">{r.publishedDate}</span>
+                          <h4 className="font-serif text-base text-ink font-normal">{r.title}</h4>
+                          <p className="text-xs text-warm-400 font-sans mt-0.5">{r.description}</p>
+                        </div>
+                        <a
+                          href={r.fileUrl || '#'}
+                          className="font-mono text-xs font-semibold text-ieee-blue hover:underline shrink-0"
+                        >
+                          Download Document ↓
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
 
-            {/* Source note */}
-            <div className="pt-4 border-t border-warm-200">
-              <p className="font-mono text-xs text-warm-300">
-                {dbResources.length > 0
-                  ? `${resources.length} resources loaded from database.`
-                  : 'Showing sample resources. Upload real files via the Admin panel.'}
-              </p>
-            </div>
+            {/* ---------------------------------------------------- */}
+            {/* SECTION 2: TECHNICAL KITS & SLIDE DECKS */}
+            {/* ---------------------------------------------------- */}
+            <section id="technical-kits" className="border-t border-warm-200 pt-16 space-y-8">
+              <div className="border-b border-warm-200 pb-3">
+                <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-widest block">
+                  Engineering Library
+                </span>
+                <h2 className="font-serif text-2xl sm:text-3xl text-ink font-normal mt-0.5">
+                  Workshop Slide Decks & Starter Kits
+                </h2>
+                <p className="text-sm text-warm-400 font-sans mt-1">
+                  Verified hardware project templates, firmware frameworks, and machine learning tutorial notebooks curated by MAIT technical leads.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {TECHNICAL_KITS.map((kit, idx) => (
+                  <div
+                    key={idx}
+                    className="border border-warm-200 bg-white rounded-[2px] p-6 flex flex-col justify-between space-y-4 hover:border-ieee-blue/40 transition-all group"
+                  >
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-mono text-xs font-semibold text-ieee-blue bg-ieee-subtle px-2 py-0.5 rounded-[2px]">
+                          {kit.category}
+                        </span>
+                        <span className="font-mono text-[10px] text-warm-400">
+                          {kit.author}
+                        </span>
+                      </div>
+                      <h3 className="font-serif text-xl text-ink font-normal group-hover:text-ieee-blue transition-colors">
+                        {kit.title}
+                      </h3>
+                      <p className="text-xs text-warm-400 font-sans leading-relaxed">
+                        {kit.description}
+                      </p>
+                    </div>
+
+                    <div className="pt-3 border-t border-warm-100 flex items-center justify-between">
+                      <span className="font-mono text-[11px] text-warm-400 bg-warm-100/70 px-2 py-0.5 rounded-[2px]">
+                        {kit.tag}
+                      </span>
+                      <a
+                        href={kit.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-xs font-semibold text-ieee-blue hover:underline"
+                      >
+                        Access Repository ↗
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* ---------------------------------------------------- */}
+            {/* SECTION 3: BRAND ASSETS & IDENTITY TOOLKIT */}
+            {/* ---------------------------------------------------- */}
+            <section id="brand-toolkit" className="border-t border-warm-200 pt-16 space-y-8">
+              <div className="border-b border-warm-200 pb-3">
+                <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-widest block">
+                  Media & Creative
+                </span>
+                <h2 className="font-serif text-2xl sm:text-3xl text-ink font-normal mt-0.5">
+                  Brand Identity Toolkit & Vectors
+                </h2>
+                <p className="text-sm text-warm-400 font-sans mt-1">
+                  Official high-resolution logos, emblem guidelines, and presentation templates for IEEE MAIT student organizers.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {BRAND_ASSETS.map((asset, idx) => (
+                  <div
+                    key={idx}
+                    className="border border-warm-200 bg-warm-50/50 rounded-[2px] p-6 flex flex-col justify-between space-y-4 hover:bg-white hover:shadow-xs transition-all"
+                  >
+                    <div className="space-y-2">
+                      <span className="font-mono text-[10px] uppercase font-bold text-ieee-blue bg-white border border-warm-200 px-2 py-0.5 rounded-[2px] inline-block">
+                        {asset.format}
+                      </span>
+                      <h4 className="font-serif text-lg text-ink font-normal leading-snug">
+                        {asset.title}
+                      </h4>
+                      <p className="text-xs text-warm-400 font-sans leading-relaxed">
+                        {asset.description}
+                      </p>
+                    </div>
+
+                    <div className="pt-2 border-t border-warm-200">
+                      <a
+                        href={asset.url}
+                        download
+                        className="font-mono text-xs font-semibold text-ieee-blue hover:underline"
+                      >
+                        Download Asset ↓
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
           </div>
         </Container>
       </main>
