@@ -89,8 +89,8 @@ export default function AdminPeoplePage() {
     e.preventDefault();
     setMsg(null);
     try {
-      const secRoles = ['Chairperson', 'Vice-Chairperson', 'General Secretary', 'Web Master', 'Treasurer', 'Joint Secretary', 'PR Head', 'Creative Head', 'Sponsorship Head'];
-      const opRoles = ['Technical Lead', 'Creative Lead', 'PR Lead', 'Hardware Lead'];
+      const secRoles = ['Chairperson', 'Vice-Chairperson', 'General Secretary', 'Web Master', 'Treasurer', 'Joint Secretary', 'PR Head', 'Creative Head', 'Sponsorship Head', 'Hardware Head'];
+      const opRoles = ['Technical Lead', 'Creative Lead', 'PR Lead', 'Event Management Lead'];
       
       let computedHierarchy = 10;
       if (secRoles.includes(role)) {
@@ -252,6 +252,7 @@ export default function AdminPeoplePage() {
                 <option value="PR Head">PR Head</option>
                 <option value="Creative Head">Creative Head</option>
                 <option value="Sponsorship Head">Sponsorship Head</option>
+                <option value="Hardware Head">Hardware Head</option>
               </select>
             ) : category === 'Operational Leads' ? (
               <select
@@ -262,7 +263,7 @@ export default function AdminPeoplePage() {
                 <option value="Technical Lead">Technical Lead</option>
                 <option value="Creative Lead">Creative Lead</option>
                 <option value="PR Lead">PR Lead</option>
-                <option value="Hardware Lead">Hardware Lead</option>
+                <option value="Event Management Lead">Event Management Lead</option>
               </select>
             ) : (
               <input

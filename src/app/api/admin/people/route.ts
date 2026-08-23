@@ -44,10 +44,10 @@ export async function POST(req: Request) {
     const secRoles = [
       'Chairperson', 'Vice-Chairperson', 'General Secretary',
       'Web Master', 'Treasurer', 'Joint Secretary',
-      'PR Head', 'Creative Head', 'Sponsorship Head'
+      'PR Head', 'Creative Head', 'Sponsorship Head', 'Hardware Head'
     ];
     const operationalRoles = [
-      'Technical Lead', 'Creative Lead', 'PR Lead', 'Hardware Lead'
+      'Technical Lead', 'Creative Lead', 'PR Lead', 'Event Management Lead'
     ];
 
     const isSEC = category === 'Senior Executive Committee' || category === 'EDS Chapter' || category === 'Affinity Group';
