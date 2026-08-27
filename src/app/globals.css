@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode in Tailwind CSS v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-ieee-blue: #00629B;
   --color-ieee-dark: #004975;
@@ -12,19 +15,52 @@
   --color-mait-warm: #8B2332;
   --color-mait-subtle: #F9ECEE;
   
+  --color-warm-50: #FAFAF7;
   --color-warm-100: #F5F5F0;
   --color-warm-200: #E8E8E3;
   --color-warm-300: #9B9B8F;
   --color-warm-400: #6C6C61;
+
+  --color-wie-purple: #7C3AED;
+  --color-wie-subtle: #F5F3FF;
+  --color-eds-blue: #0284C7;
+  --color-eds-subtle: #F0F9FF;
+  --color-sig-amber: #D97706;
+  --color-sig-emerald: #059669;
 
   --font-serif: var(--font-instrument-serif), Georgia, serif;
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), monospace;
 }
 
+/* Light Theme Variables (Default) */
 :root {
-  --background: #ffffff;
+  --background: #FFFFFF;
   --foreground: #1A1A2E;
+  --card-bg: #FFFFFF;
+  --card-border: #E8E8E3;
+  --muted-text: #6C6C61;
+  --subtle-bg: #F5F5F0;
+  --nav-bg: rgba(255, 255, 255, 0.92);
+  --nav-border: #E8E8E3;
+  --accent-blue: #00629B;
+  --accent-subtle: #E8F4F8;
+  --shadow-color: rgba(0, 0, 0, 0.06);
+}
+
+/* Dark Theme Variables */
+.dark {
+  --background: #0B0F19;
+  --foreground: #F3F4F6;
+  --card-bg: #111827;
+  --card-border: #1F2937;
+  --muted-text: #9CA3AF;
+  --subtle-bg: #1F2937;
+  --nav-bg: rgba(11, 15, 25, 0.92);
+  --nav-border: #1F2937;
+  --accent-blue: #38BDF8;
+  --accent-subtle: rgba(56, 189, 248, 0.12);
+  --shadow-color: rgba(0, 0, 0, 0.35);
 }
 
 body {
@@ -32,6 +68,7 @@ body {
   color: var(--foreground);
   font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 h1, h2, h3, h4, .font-serif-heading {
@@ -39,21 +76,53 @@ h1, h2, h3, h4, .font-serif-heading {
   letter-spacing: -0.02em;
 }
 
+/* Subtle Grid Pattern */
 .bg-grid-pattern {
   background-image: linear-gradient(rgba(0, 98, 155, 0.04) 1px, transparent 1px),
                     linear-gradient(90deg, rgba(0, 98, 155, 0.04) 1px, transparent 1px);
   background-size: 40px 40px;
 }
 
+.dark .bg-grid-pattern {
+  background-image: linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Accent Decorative Line */
 .accent-rule {
   height: 3px;
   width: 48px;
-  background-color: #00629B;
+  background-color: var(--accent-blue);
   margin-top: 8px;
   margin-bottom: 8px;
 }
 
-/* Skeleton Shimmer & Page Transition Animations */
+/* Glassmorphic Navbar & Panels */
+.glass-panel {
+  background: var(--nav-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: var(--nav-border);
+}
+
+/* Floating Social Bar Tooltip Animation */
+@keyframes tooltip-slide {
+  from {
+    opacity: 0;
+    transform: translateX(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-tooltip {
+  animation: tooltip-slide 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Shimmer Loading Animations */
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -65,6 +134,12 @@ h1, h2, h3, h4, .font-serif-heading {
 
 .animate-shimmer {
   background: linear-gradient(90deg, #f0f0eb 25%, #e2e2dc 37%, #f0f0eb 63%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite ease-in-out;
+}
+
+.dark .animate-shimmer {
+  background: linear-gradient(90deg, #1f2937 25%, #374151 37%, #1f2937 63%);
   background-size: 200% 100%;
   animation: shimmer 1.6s infinite ease-in-out;
 }
@@ -90,11 +165,11 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #00629B;
+  outline: 2px solid var(--accent-blue);
   outline-offset: 2px;
 }
 
-/* Accessibility: Respect user's reduced-motion preference (Section 51 of design spec) */
+/* Accessibility: Respect user reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
