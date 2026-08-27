@@ -249,7 +249,7 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
                     <Button href="/contact" variant="primary" size="md" className="!bg-purple-700 hover:!bg-purple-800">
                       Request Application Review →
                     </Button>
-                    <Button href="/stories/empowering-women-in-engineering-roadmap" variant="secondary" size="md" className="!border-purple-300 !text-purple-800">
+                    <Button href="/publications/empowering-women-in-engineering-roadmap" variant="secondary" size="md" className="!border-purple-300 !text-purple-800">
                       Read 2026 Roadmap
                     </Button>
                   </div>
@@ -456,7 +456,7 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
                     {chapterStories.map((story: any) => (
                       <Link
                         key={story.id}
-                        href={`/stories/${story.slug}`}
+                        href={`/publications/${story.slug}`}
                         className="block py-4 group hover:bg-warm-50/50 transition-colors px-2 -mx-2 rounded-[2px]"
                       >
                         <span className="font-mono text-[11px] text-warm-400">

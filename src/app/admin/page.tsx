@@ -56,7 +56,7 @@ export default function AdminOverviewPage() {
           { label: 'Events Registered', count: stats.events, href: '/admin/events' },
           { label: 'Achievements Ledger', count: stats.achievements, href: '/admin/achievements' },
           { label: 'Roster Members', count: stats.people, href: '/admin/people' },
-          { label: 'Stories & Articles', count: stats.stories, href: '/admin/stories' },
+          { label: 'Publications & Articles', count: stats.stories, href: '/admin/stories' },
           { label: 'Public Resources', count: stats.resources, href: '/admin/resources' },
           { label: 'Milestone Records', count: stats.milestones, href: '/admin/milestones' },
         ].map((item, idx) => (

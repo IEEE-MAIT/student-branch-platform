@@ -319,7 +319,7 @@ END:VCALENDAR`;
                         </p>
                         <div className="pt-2">
                           <Link
-                            href={`/stories/${relatedStory.slug}`}
+                            href={`/publications/${relatedStory.slug}`}
                             className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-ieee-blue dark:text-sky-400 hover:underline"
                           >
                             <span>Read Full Report & Key Takeaways →</span>

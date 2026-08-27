@@ -216,6 +216,9 @@ export const getDynamicStories = cache(async () => {
   return Object.values(STORIES_DATA);
 });
 
+export const getDynamicPublications = getDynamicStories;
+export const getDynamicPublicationBySlug = getDynamicStoryBySlug;
+
 export const getDynamicGalleries = cache(async () => {
   if (typeof window !== 'undefined') return Object.values(GALLERY_ALBUMS_DATA);
   try {

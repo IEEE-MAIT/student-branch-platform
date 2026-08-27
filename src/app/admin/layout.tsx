@@ -21,7 +21,7 @@ const ADMIN_NAV = [
   { label: 'Events', href: '/admin/events' },
   { label: 'Achievements', href: '/admin/achievements' },
   { label: 'People', href: '/admin/people' },
-  { label: 'Stories & Articles', href: '/admin/stories' },
+  { label: 'Publications & Articles', href: '/admin/stories' },
   { label: 'Galleries', href: '/admin/galleries' },
   { label: 'Resources', href: '/admin/resources' },
   { label: 'Media Library', href: '/admin/assets' },

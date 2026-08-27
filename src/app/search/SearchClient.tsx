@@ -17,7 +17,7 @@ export const STATIC_PAGES = [
   { title: 'Events & Workshops', description: 'Browse upcoming and past technical workshops and hackathons', url: '/events' },
   { title: 'Achievements Ledger', description: 'Explore awards and recognitions earned by our branch', url: '/achievements' },
   { title: 'Communities & Chapters', description: 'Discover our specialized technical societies and affinity groups', url: '/chapters' },
-  { title: 'Stories & Reports', description: 'Read articles, reports, and insights from our community', url: '/stories' },
+  { title: 'Publications & Digest', description: 'Read technical articles, Tech Tuesday digests, and insights from our community', url: '/publications' },
   { title: 'Photo Gallery', description: 'View visual archives from our past events and initiatives', url: '/gallery' },
   { title: 'People & Leadership', description: 'Meet the executive committee, branch counselors, and active members', url: '/people' },
   { title: 'Leadership Archive', description: 'Historical leadership rosters organized by academic year', url: '/people/archive' },
@@ -413,7 +413,7 @@ export const SearchClient: React.FC<SearchClientProps> = ({
                     {searchResults.stories.map((story: any) => (
                       <Link
                         key={story.id || story.slug}
-                        href={`/stories/${story.slug}`}
+                        href={`/publications/${story.slug}`}
                         className="p-5 hover:bg-warm-50/50 transition-colors block group"
                       >
                         <span className="font-mono text-[11px] text-warm-400 block mb-1">
@@ -505,7 +505,7 @@ export const SearchClient: React.FC<SearchClientProps> = ({
                   { title: 'Achievements Ledger', href: '/achievements', count: `${initialAchievements.length} Honors` },
                   { title: 'Leadership Rosters', href: '/people', count: `${initialPeople.length} Officers` },
                   { title: 'Communities & Chapters', href: '/chapters', count: `${initialChapters.length} Units` },
-                  { title: 'Stories & Reports', href: '/stories', count: `${initialStories.length} Articles` },
+                  { title: 'Publications & Digest', href: '/publications', count: `${initialStories.length} Articles` },
                   { title: 'Photo Galleries', href: '/gallery', count: `${initialGalleries.length} Albums` },
                   { title: 'Digital Resources', href: '/resources', count: `${initialResources.length} Documents` },
                 ].map((cat, idx) => (

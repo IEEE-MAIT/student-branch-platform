@@ -274,7 +274,7 @@ export const Navbar: React.FC = () => {
               Achievements
             </Link>
 
-            <Link href="/stories" className={navPillClasses('/stories')}>
+            <Link href="/publications" className={navPillClasses('/publications')}>
               Publications
             </Link>
 
@@ -495,11 +495,11 @@ export const Navbar: React.FC = () => {
             Achievements Ledger
           </Link>
           <Link
-            href="/stories"
+            href="/publications"
             className="block px-4 py-3 text-base font-medium hover:text-ieee-blue dark:hover:text-sky-400 min-h-[48px] flex items-center rounded-xl hover:bg-warm-50 dark:hover:bg-gray-900"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Publications & Stories
+            Publications & Digest
           </Link>
           <Link
             href="/gallery"
