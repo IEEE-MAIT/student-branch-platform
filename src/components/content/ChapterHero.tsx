@@ -36,23 +36,23 @@ export const ChapterHero: React.FC<ChapterHeroProps> = ({
   githubUrl,
 }) => {
   const isAffinityGroup = type.toLowerCase().includes('affinity') || slug === 'wie';
+  const normSlug = slug.toLowerCase().trim();
 
   const lightLogo =
-    logoUrl ||
-    (slug === 'eds'
+    normSlug === 'eds'
       ? '/eds_mait_sb_light_mode_logo.png'
-      : slug === 'wie'
+      : normSlug === 'wie'
       ? '/wie_mait_light_mode_logo.png'
-      : slug === 'sb'
+      : normSlug === 'sb'
       ? '/ieee_mait_sb_light_mode_logo.png'
-      : null);
+      : logoUrl;
 
   const darkLogo =
-    slug === 'eds'
+    normSlug === 'eds'
       ? '/eds_mait_sb_dark_mode_logo.png'
-      : slug === 'wie'
+      : normSlug === 'wie'
       ? '/wie_mait_dark_mode_logo.png'
-      : slug === 'sb'
+      : normSlug === 'sb'
       ? '/ieee_mait_sb_dark_mode_logo.png'
       : lightLogo;
 
@@ -84,7 +84,7 @@ export const ChapterHero: React.FC<ChapterHeroProps> = ({
                     : 'bg-ieee-subtle dark:bg-sky-950 text-ieee-blue dark:text-sky-400 border border-ieee-blue/20 dark:border-sky-800'
                 }`}
               >
-                {type}
+                {normSlug === 'sb' ? 'Student Branch' : type}
               </span>
               {parentSociety && (
                 <span className="font-mono text-xs text-warm-400 dark:text-gray-400">

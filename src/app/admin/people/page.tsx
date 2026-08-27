@@ -311,7 +311,8 @@ export default function AdminPeoplePage() {
               <option value="EDS Chapter">EDS Chapter</option>
               <option value="Affinity Group">Affinity Group</option>
               <option value="Operational Leads">Operational Leads</option>
-              <option value="Counsellor / Mentor">Counsellor / Mentor</option>
+              <option value="Counsellor / Mentor">Counsellor / Faculty Advisor</option>
+              <option value="Mentor">Branch Mentor (Advisory)</option>
             </select>
           </div>
 

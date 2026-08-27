@@ -76,6 +76,7 @@ export enum AchievementCategory {
  * Organizational unit types.
  */
 export enum ChapterType {
+  STUDENT_BRANCH = 'Student Branch',
   AFFINITY_GROUP = 'Affinity Group',
   TECHNICAL_CHAPTER = 'Technical Chapter',
 }
@@ -279,7 +280,7 @@ export const CHAPTERS_DATA: Record<string, ChapterItem> = {
     id: 'sb',
     name: 'IEEE MAIT Student Branch',
     slug: 'sb',
-    type: ChapterType.TECHNICAL_CHAPTER,
+    type: ChapterType.STUDENT_BRANCH,
     parentSociety: 'IEEE Region 10 · Delhi Section',
     establishedYear: '2005',
     tagline: 'Parent Student Branch & Flagship Operations',
@@ -349,7 +350,6 @@ export const PEOPLE_DATA: Person[] = [
     department: 'Department of Electrical & Electronics Engineering (EEE)',
     academicYear: '2025–26',
     bio: 'Professor and Branch Counsellor, Department of Electrical & Electronics Engineering (EEE). Guiding IEEE MAIT Student Branch in fostering academic research, technical innovations, and institutional leadership.',
-    imageSrc: '/images/people/counselor.jpg',
     linkedIn: 'https://linkedin.com',
   },
   {

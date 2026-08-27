@@ -1,35 +1,44 @@
 /**
  * @file src/app/people/page.tsx
  * @description People & Leadership Directory with react-icons.
- * 
+ *
  * DESIGN SPECIFICATIONS:
- * - Academic Year Pill Filter: 2025–26 (Current), 2024–25, 2023–24, etc.
- * - Hierarchy Hierarchy:
+ * - Hierarchy:
  *   1. Faculty Mentors (Branch Counselor & Advisor) — large portrait layout.
- *   2. Senior Executive Committee (Chairperson, Vice Chair, Secretary, Hardware Head, Treasurer, Webmaster) — 4-column grid.
- *   3. Chapter & Affinity Group Leads (EDS Chair, WIE Chair, SIG Leads) — 3-column grid.
- *   4. Operational & Technical Leads (PR, Logistics, Design, Content).
+ *   2. Branch Mentors & Senior Advisory Board — dedicated 3-column advisory cards.
+ *   3. Senior Executive Committee (Chairperson, Vice Chair, Secretary, Hardware Head, Treasurer, Webmaster, PR & Creative Heads) — 4-column grid sorted by rank.
+ *   4. Chapter & Affinity Group Leads (EDS Chair, WIE Chair, SIG Leads) — 3-column grid.
+ *   5. Operational & Technical Leads (Creative Leads, PR Leads, Logistics, Content) — dedicated domain-accented cards.
  * - Full SSR hydration with ISR revalidation.
  * - Unified react-icons system.
- * 
+ *
  * @author IEEE MAIT Webmaster
  * @license MIT
  */
 
-import React from 'react';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
-import { Container } from '@/components/layout/Container';
-import { SectionHeading } from '@/components/ui/SectionHeading';
-import { Breadcrumb } from '@/components/ui/Breadcrumb';
-import { PersonCard } from '@/components/content/PersonCard';
-import { getDynamicPeople } from '@/lib/api';
-import Link from '@/components/ui/AppLink';
-import { FiClock, FiBookOpen, FiAward, FiZap, FiCpu, FiArrowRight } from 'react-icons/fi';
+import React from "react";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+import { Container } from "@/components/layout/Container";
+import { SectionHeading } from "@/components/ui/SectionHeading";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { PersonCard } from "@/components/content/PersonCard";
+import { getDynamicPeople } from "@/lib/api";
+import Link from "@/components/ui/AppLink";
+import {
+  FiClock,
+  FiBookOpen,
+  FiAward,
+  FiZap,
+  FiCpu,
+  FiCompass,
+  FiArrowRight,
+} from "react-icons/fi";
 
 export const metadata = {
-  title: 'People & Leadership Directory | IEEE MAIT Student Branch',
-  description: 'Meet the executive committee, branch counselors, technical chapter chairs, and student volunteers leading IEEE MAIT.',
+  title: "People & Leadership Directory | IEEE MAIT Student Branch",
+  description:
+    "Meet the executive committee, branch counselors, technical chapter chairs, and student volunteers leading IEEE MAIT.",
 };
 
 export const revalidate = 60; // ISR Cache for 60 seconds
@@ -37,42 +46,108 @@ export const revalidate = 60; // ISR Cache for 60 seconds
 export default async function PeoplePage() {
   const allPeople = await getDynamicPeople();
 
-  // Sort people into standardized hierarchical groups
-  const counsellors = allPeople.filter((p: any) => 
-    p.category === 'Counsellor / Mentor' || 
-    p.category === 'Counsellor' || 
-    p.hierarchy === 'mentor' ||
-    p.role?.toLowerCase().includes('counselor') ||
-    p.role?.toLowerCase().includes('advisor')
-  );
+  // Helper check for executive roles
+  const isExecutiveRole = (role: string = "") => {
+    const r = role.toLowerCase();
+    return (
+      r.includes("chair") ||
+      r.includes("secretary") ||
+      r.includes("treasurer") ||
+      r.includes("web master") ||
+      r.includes("webmaster") ||
+      r.includes("hardware head") ||
+      r.includes("head")
+    );
+  };
 
-  const sec = allPeople.filter((p: any) => 
-    (p.category === 'Senior Executive Committee' || 
-     p.category === 'ExeCom' || 
-     p.hierarchy === 'featured' ||
-     p.role?.toLowerCase().includes('chair') ||
-     p.role?.toLowerCase().includes('secretary') ||
-     p.role?.toLowerCase().includes('treasurer') ||
-     p.role?.toLowerCase().includes('hardware head') ||
-     p.role?.toLowerCase().includes('webmaster')) &&
-    !counsellors.some((c: any) => c.id === p.id)
-  );
+  // 1. Faculty Counsellors & Mentors
+  const counsellors = allPeople.filter((p: any) => {
+    const roleLower = (p.role || "").toLowerCase();
+    const catLower = (p.category || "").toLowerCase();
+    return (
+      p.isFacultyAdvisor === true ||
+      catLower === "counsellor" ||
+      (catLower === "counsellor / mentor" &&
+        (roleLower.includes("counselor") ||
+          roleLower.includes("counsellor") ||
+          roleLower.includes("advisor") ||
+          p.isFacultyAdvisor)) ||
+      roleLower.includes("branch counsellor") ||
+      roleLower.includes("branch counselor") ||
+      roleLower.includes("faculty advisor")
+    );
+  });
 
-  const chapterLeads = allPeople.filter((p: any) => 
-    (p.category === 'Chapter Leads' || 
-     p.category === 'Affinity Group Leads' || 
-     p.category === 'SIG Leads' || 
-     p.role?.toLowerCase().includes('eds') ||
-     p.role?.toLowerCase().includes('wie')) &&
-    !counsellors.some((c: any) => c.id === p.id) &&
-    !sec.some((s: any) => s.id === p.id)
-  );
+  // 2. Branch Mentors & Senior Advisory
+  const mentors = allPeople
+    .filter((p: any) => {
+      if (counsellors.some((c: any) => c.id === p.id)) return false;
+      const catLower = (p.category || "").toLowerCase();
+      const roleLower = (p.role || "").toLowerCase();
+      return (
+        catLower === "mentor" ||
+        catLower.includes("mentor") ||
+        roleLower === "mentor" ||
+        roleLower.includes("mentor") ||
+        (roleLower.includes("advisor") && !p.isFacultyAdvisor)
+      );
+    })
+    .sort((a: any, b: any) => (a.hierarchy ?? 99) - (b.hierarchy ?? 99));
 
-  const webAndOp = allPeople.filter((p: any) => 
-    !counsellors.some((c: any) => c.id === p.id) &&
-    !sec.some((s: any) => s.id === p.id) &&
-    !chapterLeads.some((cl: any) => cl.id === p.id)
-  );
+  // 3. Senior Executive Committee (ExeCom)
+  const sec = allPeople
+    .filter((p: any) => {
+      if (
+        counsellors.some((c: any) => c.id === p.id) ||
+        mentors.some((m: any) => m.id === p.id)
+      )
+        return false;
+      const catLower = (p.category || "").toLowerCase();
+      const roleLower = (p.role || "").toLowerCase();
+      return (
+        catLower === "senior executive committee" ||
+        catLower === "execom" ||
+        catLower === "sec" ||
+        (isExecutiveRole(p.role) && !catLower.includes("operational"))
+      );
+    })
+    .sort((a: any, b: any) => (a.hierarchy ?? 99) - (b.hierarchy ?? 99));
+
+  // 4. Chapter & Affinity Group Leads
+  const chapterLeads = allPeople
+    .filter((p: any) => {
+      if (
+        counsellors.some((c: any) => c.id === p.id) ||
+        mentors.some((m: any) => m.id === p.id) ||
+        sec.some((s: any) => s.id === p.id)
+      )
+        return false;
+      const catLower = (p.category || "").toLowerCase();
+      const roleLower = (p.role || "").toLowerCase();
+      return (
+        catLower === "chapter leads" ||
+        catLower === "affinity group leads" ||
+        catLower === "sig leads" ||
+        catLower.includes("eds") ||
+        catLower.includes("wie") ||
+        roleLower.includes("eds") ||
+        roleLower.includes("wie") ||
+        roleLower.includes("sig")
+      );
+    })
+    .sort((a: any, b: any) => (a.hierarchy ?? 99) - (b.hierarchy ?? 99));
+
+  // 5. Operational & Technical Leads
+  const operationalLeads = allPeople
+    .filter((p: any) => {
+      return (
+        !counsellors.some((c: any) => c.id === p.id) &&
+        !mentors.some((m: any) => m.id === p.id) &&
+        !sec.some((s: any) => s.id === p.id) &&
+        !chapterLeads.some((cl: any) => cl.id === p.id)
+      );
+    })
+    .sort((a: any, b: any) => (a.hierarchy ?? 99) - (b.hierarchy ?? 99));
 
   return (
     <>
@@ -83,8 +158,8 @@ export default async function PeoplePage() {
           {/* Breadcrumbs */}
           <Breadcrumb
             items={[
-              { label: 'Home', href: '/' },
-              { label: 'People & Leadership' },
+              { label: "Home", href: "/" },
+              { label: "People & Leadership" },
             ]}
           />
 
@@ -93,7 +168,7 @@ export default async function PeoplePage() {
             <SectionHeading
               category="Organization Map"
               title="People & Leadership"
-              subtitle="The Branch Counsellor, Senior Executive Committee, Operational Leads, and Chapter Officers guiding IEEE MAIT."
+              subtitle="The Branch Counsellor, Advisory Mentors, Senior Executive Committee, and Operational Leads guiding IEEE MAIT."
               className="mb-0"
             />
 
@@ -107,7 +182,43 @@ export default async function PeoplePage() {
             </Link>
           </div>
 
-          {/* 1. Branch Mentors & Counsellors */}
+          {/* Quick Section Summary Strip */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-14">
+            <div className="p-3.5 rounded-xl border border-warm-200 dark:border-gray-800 bg-warm-50/60 dark:bg-gray-900/60">
+              <span className="font-mono text-[10px] uppercase text-warm-400 dark:text-gray-400 block">
+                Faculty Advisory
+              </span>
+              <span className="font-serif text-lg font-medium text-ink dark:text-gray-100">
+                {counsellors.length} Counsellor
+              </span>
+            </div>
+            <div className="p-3.5 rounded-xl border border-warm-200 dark:border-gray-800 bg-warm-50/60 dark:bg-gray-900/60">
+              <span className="font-mono text-[10px] uppercase text-warm-400 dark:text-gray-400 block">
+                Senior Mentors
+              </span>
+              <span className="font-serif text-lg font-medium text-ink dark:text-gray-100">
+                {mentors.length} Advisory
+              </span>
+            </div>
+            <div className="p-3.5 rounded-xl border border-warm-200 dark:border-gray-800 bg-warm-50/60 dark:bg-gray-900/60">
+              <span className="font-mono text-[10px] uppercase text-warm-400 dark:text-gray-400 block">
+                Senior ExeCom
+              </span>
+              <span className="font-serif text-lg font-medium text-ink dark:text-gray-100">
+                {sec.length} Executive Officers
+              </span>
+            </div>
+            <div className="p-3.5 rounded-xl border border-warm-200 dark:border-gray-800 bg-warm-50/60 dark:bg-gray-900/60">
+              <span className="font-mono text-[10px] uppercase text-warm-400 dark:text-gray-400 block">
+                Operational Core
+              </span>
+              <span className="font-serif text-lg font-medium text-ink dark:text-gray-100">
+                {operationalLeads.length} Domain Leads
+              </span>
+            </div>
+          </div>
+
+          {/* 1. Branch Faculty Counsellor */}
           <section className="mb-20 space-y-6">
             <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-3">
               <div className="w-9 h-9 rounded-lg bg-ieee-subtle dark:bg-sky-950 flex items-center justify-center text-ieee-blue dark:text-sky-400">
@@ -115,32 +226,37 @@ export default async function PeoplePage() {
               </div>
               <div>
                 <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-ieee-blue dark:text-sky-400">
-                  Branch Mentors & Counsellors
+                  Branch Faculty Counsellor & Advisory
                 </h3>
                 <p className="text-xs text-warm-400 dark:text-gray-400 font-sans">
-                  Institutional mentorship and faculty advisory under Maharaja Agrasen Institute of Technology.
+                  Institutional mentorship and faculty governance under Maharaja
+                  Agrasen Institute of Technology.
                 </p>
               </div>
             </div>
 
             {counsellors.length > 0 ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 gap-8">
                 {counsellors.map((person: any) => (
                   <PersonCard
                     key={person.id}
                     name={person.name}
                     role={person.role}
                     category={person.category}
-                    department={person.department || 'Department of Electrical & Electronics Engineering (EEE)'}
-                    academicYear={person.academicYear || '2025–26'}
+                    department={
+                      person.department ||
+                      "Department of Electrical & Electronics Engineering (EEE)"
+                    }
+                    academicYear={person.academicYear || "2025–26"}
                     imageUrl={person.imageUrl}
                     imageSrc={person.imageSrc}
                     linkedIn={person.linkedIn || person.linkedin}
                     github={person.github}
                     email={person.email}
                     bio={person.bio}
-                    hierarchy={person.hierarchy || 'mentor'}
+                    hierarchy="mentor"
                     size="mentor"
+                    priority={true}
                   />
                 ))}
               </div>
@@ -151,24 +267,70 @@ export default async function PeoplePage() {
             )}
           </section>
 
-          {/* 2. Senior Executive Committee */}
+          {/* 2. Branch Mentors & Senior Advisory Board */}
+          {mentors.length > 0 && (
+            <section className="mb-20 space-y-6">
+              <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-3">
+                <div className="w-9 h-9 rounded-lg bg-warm-100 dark:bg-gray-800 flex items-center justify-center text-ink dark:text-gray-200">
+                  <FiCompass className="w-5 h-5 text-ieee-blue dark:text-sky-400" />
+                </div>
+                <div>
+                  <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-ink dark:text-gray-200">
+                    Branch Mentors & Senior Advisory Board
+                  </h3>
+                  <p className="text-xs text-warm-400 dark:text-gray-400 font-sans">
+                    Experienced branch seniors providing strategic direction,
+                    hands-on mentorship, and institutional continuity.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {mentors.map((person: any) => (
+                  <PersonCard
+                    key={person.id}
+                    name={person.name}
+                    role={person.role}
+                    category={person.category}
+                    department={
+                      person.department ||
+                      "Department of Electrical & Electronics Engineering (EEE)"
+                    }
+                    academicYear={person.academicYear || "2025–26"}
+                    imageUrl={person.imageUrl}
+                    imageSrc={person.imageSrc}
+                    linkedIn={person.linkedIn || person.linkedin}
+                    github={person.github}
+                    email={person.email}
+                    bio={person.bio}
+                    hierarchy="advisory"
+                    size="advisory"
+                    priority={true}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* 3. Senior Executive Committee */}
           <section className="mb-20 space-y-6">
             <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-3">
-              <div className="w-9 h-9 rounded-lg bg-ieee-subtle dark:bg-sky-950 flex items-center justify-center text-ieee-blue dark:text-sky-400">
-                <FiAward className="w-5 h-5" />
+              <div className="w-9 h-9 rounded-lg bg-warm-100 dark:bg-gray-800 flex items-center justify-center text-ink dark:text-gray-200">
+                <FiAward className="w-5 h-5 text-ieee-blue dark:text-sky-400" />
               </div>
               <div>
-                <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-ieee-blue dark:text-sky-400">
+                <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-ink dark:text-gray-200">
                   Senior Executive Committee (ExeCom)
                 </h3>
                 <p className="text-xs text-warm-400 dark:text-gray-400 font-sans">
-                  Elected branch officers managing operations, strategic partnerships, finances, and section coordination.
+                  Elected student officers managing branch operations, technical
+                  initiatives, finances, and section partnerships.
                 </p>
               </div>
             </div>
 
             {sec.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {sec.map((person: any) => (
                   <PersonCard
                     key={person.id}
@@ -176,14 +338,14 @@ export default async function PeoplePage() {
                     role={person.role}
                     category={person.category}
                     department={person.department || undefined}
-                    academicYear={person.academicYear || '2025–26'}
+                    academicYear={person.academicYear || "2025–26"}
                     imageUrl={person.imageUrl}
                     imageSrc={person.imageSrc}
                     linkedIn={person.linkedIn || person.linkedin}
                     github={person.github}
                     email={person.email}
                     bio={person.bio}
-                    hierarchy={person.hierarchy || 'featured'}
+                    hierarchy="featured"
                     size="featured"
                   />
                 ))}
@@ -195,24 +357,25 @@ export default async function PeoplePage() {
             )}
           </section>
 
-          {/* 3. Chapter & Affinity Group Leadership */}
+          {/* 4. Chapter & Affinity Group Leadership */}
           {chapterLeads.length > 0 && (
             <section className="mb-20 space-y-6">
               <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-3">
-                <div className="w-9 h-9 rounded-lg bg-ieee-subtle dark:bg-sky-950 flex items-center justify-center text-ieee-blue dark:text-sky-400">
-                  <FiZap className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-lg bg-warm-100 dark:bg-gray-800 flex items-center justify-center text-ink dark:text-gray-200">
+                  <FiZap className="w-5 h-5 text-ieee-blue dark:text-sky-400" />
                 </div>
                 <div>
-                  <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-ieee-blue dark:text-sky-400">
+                  <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-ink dark:text-gray-200">
                     Society Chapters & Affinity Group Leadership
                   </h3>
                   <p className="text-xs text-warm-400 dark:text-gray-400 font-sans">
-                    Student chairs directing autonomous society sub-units and domain-focused activities.
+                    Student chairs directing autonomous society sub-units and
+                    domain-focused activities.
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {chapterLeads.map((person: any) => (
                   <PersonCard
                     key={person.id}
@@ -220,53 +383,57 @@ export default async function PeoplePage() {
                     role={person.role}
                     category={person.category}
                     department={person.department || undefined}
-                    academicYear={person.academicYear || '2025–26'}
+                    academicYear={person.academicYear || "2025–26"}
                     imageUrl={person.imageUrl}
                     imageSrc={person.imageSrc}
                     linkedIn={person.linkedIn || person.linkedin}
                     github={person.github}
                     email={person.email}
                     bio={person.bio}
-                    hierarchy={person.hierarchy || 'standard'}
+                    hierarchy="standard"
+                    size="standard"
                   />
                 ))}
               </div>
             </section>
           )}
 
-          {/* 4. Operational & Technical Leads */}
+          {/* 5. Operational & Technical Leads */}
           <section className="mb-20 space-y-6">
             <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-3">
-              <div className="w-9 h-9 rounded-lg bg-ieee-subtle dark:bg-sky-950 flex items-center justify-center text-ieee-blue dark:text-sky-400">
-                <FiCpu className="w-5 h-5" />
+              <div className="w-9 h-9 rounded-lg bg-warm-100 dark:bg-gray-800 flex items-center justify-center text-ink dark:text-gray-200">
+                <FiCpu className="w-5 h-5 text-ieee-blue dark:text-sky-400" />
               </div>
               <div>
-                <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-ieee-blue dark:text-sky-400">
+                <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-ink dark:text-gray-200">
                   Operational & Technical Leads
                 </h3>
                 <p className="text-xs text-warm-400 dark:text-gray-400 font-sans">
-                  Domain heads driving web development, technical workshops, PR, design, and event logistics.
+                  Specialized domain leads driving creative design, public
+                  relations, technical workshops, and campus community
+                  engagement.
                 </p>
               </div>
             </div>
 
-            {webAndOp.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {webAndOp.map((person: any) => (
+            {operationalLeads.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {operationalLeads.map((person: any) => (
                   <PersonCard
                     key={person.id}
                     name={person.name}
                     role={person.role}
                     category={person.category}
                     department={person.department || undefined}
-                    academicYear={person.academicYear || '2025–26'}
+                    academicYear={person.academicYear || "2025–26"}
                     imageUrl={person.imageUrl}
                     imageSrc={person.imageSrc}
                     linkedIn={person.linkedIn || person.linkedin}
                     github={person.github}
                     email={person.email}
                     bio={person.bio}
-                    hierarchy={person.hierarchy || 'standard'}
+                    hierarchy="operational"
+                    size="operational"
                   />
                 ))}
               </div>
@@ -277,7 +444,7 @@ export default async function PeoplePage() {
             )}
           </section>
 
-          {/* 5. Leadership Archive Transition Banner */}
+          {/* 6. Leadership Archive Transition Banner */}
           <div className="p-8 border border-warm-200 dark:border-gray-800 bg-warm-50/60 dark:bg-gray-900/60 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xs">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
@@ -292,7 +459,9 @@ export default async function PeoplePage() {
                 Past Leadership & Historical ExeCom Archive
               </h4>
               <p className="text-xs text-warm-500 dark:text-gray-300 font-sans max-w-xl leading-relaxed">
-                Explore executive committee rosters, leadership tenures, and student contributions across every academic year since our founding in 2005.
+                Explore executive committee rosters, leadership tenures, and
+                student contributions across every academic year since our
+                founding in 2005.
               </p>
             </div>
 

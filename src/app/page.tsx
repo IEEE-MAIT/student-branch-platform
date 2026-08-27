@@ -65,14 +65,32 @@ export default async function HomePage() {
   const featuredEvent = events.length > 0 ? events[0] : null;
   const remainingUpcoming = events.length > 1 ? events.slice(1, 4) : [];
 
-  // Top Leadership for Spotlight: Counselors & Core ExeCom
+  // Top Leadership for Spotlight: Core Executive Officers
   const topLeadership = (peopleList as any[])
-    .filter((p: any) => 
-      p.category === 'Counsellor / Mentor' || 
-      p.category === 'Senior Executive Committee' ||
-      p.hierarchy === 'mentor' ||
-      p.hierarchy === 1
-    )
+    .filter((p: any) => {
+      const cat = (p.category || '').toLowerCase();
+      const role = (p.role || '').toLowerCase();
+      if (
+        p.isFacultyAdvisor ||
+        cat.includes('counsellor') ||
+        cat.includes('counselor') ||
+        cat.includes('mentor') ||
+        role.includes('counsellor') ||
+        role.includes('counselor') ||
+        role.includes('mentor')
+      ) {
+        return false;
+      }
+      return (
+        cat.includes('senior executive') ||
+        cat.includes('execom') ||
+        role.includes('chair') ||
+        role.includes('secretary') ||
+        role.includes('treasurer') ||
+        role.includes('web master')
+      );
+    })
+    .sort((a: any, b: any) => (a.hierarchy ?? 99) - (b.hierarchy ?? 99))
     .slice(0, 4);
 
   // Featured Achievements
