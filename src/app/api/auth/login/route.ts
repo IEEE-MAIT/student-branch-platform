@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { authenticateOfficer } from '@/lib/officers';
 import { signJWT } from '@/lib/jwt';
+import { recordAuditLog } from '@/lib/auditLog';
 
 /**
  * POST /api/auth/login
- * Authenticates email & password, issues a signed JWT token in an HttpOnly cookie.
+ * Authenticates email & password, issues a signed JWT token in an HttpOnly cookie,
+ * and records a login event in the audit trail.
  */
 export async function POST(request: Request) {
   try {
@@ -15,28 +17,45 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email and password are required.' }, { status: 400 });
     }
 
-    const officer = await authenticateOfficer(email, password);
-    if (!officer) {
+    const admin = await authenticateOfficer(email, password);
+    if (!admin) {
       return NextResponse.json({ error: 'Invalid email or password.' }, { status: 401 });
     }
 
-    // Issue JWT token
+    // Issue JWT token with embedded role and permissions
     const token = signJWT({
-      userId: officer.id,
-      email: officer.email,
-      name: officer.name,
-      role: officer.role || 'Super Admin',
-      category: officer.category || 'Executive',
+      userId: admin.id,
+      email: admin.email,
+      name: admin.name,
+      role: admin.role,
+      roleId: admin.roleId,
+      category: admin.category || 'Executive',
+      permissions: admin.permissions,
+      customPermissions: admin.customPermissions,
     });
+
+    // Record login in audit log asynchronously
+    recordAuditLog({
+      performedBy: admin.name,
+      userEmail: admin.email,
+      actionType: 'LOGIN',
+      entityType: 'AUTH',
+      entityId: admin.id,
+      entityTitle: admin.email,
+      changeSummary: `Admin logged in successfully: ${admin.name} (${admin.role})`,
+    }).catch(() => {});
 
     const response = NextResponse.json({
       success: true,
       officer: {
-        id: officer.id,
-        name: officer.name,
-        email: officer.email,
-        role: officer.role,
-        category: officer.category,
+        id: admin.id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role,
+        roleId: admin.roleId,
+        category: admin.category,
+        permissions: admin.permissions,
+        customPermissions: admin.customPermissions,
       },
     });
 

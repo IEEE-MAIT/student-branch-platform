@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyJWT } from '@/lib/jwt';
 import { getSafeOfficersList } from '@/lib/officers';
+import { canPerform } from '@/lib/permissions';
 
 /**
  * GET /api/auth/session
- * Verifies JWT token from HttpOnly cookie and returns authenticated officer payload & officers directory.
+ * Verifies JWT token from HttpOnly cookie and returns authenticated officer payload & directory.
  */
 export async function GET() {
   try {
@@ -21,7 +22,19 @@ export async function GET() {
       return NextResponse.json({ authenticated: false, error: 'Token expired or invalid' }, { status: 200 });
     }
 
-    const officersList = payload.role === 'Super Admin' ? await getSafeOfficersList() : [];
+    const sessionUser = {
+      id: payload.userId,
+      name: payload.name,
+      email: payload.email,
+      role: payload.role,
+      roleId: payload.roleId,
+      permissions: payload.permissions,
+      customPermissions: payload.customPermissions,
+    };
+
+    // Only fetch officers list if user has permission to view Users module
+    const canViewUsers = canPerform(sessionUser, 'Users', 'view');
+    const officersList = canViewUsers ? await getSafeOfficersList() : [];
 
     return NextResponse.json({
       authenticated: true,
@@ -30,7 +43,10 @@ export async function GET() {
         name: payload.name,
         email: payload.email,
         role: payload.role,
+        roleId: payload.roleId,
         category: payload.category,
+        permissions: payload.permissions,
+        customPermissions: payload.customPermissions,
       },
       officersList,
     });

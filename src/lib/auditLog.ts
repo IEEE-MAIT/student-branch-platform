@@ -1,54 +1,117 @@
 /**
  * @file src/lib/auditLog.ts
- * @description Centralized Audit Log Engine & Change History Ledger using Prisma ORM.
+ * @description Centralized Immutable Audit Log Engine & Activity Ledger for IEEE MAIT.
  * 
- * @author IEEE MAIT Webmaster
+ * SECURITY SPECIFICATION:
+ * - Immutable ledger: No DELETE or UPDATE methods exist.
+ * - Records timestamps, actor name, actor email, action type, entity type, entity ID, title, and structured diffs.
+ * 
+ * @author IEEE MAIT Webmaster & Security Engineering
  * @license MIT
  */
 
 import { prisma } from './db';
+import { sanitizePlainText } from './security';
+
+export type AuditActionType =
+  | 'CREATE'
+  | 'UPDATE'
+  | 'DELETE'
+  | 'RESTORE'
+  | 'PUBLISH'
+  | 'APPROVE'
+  | 'LOGIN'
+  | 'LOGOUT';
 
 export interface AuditLogEntry {
   id: string;
   timestamp: string;
   performedBy: string;
+  userEmail?: string | null;
   actionType: string;
   entityType: string;
-  entityTitle: string | null;
-  changeSummary: string | null;
+  entityId?: string | null;
+  entityTitle?: string | null;
+  changeSummary?: string | null;
+  details?: any;
+  ipAddress?: string | null;
+  createdAt?: Date;
 }
 
-export async function recordAuditLog(entry: {
+export interface RecordAuditParams {
   performedBy: string;
-  actionType: 'CREATE' | 'UPDATE' | 'DELETE';
+  userEmail?: string | null;
+  actionType: AuditActionType | string;
   entityType: string;
-  entityTitle: string;
+  entityId?: string | null;
+  entityTitle?: string | null;
   changeSummary: string;
-}) {
+  details?: any;
+  ipAddress?: string | null;
+}
+
+/**
+ * Appends a new immutable entry to the system audit ledger.
+ */
+export async function recordAuditLog(entry: RecordAuditParams): Promise<void> {
   const timestamp = new Date().toISOString();
-  
+
   try {
     await prisma.auditLog.create({
       data: {
         timestamp,
-        performedBy: entry.performedBy || 'System Admin',
-        actionType: entry.actionType,
-        entityType: entry.entityType,
-        entityTitle: entry.entityTitle,
-        changeSummary: entry.changeSummary,
-      }
+        performedBy: sanitizePlainText(entry.performedBy || 'System Admin', 100),
+        userEmail: entry.userEmail ? sanitizePlainText(entry.userEmail, 150) : null,
+        actionType: entry.actionType.toUpperCase(),
+        entityType: entry.entityType.toUpperCase(),
+        entityId: entry.entityId || null,
+        entityTitle: entry.entityTitle ? sanitizePlainText(entry.entityTitle, 250) : null,
+        changeSummary: sanitizePlainText(entry.changeSummary, 1000),
+        details: entry.details ? JSON.parse(JSON.stringify(entry.details)) : undefined,
+        ipAddress: entry.ipAddress || null,
+      },
     });
   } catch (e) {
-    console.error('Failed to write audit log to DB', e);
+    console.error('Failed to write audit log to DB:', e);
   }
 }
 
-export async function getAuditLogs(): Promise<AuditLogEntry[]> {
+/**
+ * Fetches audit logs with optional filtering. Strictly read-only.
+ */
+export async function getAuditLogs(options?: {
+  limit?: number;
+  offset?: number;
+  entityType?: string;
+  actionType?: string;
+  userEmail?: string;
+}): Promise<{ logs: AuditLogEntry[]; total: number }> {
   try {
-    const logs = await prisma.auditLog.findMany({ orderBy: { timestamp: 'desc' } });
-    return logs;
+    const where: any = {};
+
+    if (options?.entityType) {
+      where.entityType = options.entityType.toUpperCase();
+    }
+    if (options?.actionType) {
+      where.actionType = options.actionType.toUpperCase();
+    }
+    if (options?.userEmail) {
+      where.userEmail = { contains: options.userEmail.toLowerCase(), mode: 'insensitive' };
+    }
+
+    const [logs, total] = await Promise.all([
+      prisma.auditLog.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take: options?.limit || 100,
+        skip: options?.offset || 0,
+      }),
+      prisma.auditLog.count({ where }),
+    ]);
+
+    return { logs: logs as any, total };
   } catch (e) {
-    console.error('Failed to fetch audit logs from DB', e);
-    return [];
+    console.error('Failed to fetch audit logs from DB:', e);
+    return { logs: [], total: 0 };
   }
 }

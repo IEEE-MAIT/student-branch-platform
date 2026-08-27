@@ -17,7 +17,19 @@ export async function GET() {
         },
       });
     }
-    return NextResponse.json({}, { status: 404 });
+    return NextResponse.json({
+      id: 'global',
+      announcementMessage: '',
+      announcementLinkText: '',
+      announcementLinkHref: '',
+      announcementActive: false,
+      donateUrl: 'https://www.ieee.org/membership/join/index.html',
+      recycleBinRetentionDays: 30,
+    }, {
+      headers: {
+        'Cache-Control': 'public, max-age=30, s-maxage=60, stale-while-revalidate=120',
+      },
+    });
   } catch (err) {
     return NextResponse.json({ error: 'Database error' }, { status: 500 });
   }

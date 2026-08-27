@@ -1,18 +1,18 @@
 /**
  * @file src/lib/jwt.ts
- * @description Lightweight, zero-dependency Cryptographic JWT Authentication Module for IEEE MAIT.
+ * @description Cryptographic JWT Authentication Module for IEEE MAIT.
  * 
  * SECURITY SPECIFICATIONS:
  * - Uses HMAC-SHA256 (HS256) signing algorithm via Node.js native `crypto`.
- * - Token payload contains user ID, email, role, and expiration timestamp (exp).
- * - Verifies signature and token expiration against tampering or replay attacks.
+ * - Token payload contains user ID, email, name, role, customPermissions, and expiration timestamp (exp).
+ * - Verifies cryptographic signature and token expiration against tampering or replay attacks.
  * 
  * @author IEEE MAIT Webmaster & Security Engineering
  * @license MIT
  */
 
 import crypto from 'crypto';
-import type { Role } from './auth';
+import type { PermissionMatrix } from './permissions';
 
 const JWT_SECRET = process.env.PAYLOAD_SECRET || 'ieee-mait-jwt-super-secret-key-2026';
 
@@ -20,8 +20,11 @@ export interface JWTPayload {
   userId: string;
   email: string;
   name: string;
-  role: Role | string;
-  category: string;
+  role: string;
+  roleId?: string | null;
+  category?: string | null;
+  permissions?: PermissionMatrix;
+  customPermissions?: PermissionMatrix | null;
   iat: number;
   exp: number;
 }
@@ -49,11 +52,11 @@ function base64UrlDecode(str: string): string {
 }
 
 /**
- * Generates a signed JWT token.
+ * Generates a signed JWT token. Default expiration: 8 hours (28,800 seconds).
  */
 export function signJWT(payload: Omit<JWTPayload, 'iat' | 'exp'>, expiresInSeconds: number = 28800): string {
   const iat = Math.floor(Date.now() / 1000);
-  const exp = iat + expiresInSeconds; // Default: 8 Hours
+  const exp = iat + expiresInSeconds;
 
   const fullPayload: JWTPayload = {
     ...payload,

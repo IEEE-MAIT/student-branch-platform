@@ -8,73 +8,38 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Event {
-  id               String        @id @default(cuid())
-  title            String
-  slug             String        @unique
-  date             String?
-  time             String?
-  venue            String?
-  unit             String?
-  unitSlug         String?
-  category         String?
-  status           String?
-  description      String?
-  imageSrc         String?
-  images           String[]      @default([])
-  registrationLink String?
-  galleryId        String?
-  storyId          String?
-  chapterId        String?
-  academicYearId   String?
-  gallery          Gallery?      @relation(fields: [galleryId], references: [id], onDelete: SetNull)
-  story            Story?        @relation("EventReport", fields: [storyId], references: [id], onDelete: SetNull)
-  chapter          Chapter?      @relation(fields: [chapterId], references: [id], onDelete: SetNull)
-  academicYear     AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
-  achievements     Achievement[]
+// -----------------------------------------------------------------------------
+// Core RBAC & User Management
+// -----------------------------------------------------------------------------
 
-  @@map("events")
+model AdminRole {
+  id          String      @id @default(cuid())
+  name        String      @unique // "Super Admin" | "Admin" | "Event Manager" | "PR/Media" | "SIG Lead" | "Content Editor" | "Viewer"
+  description String?
+  permissions Json        // { [module: string]: { view?: boolean, create?: boolean, edit?: boolean, delete?: boolean, restore?: boolean, publish?: boolean, approve?: boolean } }
+  isSystem    Boolean     @default(false)
+  users       AdminUser[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("admin_roles")
 }
 
-model Achievement {
-  id             String              @id @default(cuid())
-  year           String
-  title          String
-  conferredBy    String?
-  unitOrTeam     String?
-  category       String?
-  description    String?
-  imageSrc       String?
-  images         String[]            @default([])
-  chapterId      String?
-  eventId        String?
-  academicYearId String?
-  chapter        Chapter?            @relation(fields: [chapterId], references: [id], onDelete: SetNull)
-  event          Event?              @relation(fields: [eventId], references: [id], onDelete: SetNull)
-  academicYear   AcademicYear?       @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
-  people         AchievementPerson[]
+model AdminUser {
+  id                String     @id @default(cuid())
+  name              String
+  email             String     @unique
+  password          String
+  roleId            String?
+  role              AdminRole? @relation(fields: [roleId], references: [id], onDelete: SetNull)
+  customPermissions Json?      // Granular overrides on top of role permissions
+  isActive          Boolean    @default(true)
+  lastLoginAt       DateTime?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  createdBy         String?
 
-  @@map("achievements")
-}
-
-model AchievementPerson {
-  achievementId String
-  personId      String
-  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
-  person        Person      @relation(fields: [personId], references: [id], onDelete: Cascade)
-
-  @@id([achievementId, personId])
-  @@map("achievement_people")
-}
-
-model SiteSetting {
-  id                   String  @id
-  announcementMessage  String?
-  announcementLinkText String?
-  announcementLinkHref String?
-  announcementActive   Boolean @default(true)
-
-  @@map("site_settings")
+  @@map("admin_users")
 }
 
 model Officer {
@@ -91,103 +56,139 @@ model Officer {
 }
 
 model AuditLog {
-  id            String  @id @default(cuid())
+  id            String    @id @default(cuid())
   timestamp     String
   performedBy   String
-  actionType    String
-  entityType    String
+  userEmail     String?
+  actionType    String    // CREATE | UPDATE | DELETE | RESTORE | PUBLISH | APPROVE
+  entityType    String    // EVENT | PERSON | CHAPTER | SIG | PUBLICATION | etc.
+  entityId      String?
   entityTitle   String?
   changeSummary String?
+  details       Json?
+  ipAddress     String?
+  createdAt     DateTime  @default(now())
 
   @@map("audit_logs")
 }
 
-model Chapter {
-  id              String                   @id @default(cuid())
-  name            String
-  slug            String                   @unique
-  type            String
-  parentSociety   String?
-  establishedYear String?
-  description     String?
-  mission         String?
-  // New enrichment fields
-  tagline         String?   // One-liner hook, e.g. "Empowering Women in Technology"
-  logoUrl         String?   // Cloudinary URL; replaces hardcoded slug check in ChapterPanel
-  coverImageUrl   String?   // Hero image for chapter detail page
-  accentColor     String?   // Chapter brand hex, e.g. "#7C3AED" for WIE purple
-  instagramUrl    String?   // Chapter-specific Instagram profile URL
-  linkedinUrl     String?   // Chapter-specific LinkedIn page URL
-  githubUrl       String?   // Chapter GitHub org URL
-  // Leadership
-  leaderName      String?
-  leaderRole      String?
-  leaderId        String?   // Optional FK to Person (supplements leaderName/leaderRole)
-  memberCount     Int                      @default(0)
-  eventCount      Int                      @default(0)
-  events          Event[]
-  achievements    Achievement[]
-  stories         Story[]
-  galleries       Gallery[]
-  projects        Project[]
-  initiatives     Initiative[]
-  memberships     OrganizationMembership[]
-  leader          Person?                  @relation("ChapterLeader", fields: [leaderId], references: [id], onDelete: SetNull)
+model SiteSetting {
+  id                     String  @id
+  announcementMessage    String?
+  announcementLinkText   String?
+  announcementLinkHref   String?
+  announcementActive     Boolean @default(true)
+  donateUrl              String?
+  recycleBinRetentionDays Int     @default(30)
 
-  @@map("chapters")
+  @@map("site_settings")
 }
 
-model Story {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  date        String
-  author      String
-  authorId    String?
-  category    String
-  excerpt     String
-  contentHtml String
-  imageUrl    String?
-  chapterId   String?
-  authorPerson Person?  @relation(fields: [authorId], references: [id], onDelete: SetNull)
-  chapter     Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
-  events      Event[]  @relation("EventReport")
+// -----------------------------------------------------------------------------
+// Events & Event Resources
+// -----------------------------------------------------------------------------
 
-  @@map("stories")
+model Event {
+  id               String          @id @default(cuid())
+  title            String
+  slug             String          @unique
+  date             String?
+  endDate          String?
+  time             String?
+  venue            String?
+  unit             String?
+  unitSlug         String?
+  category         String?
+  eventType        String?         // Flagship | Chapter | Affinity Group | Technical | Non-Technical
+  status           String?         // Upcoming | Ongoing | Past
+  isLive           Boolean         @default(false)
+  description      String?
+  imageSrc         String?
+  images           String[]        @default([])
+  registrationLink String?
+  vtoolsLink       String?
+  liveLink         String?
+  virtualLink      String?
+  galleryId        String?
+  storyId          String?
+  chapterId        String?
+  academicYearId   String?
+  sigId            String?
+  workflowStatus   String          @default("Published") // Draft | Review | Approved | Published | Archived
+  deletedAt        DateTime?
+  deletedBy        String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  gallery          Gallery?        @relation(fields: [galleryId], references: [id], onDelete: SetNull)
+  story            Story?          @relation("EventReport", fields: [storyId], references: [id], onDelete: SetNull)
+  chapter          Chapter?        @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  academicYear     AcademicYear?   @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  sig              SIG?            @relation(fields: [sigId], references: [id], onDelete: SetNull)
+  achievements     Achievement[]
+  resources        EventResource[]
+  milestones       Milestone[]
+
+  @@map("events")
 }
 
-model Gallery {
-  id          String         @id @default(cuid())
-  title       String
-  slug        String         @unique
-  date        String
-  category    String
-  coverImage  String
-  imageCount  Int            @default(0)
-  description String?
-  chapterId   String?
-  chapter     Chapter?       @relation(fields: [chapterId], references: [id], onDelete: SetNull)
-  photos      GalleryPhoto[]
-  events      Event[]
+model EventResource {
+  id        String    @id @default(cuid())
+  eventId   String
+  type      String    // Report | PPT | Photos | Videos | Certificate | Document | Link | Other
+  title     String
+  url       String
+  fileUrl   String?
+  isPublic  Boolean   @default(true)
+  deletedAt DateTime?
+  deletedBy String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
-  @@map("galleries")
+  event     Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("event_resources")
 }
 
-model GalleryPhoto {
-  id        String  @id @default(cuid())
-  galleryId String
-  caption   String
-  url       String?
-  gallery   Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+// -----------------------------------------------------------------------------
+// People, Positions & Organization Memberships
+// -----------------------------------------------------------------------------
 
-  @@map("gallery_photos")
+model Person {
+  id                 String                   @id @default(cuid())
+  name               String
+  role               String
+  department         String?
+  academicYear       String?
+  hierarchy          Int                      @default(10)
+  category           String?
+  imageUrl           String?
+  email              String?
+  linkedIn           String?
+  github             String?
+  bio                String?
+  isFacultyAdvisor   Boolean                  @default(false)
+  facultyDepartment  String?
+  deletedAt          DateTime?
+  deletedBy          String?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+
+  memberships        OrganizationMembership[]
+  sigMemberships     SIGMembership[]
+  stories            Story[]
+  achievements       AchievementPerson[]
+  ledChapters        Chapter[]                @relation("ChapterLeader")
+  ledSIGs            SIG[]                    @relation("SIGLeader")
+
+  @@map("people")
 }
 
 model Role {
   id          String                   @id @default(cuid())
   title       String                   @unique
   hierarchy   Int                      @default(1)
-  category    String // SEC | Lead | ChapterEC | MentorRole
+  category    String                   // SEC | Lead | ChapterEC | MentorRole
   isActive    Boolean                  @default(true)
   memberships OrganizationMembership[]
 
@@ -207,27 +208,6 @@ model AcademicYear {
   @@map("academic_years")
 }
 
-model Person {
-  id           String                   @id @default(cuid())
-  name         String
-  role         String
-  department   String?
-  academicYear String?
-  hierarchy    Int                      @default(10)
-  category     String?
-  imageUrl     String?
-  email        String?
-  linkedIn     String?
-  github       String?
-  bio          String?
-  memberships  OrganizationMembership[]
-  stories      Story[]
-  achievements AchievementPerson[]
-  ledChapters  Chapter[]                @relation("ChapterLeader") // back-relation for leaderId FK
-
-  @@map("people")
-}
-
 model OrganizationMembership {
   id             String       @id @default(cuid())
   personId       String
@@ -238,6 +218,7 @@ model OrganizationMembership {
   endDate        String?
   isCurrent      Boolean      @default(true)
   sortOrder      Int          @default(0)
+
   person         Person       @relation(fields: [personId], references: [id], onDelete: Cascade)
   role           Role         @relation(fields: [roleId], references: [id], onDelete: Cascade)
   academicYear   AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
@@ -246,70 +227,376 @@ model OrganizationMembership {
   @@map("organization_memberships")
 }
 
-model Milestone {
-  id          String  @id @default(cuid())
-  year        String
-  title       String
-  description String?
-  category    String?
-  sortOrder   Int     @default(0)
+// -----------------------------------------------------------------------------
+// Chapters & Special Interest Groups (SIGs)
+// -----------------------------------------------------------------------------
 
-  @@map("milestones")
+model Chapter {
+  id              String                   @id @default(cuid())
+  name            String
+  slug            String                   @unique
+  type            String
+  parentSociety   String?
+  establishedYear String?
+  description     String?
+  mission         String?
+  tagline         String?
+  logoUrl         String?
+  coverImageUrl   String?
+  accentColor     String?
+  instagramUrl    String?
+  linkedinUrl     String?
+  githubUrl       String?
+  leaderName      String?
+  leaderRole      String?
+  leaderId        String?
+  memberCount     Int                      @default(0)
+  eventCount      Int                      @default(0)
+  deletedAt       DateTime?
+  deletedBy       String?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  events          Event[]
+  achievements    Achievement[]
+  stories         Story[]
+  galleries       Gallery[]
+  projects        Project[]
+  initiatives     Initiative[]
+  memberships     OrganizationMembership[]
+  leader          Person?                  @relation("ChapterLeader", fields: [leaderId], references: [id], onDelete: SetNull)
+
+  @@map("chapters")
 }
 
-model Resource {
-  id            String  @id @default(cuid())
-  title         String
-  type          String // Newsletter | AnnualReport | Document | Other
-  fileUrl       String?
-  publishedDate String
+model SIG {
+  id            String          @id @default(cuid())
+  name          String          // DSA | Development | AI/ML | Hardware | etc.
+  slug          String          @unique
   description   String?
-  status        String  @default("published")
+  leadId        String?
+  memberCount   Int             @default(0)
+  accentColor   String?
+  logoUrl       String?
+  coverImageUrl String?
+  deletedAt     DateTime?
+  deletedBy     String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
-  @@map("resources")
+  lead          Person?         @relation("SIGLeader", fields: [leadId], references: [id], onDelete: SetNull)
+  projects      Project[]
+  events        Event[]
+  achievements  Achievement[]
+  memberships   SIGMembership[]
+
+  @@map("sigs")
 }
 
-model Inquiry {
-  id        String  @id @default(cuid())
-  name      String
-  email     String
-  subject   String?
-  message   String
-  status    String  @default("Unread")
-  createdAt String
-  
-  @@map("inquiries")
+model SIGMembership {
+  id        String    @id @default(cuid())
+  sigId     String
+  personId  String
+  role      String    @default("Member") // Lead | Co-Lead | Member | Mentor
+  isCurrent Boolean   @default(true)
+  joinedAt  DateTime?
+
+  sig       SIG       @relation(fields: [sigId], references: [id], onDelete: Cascade)
+  person    Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([sigId, personId])
+  @@map("sig_memberships")
 }
+
+// -----------------------------------------------------------------------------
+// Achievements & Custom Tags
+// -----------------------------------------------------------------------------
+
+model Achievement {
+  id              String              @id @default(cuid())
+  year            String
+  title           String
+  conferredBy     String?
+  unitOrTeam      String?
+  category        String?
+  achievementType String?             @default("Branch") // Branch | Individual
+  description     String?
+  imageSrc        String?
+  images          String[]            @default([])
+  chapterId       String?
+  eventId         String?
+  academicYearId  String?
+  sigId           String?
+  deletedAt       DateTime?
+  deletedBy       String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  chapter         Chapter?            @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  event           Event?              @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  academicYear    AcademicYear?       @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  sig             SIG?                @relation(fields: [sigId], references: [id], onDelete: SetNull)
+  people          AchievementPerson[]
+  tags            AchievementTag[]
+
+  @@map("achievements")
+}
+
+model AchievementPerson {
+  achievementId String
+  personId      String
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  person        Person      @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@id([achievementId, personId])
+  @@map("achievement_people")
+}
+
+model AchievementTag {
+  id            String      @id @default(cuid())
+  achievementId String
+  tag           String      // "Ambassador" | "Leadership" | "Global Recognition" | custom
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([achievementId, tag])
+  @@map("achievement_tags")
+}
+
+// -----------------------------------------------------------------------------
+// Publications (formerly Stories)
+// -----------------------------------------------------------------------------
+
+model Story {
+  id              String    @id @default(cuid())
+  title           String
+  slug            String    @unique
+  date            String
+  author          String
+  authorId        String?
+  category        String
+  publicationType String?   // Tech Tuesday | Newsletter | Technical Article | Personal/IEEE Publication | Other
+  excerpt         String
+  contentHtml     String
+  imageUrl        String?
+  pdfUrl          String?
+  externalLink    String?
+  chapterId       String?
+  workflowStatus  String    @default("Published") // Draft | Review | Approved | Published | Archived
+  deletedAt       DateTime?
+  deletedBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  authorPerson    Person?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  chapter         Chapter?  @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  events          Event[]   @relation("EventReport")
+
+  @@map("stories")
+}
+
+// -----------------------------------------------------------------------------
+// Gallery & Photos
+// -----------------------------------------------------------------------------
+
+model Gallery {
+  id          String         @id @default(cuid())
+  title       String
+  slug        String         @unique
+  date        String
+  category    String
+  coverImage  String
+  imageCount  Int            @default(0)
+  description String?
+  chapterId   String?
+  deletedAt   DateTime?
+  deletedBy   String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  chapter     Chapter?       @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  photos      GalleryPhoto[]
+  events      Event[]
+
+  @@map("galleries")
+}
+
+model GalleryPhoto {
+  id        String    @id @default(cuid())
+  galleryId String
+  caption   String
+  url       String?
+  deletedAt DateTime?
+  deletedBy String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  gallery   Gallery   @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+
+  @@map("gallery_photos")
+}
+
+// -----------------------------------------------------------------------------
+// Projects & Initiatives
+// -----------------------------------------------------------------------------
 
 model Project {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  summary     String
-  description String?
-  githubUrl   String?
-  demoUrl     String?
-  coverImage  String?
-  chapterId   String?
-  chapter     Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
-  year        String
-  tags        String[] @default([])
-  featured    Boolean  @default(false)
+  id             String    @id @default(cuid())
+  title          String
+  slug           String    @unique
+  summary        String
+  description    String?
+  githubUrl      String?
+  demoUrl        String?
+  coverImage     String?
+  chapterId      String?
+  sigId          String?
+  year           String
+  tags           String[]  @default([])
+  status         String    @default("Ongoing") // Ongoing | Upcoming | Completed
+  featured       Boolean   @default(false)
+  workflowStatus String    @default("Published")
+  deletedAt      DateTime?
+  deletedBy      String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  chapter        Chapter?  @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  sig            SIG?      @relation(fields: [sigId], references: [id], onDelete: SetNull)
 
   @@map("projects")
 }
 
 model Initiative {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   title          String
-  slug           String   @unique
+  slug           String    @unique
   description    String
-  status         String   @default("Active")
+  status         String    @default("Active")
   chapterId      String?
-  chapter        Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
   iconName       String?
   targetAudience String?
-  featured       Boolean  @default(false)
+  featured       Boolean   @default(false)
+  deletedAt      DateTime?
+  deletedBy      String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  chapter        Chapter?  @relation(fields: [chapterId], references: [id], onDelete: SetNull)
 
   @@map("initiatives")
+}
+
+// -----------------------------------------------------------------------------
+// Milestones, Resources, Opportunities, Banners, Social Links & Workflows
+// -----------------------------------------------------------------------------
+
+model Milestone {
+  id            String    @id @default(cuid())
+  year          String
+  title         String
+  description   String?
+  category      String?
+  sortOrder     Int       @default(0)
+  sourceEventId String?
+  deletedAt     DateTime?
+  deletedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sourceEvent   Event?    @relation(fields: [sourceEventId], references: [id], onDelete: SetNull)
+
+  @@map("milestones")
+}
+
+model Resource {
+  id            String    @id @default(cuid())
+  title         String
+  type          String    // Newsletter | AnnualReport | Document | Other
+  fileUrl       String?
+  publishedDate String
+  description   String?
+  status        String    @default("published")
+  deletedAt     DateTime?
+  deletedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("resources")
+}
+
+model Opportunity {
+  id           String    @id @default(cuid())
+  title        String
+  slug         String    @unique
+  description  String?
+  deadline     String?
+  deadlineDate DateTime?
+  organisation String?
+  eligibility  String?
+  link         String?
+  status       String    @default("Active") // Active | Closed | Upcoming
+  category     String    // Grant | Scholarship | Competition | Fellowship | Conference | Other
+  featured     Boolean   @default(false)
+  deletedAt    DateTime?
+  deletedBy    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("opportunities")
+}
+
+model Banner {
+  id        String    @id @default(cuid())
+  title     String
+  subtitle  String?
+  imageUrl  String
+  linkHref  String?
+  linkText  String?
+  expiresAt DateTime?
+  isActive  Boolean   @default(true)
+  sortOrder Int       @default(0)
+  deletedAt DateTime?
+  deletedBy String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("banners")
+}
+
+model SocialLink {
+  id        String   @id @default(cuid())
+  entity    String   @default("Branch") // Branch | WIE AG | EDS | Chapter | etc.
+  platform  String   // LinkedIn | Instagram | X | GitHub | Email | Other
+  url       String
+  handle    String?
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("social_links")
+}
+
+model ContentWorkflow {
+  id         String   @id @default(cuid())
+  entityType String   // Event | Publication | Story | Project | Resource | Opportunity
+  entityId   String
+  status     String   @default("Draft") // Draft | Review | Approved | Published | Archived
+  updatedBy  String
+  updatedAt  DateTime @default(now())
+  comments   String?
+
+  @@map("content_workflows")
+}
+
+model Inquiry {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String
+  status    String   @default("Unread")
+  createdAt String
+  
+  @@map("inquiries")
 }

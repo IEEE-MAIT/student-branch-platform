@@ -1,17 +1,26 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { verifyJWT } from '@/lib/jwt';
-import { hasPermission } from '@/lib/auth';
+import { guardApiRoute } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { recordAuditLog } from '@/lib/auditLog';
-import { sanitizeText, validateSafeUrl } from '@/lib/security';
+import { sanitizePlainText, validateSafeUrl } from '@/lib/security';
 import { deleteCloudinaryImage } from '@/lib/cloudinaryServer';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const people = await prisma.person.findMany({ 
+    const { searchParams } = new URL(req.url);
+    const includeDeleted = searchParams.get('includeDeleted') === 'true';
+
+    const people = await prisma.person.findMany({
+      where: includeDeleted ? undefined : { deletedAt: null },
       orderBy: { hierarchy: 'asc' },
-      include: { memberships: { include: { academicYear: true, chapter: true } } }
+      include: {
+        memberships: {
+          include: { academicYear: true, chapter: true, role: true },
+        },
+        sigMemberships: {
+          include: { sig: true },
+        },
+      },
     });
     return NextResponse.json(people);
   } catch (error: any) {
@@ -21,78 +30,55 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value;
-    const payload = token ? verifyJWT(token) : null;
-
-    if (!payload || !hasPermission(payload.role, 'People', 'create')) {
-      return NextResponse.json({ error: 'Unauthorized. Insufficient permissions.' }, { status: 403 });
+    const authCheck = await guardApiRoute(req, 'People', 'create');
+    if (!authCheck.isAuthorized) {
+      return authCheck.errorResponse;
     }
+    const user = authCheck.user;
 
     const body: any = await req.json();
-    const { name, role, category, department, hierarchy, imageUrl, bio, quote, linkedin, chapterId, academicYear } = body;
+    const {
+      name,
+      role,
+      category,
+      department,
+      hierarchy,
+      imageUrl,
+      bio,
+      quote,
+      linkedin,
+      chapterId,
+      academicYear,
+      isFacultyAdvisor,
+      facultyDepartment,
+    } = body;
 
     if (!name || !role || !category) {
       return NextResponse.json({ error: 'Name, Role, and Category are required.' }, { status: 400 });
     }
 
-    // Sanitize inputs
-    const safeName = sanitizeText(name, 100);
+    // Sanitize inputs cleanly to pure UTF-8 strings
+    const safeName = sanitizePlainText(name, 100);
+    const safeRole = sanitizePlainText(role, 100);
+    const safeCategory = sanitizePlainText(category, 100);
     const rawBio = bio || quote;
-    const safeBio = rawBio ? sanitizeText(rawBio, 1000) : null;
+    const safeBio = rawBio ? sanitizePlainText(rawBio, 2000) : null;
     const safeLinkedin = linkedin ? validateSafeUrl(linkedin) : null;
     const safeImageUrl = imageUrl ? validateSafeUrl(imageUrl) : null;
-    const safeDepartment = department ? sanitizeText(department, 100) : '';
-    const safeAcademicYear = academicYear ? sanitizeText(academicYear, 50) : '2025-26';
+    const safeDepartment = department ? sanitizePlainText(department, 100) : '';
+    const safeFacultyDepartment = facultyDepartment ? sanitizePlainText(facultyDepartment, 100) : null;
+    const safeAcademicYear = academicYear ? sanitizePlainText(academicYear, 50) : '2025-26';
 
-    // --- STRUCTURAL VALIDATION ENGINE ---
-    const secRoles = [
-      'Chairperson', 'Vice-Chairperson', 'General Secretary',
-      'Web Master', 'Treasurer', 'Joint Secretary',
-      'PR Head', 'Creative Head', 'Sponsorship Head', 'Hardware Head'
-    ];
-    const operationalRoles = [
-      'Technical Lead', 'Creative Lead', 'PR Lead', 'Event Management Lead'
-    ];
-
-    const isSEC = category === 'Senior Executive Committee' || category === 'EDS Chapter' || category === 'Affinity Group';
-    const isOperational = category === 'Operational Leads';
-
-    if (isSEC && !secRoles.includes(role)) {
-      return NextResponse.json({ error: `Invalid role for ${category}. Allowed roles: ${secRoles.join(', ')}` }, { status: 400 });
-    }
-
-    if (isOperational && !operationalRoles.includes(role)) {
-      return NextResponse.json({ error: `Invalid role for ${category}. Allowed roles: ${operationalRoles.join(', ')}` }, { status: 400 });
-    }
-
-    // --- CAPACITY ENFORCEMENT (MAX 2 PER ROLE IN A CATEGORY, CHAPTER, AND ACADEMIC YEAR) ---
-    if (isSEC || isOperational) {
-      const existingCount = await prisma.person.count({
-        where: {
-          role: role,
-          category: category,
-          academicYear: safeAcademicYear,
-          ...(chapterId ? { memberships: { some: { chapterId } } } : {})
-        }
-      });
-
-      if (existingCount >= 2) {
-        return NextResponse.json({ error: `Position Limit Reached: There are already 2 active people holding the '${role}' position in this unit for ${safeAcademicYear}.` }, { status: 400 });
-      }
-    }
-    // --- END VALIDATION ---
-
-    // Fetch or create Role
-    let dbRole = await prisma.role.findFirst({ where: { title: role } });
+    // Fetch or create Role in DB (CMS-managed)
+    let dbRole = await prisma.role.findFirst({ where: { title: safeRole } });
     if (!dbRole) {
       dbRole = await prisma.role.create({
         data: {
-          title: role,
-          category: isSEC ? 'SEC' : isOperational ? 'Operational' : 'General',
+          title: safeRole,
+          category: safeCategory === 'Senior Executive Committee' ? 'SEC' : 'Lead',
           hierarchy: Number(hierarchy) || 10,
-          isActive: true
-        }
+          isActive: true,
+        },
       });
     }
 
@@ -102,17 +88,17 @@ export async function POST(req: Request) {
         OR: [
           { label: safeAcademicYear },
           { label: safeAcademicYear.replace('-', '–') },
-          { label: safeAcademicYear.replace('–', '-') }
-        ]
-      }
+          { label: safeAcademicYear.replace('–', '-') },
+        ],
+      },
     });
 
     if (!dbAcademicYear) {
       dbAcademicYear = await prisma.academicYear.create({
         data: {
           label: safeAcademicYear,
-          isCurrent: safeAcademicYear === '2025-26' || safeAcademicYear === '2025–26'
-        }
+          isCurrent: safeAcademicYear === '2025-26' || safeAcademicYear === '2025–26',
+        },
       });
     }
 
@@ -120,10 +106,12 @@ export async function POST(req: Request) {
     const person = await prisma.person.create({
       data: {
         name: safeName,
-        role,
-        category,
+        role: safeRole,
+        category: safeCategory,
         academicYear: safeAcademicYear,
         department: safeDepartment,
+        facultyDepartment: safeFacultyDepartment,
+        isFacultyAdvisor: Boolean(isFacultyAdvisor),
         hierarchy: Number(hierarchy) || 10,
         imageUrl: safeImageUrl,
         bio: safeBio,
@@ -134,20 +122,22 @@ export async function POST(req: Request) {
             academicYearId: dbAcademicYear.id,
             chapterId: chapterId || null,
             isCurrent: dbAcademicYear.isCurrent,
-          }
-        }
+          },
+        },
       },
     });
 
     await recordAuditLog({
-      performedBy: payload.name || payload.email,
+      performedBy: user.name || user.email,
+      userEmail: user.email,
       actionType: 'CREATE',
       entityType: 'PERSON',
+      entityId: person.id,
       entityTitle: safeName,
-      changeSummary: `Created team member: ${safeName} (${role})`,
+      changeSummary: `Created team member: ${safeName} (${safeRole})`,
     });
 
-    return NextResponse.json(person);
+    return NextResponse.json(person, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -155,16 +145,29 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value;
-    const payload = token ? verifyJWT(token) : null;
-
-    if (!payload || !hasPermission(payload.role, 'People', 'edit')) {
-      return NextResponse.json({ error: 'Unauthorized. Insufficient permissions.' }, { status: 403 });
+    const authCheck = await guardApiRoute(req, 'People', 'edit');
+    if (!authCheck.isAuthorized) {
+      return authCheck.errorResponse;
     }
+    const user = authCheck.user;
 
     const body: any = await req.json();
-    const { id, name, role, category, department, hierarchy, imageUrl, bio, quote, linkedin, chapterId, academicYear } = body;
+    const {
+      id,
+      name,
+      role,
+      category,
+      department,
+      hierarchy,
+      imageUrl,
+      bio,
+      quote,
+      linkedin,
+      chapterId,
+      academicYear,
+      isFacultyAdvisor,
+      facultyDepartment,
+    } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Person ID is required for update.' }, { status: 400 });
@@ -174,79 +177,42 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: 'Name, Role, and Category are required.' }, { status: 400 });
     }
 
-    // Find existing person record
     const existingPerson = await prisma.person.findUnique({
       where: { id },
-      include: { memberships: true }
+      include: { memberships: true },
     });
 
     if (!existingPerson) {
       return NextResponse.json({ error: 'Person record not found.' }, { status: 404 });
     }
 
-    // Sanitize inputs
-    const safeName = sanitizeText(name, 100);
+    // Sanitize inputs cleanly to pure UTF-8 strings
+    const safeName = sanitizePlainText(name, 100);
+    const safeRole = sanitizePlainText(role, 100);
+    const safeCategory = sanitizePlainText(category, 100);
     const rawBio = bio || quote;
-    const safeBio = rawBio ? sanitizeText(rawBio, 1000) : null;
+    const safeBio = rawBio ? sanitizePlainText(rawBio, 2000) : null;
     const safeLinkedin = linkedin ? validateSafeUrl(linkedin) : null;
     const safeImageUrl = imageUrl ? validateSafeUrl(imageUrl) : null;
-    const safeDepartment = department ? sanitizeText(department, 100) : '';
-    const safeAcademicYear = academicYear ? sanitizeText(academicYear, 50) : (existingPerson.academicYear || '2025-26');
-
-    // --- STRUCTURAL VALIDATION ENGINE ---
-    const secRoles = [
-      'Chairperson', 'Vice-Chairperson', 'General Secretary',
-      'Web Master', 'Treasurer', 'Joint Secretary',
-      'PR Head', 'Creative Head', 'Sponsorship Head', 'Hardware Head'
-    ];
-    const operationalRoles = [
-      'Technical Lead', 'Creative Lead', 'PR Lead', 'Event Management Lead'
-    ];
-
-    const isSEC = category === 'Senior Executive Committee' || category === 'EDS Chapter' || category === 'Affinity Group';
-    const isOperational = category === 'Operational Leads';
-
-    if (isSEC && !secRoles.includes(role)) {
-      return NextResponse.json({ error: `Invalid role for ${category}. Allowed roles: ${secRoles.join(', ')}` }, { status: 400 });
-    }
-
-    if (isOperational && !operationalRoles.includes(role)) {
-      return NextResponse.json({ error: `Invalid role for ${category}. Allowed roles: ${operationalRoles.join(', ')}` }, { status: 400 });
-    }
-
-    // --- CAPACITY ENFORCEMENT (MAX 2 PER ROLE IN A CATEGORY, CHAPTER, AND ACADEMIC YEAR EXCEPT CURRENT PERSON) ---
-    if (isSEC || isOperational) {
-      const existingCount = await prisma.person.count({
-        where: {
-          id: { not: id },
-          role: role,
-          category: category,
-          academicYear: safeAcademicYear,
-          ...(chapterId ? { memberships: { some: { chapterId } } } : {})
-        }
-      });
-
-      if (existingCount >= 2) {
-        return NextResponse.json({ error: `Position Limit Reached: There are already 2 active people holding the '${role}' position in this unit for ${safeAcademicYear}.` }, { status: 400 });
-      }
-    }
-    // --- END VALIDATION ---
+    const safeDepartment = department ? sanitizePlainText(department, 100) : '';
+    const safeFacultyDepartment = facultyDepartment ? sanitizePlainText(facultyDepartment, 100) : null;
+    const safeAcademicYear = academicYear ? sanitizePlainText(academicYear, 50) : (existingPerson.academicYear || '2025-26');
 
     // IF IMAGE CHANGED: Delete old image from Cloudinary
     if (existingPerson.imageUrl && existingPerson.imageUrl !== safeImageUrl) {
-      await deleteCloudinaryImage(existingPerson.imageUrl);
+      await deleteCloudinaryImage(existingPerson.imageUrl).catch(() => {});
     }
 
     // Fetch or create Role
-    let dbRole = await prisma.role.findFirst({ where: { title: role } });
+    let dbRole = await prisma.role.findFirst({ where: { title: safeRole } });
     if (!dbRole) {
       dbRole = await prisma.role.create({
         data: {
-          title: role,
-          category: isSEC ? 'SEC' : isOperational ? 'Operational' : 'General',
+          title: safeRole,
+          category: safeCategory === 'Senior Executive Committee' ? 'SEC' : 'Lead',
           hierarchy: Number(hierarchy) || 10,
-          isActive: true
-        }
+          isActive: true,
+        },
       });
     }
 
@@ -256,17 +222,17 @@ export async function PUT(req: Request) {
         OR: [
           { label: safeAcademicYear },
           { label: safeAcademicYear.replace('-', '–') },
-          { label: safeAcademicYear.replace('–', '-') }
-        ]
-      }
+          { label: safeAcademicYear.replace('–', '-') },
+        ],
+      },
     });
 
     if (!dbAcademicYear) {
       dbAcademicYear = await prisma.academicYear.create({
         data: {
           label: safeAcademicYear,
-          isCurrent: safeAcademicYear === '2025-26' || safeAcademicYear === '2025–26'
-        }
+          isCurrent: safeAcademicYear === '2025-26' || safeAcademicYear === '2025–26',
+        },
       });
     }
 
@@ -275,10 +241,12 @@ export async function PUT(req: Request) {
       where: { id },
       data: {
         name: safeName,
-        role,
-        category,
+        role: safeRole,
+        category: safeCategory,
         academicYear: safeAcademicYear,
         department: safeDepartment,
+        facultyDepartment: safeFacultyDepartment,
+        isFacultyAdvisor: isFacultyAdvisor !== undefined ? Boolean(isFacultyAdvisor) : existingPerson.isFacultyAdvisor,
         hierarchy: Number(hierarchy) || 10,
         imageUrl: safeImageUrl,
         bio: safeBio,
@@ -289,25 +257,27 @@ export async function PUT(req: Request) {
     // Update or recreate membership
     if (dbRole && dbAcademicYear) {
       await prisma.organizationMembership.deleteMany({
-        where: { personId: id }
+        where: { personId: id },
       });
       await prisma.organizationMembership.create({
         data: {
           personId: id,
           roleId: dbRole.id,
           academicYearId: dbAcademicYear.id,
-          chapterId: (category === 'EDS Chapter' || category === 'Affinity Group') ? (chapterId || null) : null,
+          chapterId: chapterId || null,
           isCurrent: dbAcademicYear.isCurrent,
-        }
+        },
       });
     }
 
     await recordAuditLog({
-      performedBy: payload.name || payload.email,
+      performedBy: user.name || user.email,
+      userEmail: user.email,
       actionType: 'UPDATE',
       entityType: 'PERSON',
+      entityId: id,
       entityTitle: safeName,
-      changeSummary: `Updated team member: ${safeName} (${role})`,
+      changeSummary: `Updated team member: ${safeName} (${safeRole})`,
     });
 
     return NextResponse.json(updatedPerson);
@@ -318,37 +288,63 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value;
-    const payload = token ? verifyJWT(token) : null;
-
-    if (!payload || !hasPermission(payload.role, 'People', 'delete')) {
-      return NextResponse.json({ error: 'Unauthorized. Insufficient permissions.' }, { status: 403 });
+    const authCheck = await guardApiRoute(req, 'People', 'delete');
+    if (!authCheck.isAuthorized) {
+      return authCheck.errorResponse;
     }
+    const user = authCheck.user;
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
+    const permanent = searchParams.get('permanent') === 'true';
 
     if (!id) {
       return NextResponse.json({ error: 'Person ID is required.' }, { status: 400 });
     }
 
     const existingPerson = await prisma.person.findUnique({ where: { id } });
-    if (existingPerson?.imageUrl) {
-      await deleteCloudinaryImage(existingPerson.imageUrl);
+    if (!existingPerson) {
+      return NextResponse.json({ error: 'Person not found.' }, { status: 404 });
     }
 
-    await prisma.person.delete({ where: { id } });
+    const performedBy = user.name || user.email;
 
-    await recordAuditLog({
-      performedBy: payload.name || payload.email,
-      actionType: 'DELETE',
-      entityType: 'PERSON',
-      entityTitle: existingPerson?.name || id,
-      changeSummary: `Deleted team member: ${existingPerson?.name || id}`,
-    });
+    if (permanent) {
+      if (existingPerson.imageUrl) {
+        await deleteCloudinaryImage(existingPerson.imageUrl).catch(() => {});
+      }
+      await prisma.person.delete({ where: { id } });
 
-    return NextResponse.json({ success: true });
+      await recordAuditLog({
+        performedBy,
+        userEmail: user.email,
+        actionType: 'DELETE',
+        entityType: 'PERSON',
+        entityId: id,
+        entityTitle: existingPerson.name,
+        changeSummary: `Permanently deleted person: ${existingPerson.name} (${id})`,
+      });
+    } else {
+      await prisma.person.update({
+        where: { id },
+        data: {
+          deletedAt: new Date(),
+          deletedBy: performedBy,
+        },
+      });
+
+      await recordAuditLog({
+        performedBy,
+        userEmail: user.email,
+        actionType: 'DELETE',
+        entityType: 'PERSON',
+        entityId: id,
+        entityTitle: existingPerson.name,
+        changeSummary: `Moved person to Recycle Bin: ${existingPerson.name} (${id})`,
+      });
+    }
+
+    return NextResponse.json({ success: true, softDeleted: !permanent });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
