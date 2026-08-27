@@ -20,8 +20,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 /**
- * Structured Button & Link CTA Component.
- * Implements 2px border radius, sharp focus rings, and explicit IEEE brand variants.
+ * Structured Button & Link CTA Component with Light and Dark Theme Compatibility.
  */
 export const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
@@ -32,19 +31,19 @@ export const Button: React.FC<ButtonProps> = ({
   className = '',
   ...props
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center font-medium tracking-wide transition-colors duration-150 rounded-[2px] focus:outline-none focus:ring-2 focus:ring-ieee-blue focus:ring-offset-2';
+  const baseStyles = 'inline-flex items-center justify-center font-medium tracking-wide whitespace-nowrap shrink-0 transition-all duration-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ieee-blue focus-visible:ring-offset-2';
 
   const variantStyles = {
-    primary: 'bg-ieee-blue text-white hover:bg-ieee-dark border border-ieee-blue',
-    secondary: 'bg-transparent text-ink border border-warm-200 hover:bg-warm-100 hover:border-warm-300',
-    accent: 'bg-mait-warm text-white hover:bg-red-900 border border-mait-warm',
-    ghost: 'bg-transparent text-ieee-blue hover:bg-ieee-subtle border border-transparent',
+    primary: 'bg-ieee-blue hover:bg-ieee-dark dark:bg-[#007CBD] dark:hover:bg-[#00629B] text-white font-semibold border border-transparent shadow-sm hover:shadow active:scale-[0.98]',
+    secondary: 'bg-transparent text-ink dark:text-gray-200 border border-warm-200 dark:border-gray-800 hover:bg-warm-100 dark:hover:bg-gray-800 hover:border-warm-300 dark:hover:border-gray-700',
+    accent: 'bg-mait-warm hover:bg-red-900 dark:bg-rose-700 dark:hover:bg-rose-800 text-white font-semibold border border-transparent shadow-sm active:scale-[0.98]',
+    ghost: 'bg-transparent text-ieee-blue dark:text-sky-400 hover:bg-ieee-subtle dark:hover:bg-gray-800 border border-transparent',
   };
 
   const sizeStyles = {
-    sm: 'text-xs px-3 py-1.5 gap-1.5',
-    md: 'text-sm px-5 py-2.5 gap-2',
-    lg: 'text-base px-7 py-3.5 gap-2.5',
+    sm: 'text-xs px-3 py-1.5 gap-1.5 h-8',
+    md: 'text-sm px-4 py-2 gap-2 h-10',
+    lg: 'text-base px-6 py-2.5 gap-2.5 h-12',
   };
 
   const combinedClasses = `${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`;

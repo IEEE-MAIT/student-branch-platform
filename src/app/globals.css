@@ -3,24 +3,42 @@
 /* Enable class-based dark mode in Tailwind CSS v4 */
 @custom-variant dark (&:where(.dark, .dark *));
 
-@theme {
-  --color-ieee-blue: #00629B;
-  --color-ieee-dark: #004975;
-  --color-ieee-light: #007CBD;
-  --color-ieee-subtle: #E8F4F8;
-  
-  --color-ink: #1A1A2E;
-  --color-ink-muted: #2D2D44;
-  
-  --color-mait-warm: #8B2332;
-  --color-mait-subtle: #F9ECEE;
-  
+/* -------------------------------------------------------------------------- */
+/* THEME TOKENS: Dynamic CSS Variables for Light and Dark Modes               */
+/* -------------------------------------------------------------------------- */
+
+:root {
+  /* Surface & Base Backgrounds */
+  --bg-app: #FFFFFF;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #FFFFFF;
+  --bg-subtle: #F8F9FA;
+  --bg-subtle-alt: #FDF2F4;
+  --bg-glass: rgba(255, 255, 255, 0.92);
+
+  /* Warm Palette (Light Mode) */
   --color-warm-50: #FAFAF7;
   --color-warm-100: #F5F5F0;
   --color-warm-200: #E8E8E3;
   --color-warm-300: #9B9B8F;
   --color-warm-400: #6C6C61;
 
+  /* Typography / Text Colors (Light Mode) */
+  --color-ink: #1A1A2E;
+  --color-ink-muted: #4A4A68;
+  --color-ink-subtle: #6C6C61;
+
+  /* IEEE Brand Colors (Light Mode) */
+  --color-ieee-blue: #00629B;
+  --color-ieee-dark: #004975;
+  --color-ieee-light: #007CBD;
+  --color-ieee-subtle: #E8F4F8;
+  
+  /* MAIT Institutional Burgundy (Light Mode) */
+  --color-mait-warm: #8B2332;
+  --color-mait-subtle: #F9ECEE;
+
+  /* Affinity Groups & SIGs (Light Mode) */
   --color-wie-purple: #7C3AED;
   --color-wie-subtle: #F5F3FF;
   --color-eds-blue: #0284C7;
@@ -28,52 +46,129 @@
   --color-sig-amber: #D97706;
   --color-sig-emerald: #059669;
 
+  /* Shadows */
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.07), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  --shadow-dropdown: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+}
+
+.dark {
+  /* Surface & Base Backgrounds (Dark Mode - Rich Midnight Slate) */
+  --bg-app: #0B0F19;
+  --bg-surface: #111827;
+  --bg-surface-elevated: #1F2937;
+  --bg-subtle: #162032;
+  --bg-subtle-alt: #2D141C;
+  --bg-glass: rgba(11, 15, 25, 0.92);
+
+  /* Warm Palette (Dark Mode - Slate Tones) */
+  --color-warm-50: #131B2B;
+  --color-warm-100: #182234;
+  --color-warm-200: #263348;
+  --color-warm-300: #64748B;
+  --color-warm-400: #94A3B8;
+
+  /* Typography / Text Colors (Dark Mode) */
+  --color-ink: #F3F4F6;
+  --color-ink-muted: #CBD5E1;
+  --color-ink-subtle: #9CA3AF;
+
+  /* IEEE Brand Colors (Dark Mode - Radiant Sky) */
+  --color-ieee-blue: #38BDF8;
+  --color-ieee-dark: #7DD3FC;
+  --color-ieee-light: #38BDF8;
+  --color-ieee-subtle: rgba(56, 189, 248, 0.12);
+  
+  /* MAIT Institutional Burgundy (Dark Mode) */
+  --color-mait-warm: #FB7185;
+  --color-mait-subtle: rgba(251, 113, 133, 0.14);
+
+  /* Affinity Groups & SIGs (Dark Mode) */
+  --color-wie-purple: #C084FC;
+  --color-wie-subtle: rgba(192, 132, 252, 0.14);
+  --color-eds-blue: #38BDF8;
+  --color-eds-subtle: rgba(56, 189, 248, 0.14);
+  --color-sig-amber: #FBBF24;
+  --color-sig-emerald: #34D399;
+
+  /* Shadows (Dark Mode) */
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+  --shadow-dropdown: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+}
+
+@theme {
+  --color-ink: var(--color-ink);
+  --color-ink-muted: var(--color-ink-muted);
+  
+  --color-ieee-blue: var(--color-ieee-blue);
+  --color-ieee-dark: var(--color-ieee-dark);
+  --color-ieee-light: var(--color-ieee-light);
+  --color-ieee-subtle: var(--color-ieee-subtle);
+
+  --color-mait-warm: var(--color-mait-warm);
+  --color-mait-subtle: var(--color-mait-subtle);
+
+  --color-warm-50: var(--color-warm-50);
+  --color-warm-100: var(--color-warm-100);
+  --color-warm-200: var(--color-warm-200);
+  --color-warm-300: var(--color-warm-300);
+  --color-warm-400: var(--color-warm-400);
+
+  --color-wie-purple: var(--color-wie-purple);
+  --color-wie-subtle: var(--color-wie-subtle);
+  --color-eds-blue: var(--color-eds-blue);
+  --color-eds-subtle: var(--color-eds-subtle);
+  --color-sig-amber: var(--color-sig-amber);
+  --color-sig-emerald: var(--color-sig-emerald);
+
   --font-serif: var(--font-instrument-serif), Georgia, serif;
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), monospace;
 }
 
-/* Light Theme Variables (Default) */
-:root {
-  --background: #FFFFFF;
-  --foreground: #1A1A2E;
-  --card-bg: #FFFFFF;
-  --card-border: #E8E8E3;
-  --muted-text: #6C6C61;
-  --subtle-bg: #F5F5F0;
-  --nav-bg: rgba(255, 255, 255, 0.92);
-  --nav-border: #E8E8E3;
-  --accent-blue: #00629B;
-  --accent-subtle: #E8F4F8;
-  --shadow-color: rgba(0, 0, 0, 0.06);
-}
+/* -------------------------------------------------------------------------- */
+/* GLOBAL ELEMENT STYLES & TRANSITIONS                                        */
+/* -------------------------------------------------------------------------- */
 
-/* Dark Theme Variables */
-.dark {
-  --background: #0B0F19;
-  --foreground: #F3F4F6;
-  --card-bg: #111827;
-  --card-border: #1F2937;
-  --muted-text: #9CA3AF;
-  --subtle-bg: #1F2937;
-  --nav-bg: rgba(11, 15, 25, 0.92);
-  --nav-border: #1F2937;
-  --accent-blue: #38BDF8;
-  --accent-subtle: rgba(56, 189, 248, 0.12);
-  --shadow-color: rgba(0, 0, 0, 0.35);
+html {
+  background-color: var(--bg-app);
+  color: var(--color-ink);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: var(--bg-app);
+  color: var(--color-ink);
   font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.25s ease, color 0.25s ease;
+  transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 h1, h2, h3, h4, .font-serif-heading {
   font-family: var(--font-instrument-serif), Georgia, serif;
   letter-spacing: -0.02em;
+}
+
+/* Automatic Dark Mode Overrides for Hardcoded Backgrounds & Cards */
+.dark .bg-white {
+  background-color: var(--bg-surface);
+}
+
+.dark .hover\:bg-white:hover {
+  background-color: var(--bg-surface-elevated);
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: var(--bg-surface);
+  color: var(--color-ink);
+  border-color: var(--color-warm-200);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: var(--color-warm-400);
 }
 
 /* Subtle Grid Pattern */
@@ -93,17 +188,17 @@ h1, h2, h3, h4, .font-serif-heading {
 .accent-rule {
   height: 3px;
   width: 48px;
-  background-color: var(--accent-blue);
+  background-color: var(--color-ieee-blue);
   margin-top: 8px;
   margin-bottom: 8px;
 }
 
 /* Glassmorphic Navbar & Panels */
 .glass-panel {
-  background: var(--nav-bg);
+  background: var(--bg-glass);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-color: var(--nav-border);
+  border-color: var(--color-warm-200);
 }
 
 /* Floating Social Bar Tooltip Animation */
@@ -139,7 +234,7 @@ h1, h2, h3, h4, .font-serif-heading {
 }
 
 .dark .animate-shimmer {
-  background: linear-gradient(90deg, #1f2937 25%, #374151 37%, #1f2937 63%);
+  background: linear-gradient(90deg, #182234 25%, #263348 37%, #182234 63%);
   background-size: 200% 100%;
   animation: shimmer 1.6s infinite ease-in-out;
 }
@@ -165,7 +260,7 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--accent-blue);
+  outline: 2px solid var(--color-ieee-blue);
   outline-offset: 2px;
 }
 

@@ -59,15 +59,24 @@ export const ChapterPanel: React.FC<ChapterPanelProps> = ({
   const isAffinityGroup = type.toLowerCase().includes('affinity') || slug === 'wie';
   
   // Resolve logo source with fallback to existing static logos for wie, eds, and sb
-  const resolvedLogo =
+  const lightLogo =
     logoUrl ||
     (slug === 'eds'
-      ? '/eds_mait_logo.png'
+      ? '/eds_mait_sb_light_mode_logo.png'
       : slug === 'wie'
-      ? '/wie_ag_mait_logo.png'
+      ? '/wie_mait_light_mode_logo.png'
       : slug === 'sb'
-      ? '/main_student_branch_logo.png'
+      ? '/ieee_mait_sb_light_mode_logo.png'
       : null);
+
+  const darkLogo =
+    slug === 'eds'
+      ? '/eds_mait_sb_dark_mode_logo.png'
+      : slug === 'wie'
+      ? '/wie_mait_dark_mode_logo.png'
+      : slug === 'sb'
+      ? '/ieee_mait_sb_dark_mode_logo.png'
+      : lightLogo;
 
   const ctaLabel = isAffinityGroup
     ? 'Join WIE →'
@@ -79,7 +88,7 @@ export const ChapterPanel: React.FC<ChapterPanelProps> = ({
 
   return (
     <div
-      className="border border-warm-200 bg-white p-6 sm:p-8 rounded-[2px] flex flex-col justify-between space-y-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-warm-300 group relative"
+      className="border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-[2px] flex flex-col justify-between space-y-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-warm-300 dark:hover:border-gray-700 group relative"
       style={accentColor ? { borderLeftColor: accentColor, borderLeftWidth: '3px' } : undefined}
       aria-label={`${name} - ${type}`}
     >
@@ -89,33 +98,43 @@ export const ChapterPanel: React.FC<ChapterPanelProps> = ({
           <span
             className={`font-mono text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-[2px] ${
               isAffinityGroup
-                ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                : 'bg-ieee-subtle text-ieee-blue border border-ieee-blue/20'
+                ? 'bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
+                : 'bg-ieee-subtle dark:bg-sky-950 text-ieee-blue dark:text-sky-400 border border-ieee-blue/20 dark:border-sky-800'
             }`}
           >
             {type}
           </span>
           {parentSociety && (
-            <span className="font-mono text-[11px] text-warm-400">
+            <span className="font-mono text-[11px] text-warm-400 dark:text-gray-400">
               {parentSociety}
             </span>
           )}
         </div>
 
         {/* Logo or Text Heading */}
-        {resolvedLogo ? (
+        {lightLogo ? (
           <div className="mb-3 flex items-center h-16">
             <Image
-              src={resolvedLogo}
+              src={lightLogo}
               alt={`${name} Logo`}
               width={260}
               height={80}
-              className="w-auto max-h-14 object-contain"
-              unoptimized={resolvedLogo.startsWith('/')}
+              className="w-auto max-h-14 object-contain dark:hidden"
+              unoptimized={lightLogo.startsWith('/')}
             />
+            {darkLogo && (
+              <Image
+                src={darkLogo}
+                alt={`${name} Logo`}
+                width={260}
+                height={80}
+                className="w-auto max-h-14 object-contain hidden dark:block"
+                unoptimized={darkLogo.startsWith('/')}
+              />
+            )}
           </div>
         ) : (
-          <h3 className="font-serif text-2xl text-ink font-normal mb-2 group-hover:text-ieee-blue transition-colors">
+          <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal mb-2 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors">
             {name}
           </h3>
         )}

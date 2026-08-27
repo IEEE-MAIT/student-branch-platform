@@ -29,8 +29,8 @@ export const JsonLd: React.FC<JsonLdProps> = ({ siteUrl }) => {
       'IEEE MAIT SB',
     ],
     url: baseUrl,
-    logo: `${baseUrl}/main_student_branch_logo.png`,
-    image: `${baseUrl}/main_student_branch_logo.png`,
+    logo: `${baseUrl}/ieee_mait_sb_light_mode_logo.png`,
+    image: `${baseUrl}/ieee_mait_sb_light_mode_logo.png`,
     description:
       'Official digital platform, identity, and institutional record of IEEE MAIT Student Branch at Maharaja Agrasen Institute of Technology, Delhi. Established in 2005 under IEEE Delhi Section, Region 10.',
     foundingDate: '2005',

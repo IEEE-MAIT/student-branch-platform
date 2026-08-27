@@ -23,7 +23,6 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { Container } from './Container';
 import { Button } from '../ui/Button';
-import { ThemeToggle } from './ThemeToggle';
 
 export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -101,19 +100,27 @@ export const Navbar: React.FC = () => {
           >
             <div className="flex flex-col justify-center py-1">
               <Image 
-                src="/main_student_branch_logo.png" 
+                src="/ieee_mait_sb_light_mode_logo.png" 
                 alt="IEEE MAIT Student Branch Logo" 
                 width={300} 
                 height={80} 
-                className="w-auto h-12 sm:h-14 object-contain group-hover:opacity-90 transition-opacity dark:brightness-110"
+                className="w-auto h-12 sm:h-14 object-contain group-hover:opacity-90 transition-opacity dark:hidden"
+                priority
+                unoptimized
+              />
+              <Image 
+                src="/ieee_mait_sb_dark_mode_logo.png" 
+                alt="IEEE MAIT Student Branch Logo" 
+                width={300} 
+                height={80} 
+                className="w-auto h-12 sm:h-14 object-contain group-hover:opacity-90 transition-opacity hidden dark:block"
                 priority
                 unoptimized
               />
             </div>
             <div className="hidden sm:block h-7 w-[1px] bg-warm-200 dark:bg-gray-800" aria-hidden="true" />
-            <div className="hidden md:flex flex-col text-xs leading-tight">
-              <span className="font-medium text-ink dark:text-gray-100">Maharaja Agrasen Institute of Technology</span>
-              <span className="text-[10px] text-warm-400 dark:text-gray-400">Delhi, India • Est. 2005</span>
+            <div className="hidden md:flex items-center">
+              <span className="font-mono text-xs text-warm-400 dark:text-gray-400 tracking-tight">Delhi, India · Est. since 2005</span>
             </div>
           </Link>
 
@@ -290,7 +297,7 @@ export const Navbar: React.FC = () => {
             {/* Command-K Search Trigger */}
             <Link 
               href="/search" 
-              className="flex items-center gap-2 text-ink dark:text-gray-300 hover:text-ieee-blue dark:hover:text-sky-400 transition-all duration-200 group p-1.5 px-2.5 border border-warm-200 dark:border-gray-800 hover:border-ieee-blue/40 rounded-lg bg-warm-50/70 dark:bg-gray-900/70 hover:bg-white dark:hover:bg-gray-800 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ieee-blue"
+              className="flex items-center gap-2 text-ink dark:text-gray-300 hover:text-ieee-blue dark:hover:text-sky-400 transition-all duration-200 group p-1.5 px-2.5 border border-warm-200 dark:border-gray-800 hover:border-ieee-blue/40 rounded-lg bg-warm-50/70 dark:bg-gray-900/70 hover:bg-white dark:hover:bg-gray-800 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ieee-blue shrink-0"
               aria-label="Search Platform (Shortcut ⌘K or Ctrl+K)"
             >
               <svg className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -300,36 +307,18 @@ export const Navbar: React.FC = () => {
                 <span className="text-[11px] leading-none">⌘</span>K
               </kbd>
             </Link>
-
-            {/* Theme Toggle Button */}
-            <ThemeToggle />
           </nav>
 
           {/* Primary Action Buttons */}
-          <div className="hidden lg:flex items-center gap-3">
-            {/* Donate External Link Button */}
-            <a
-              href="https://www.ieee.org/membership/join/index.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden 2xl:inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg border border-warm-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-ink dark:text-gray-200 hover:text-ieee-blue dark:hover:text-sky-400 hover:border-ieee-blue transition-all shadow-xs"
-              title="Support IEEE & MAIT Student Branch"
-            >
-              <span>Donate</span>
-              <svg className="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
-
+          <div className="hidden lg:flex items-center gap-3 shrink-0">
             {/* Join CTA */}
             <Button href="/join" variant="primary" size="md">
-              Join IEEE MAIT →
+              JOIN →
             </Button>
           </div>
 
           {/* Mobile Menu Controls */}
           <div className="xl:hidden flex items-center gap-2">
-            <ThemeToggle />
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -524,25 +513,10 @@ export const Navbar: React.FC = () => {
             Digital Library & Resources
           </Link>
 
-          {/* Donate External Link */}
-          <a
-            href="https://www.ieee.org/membership/join/index.html"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between px-3 py-3 text-base font-medium text-ink dark:text-gray-200 border border-warm-200 dark:border-gray-800 rounded-lg bg-warm-50/50 dark:bg-gray-900/50 hover:bg-warm-100 min-h-[48px]"
-          >
-            <span className="flex items-center gap-2">
-              <span>Donate to IEEE & Branch</span>
-            </span>
-            <svg className="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-          </a>
-
           {/* Join CTA */}
           <div className="pt-3 px-1">
             <Button href="/join" variant="primary" size="lg" className="w-full justify-center min-h-[48px]">
-              Join IEEE MAIT →
+              JOIN →
             </Button>
           </div>
         </div>

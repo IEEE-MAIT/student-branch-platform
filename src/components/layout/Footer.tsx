@@ -2,6 +2,7 @@ import React from 'react';
 import Link from '@/components/ui/AppLink';
 import Image from 'next/image';
 import { Container } from './Container';
+import { ThemeToggle } from './ThemeToggle';
 
 /**
  * @file src/components/layout/Footer.tsx
@@ -11,8 +12,8 @@ import { Container } from './Container';
  * - 4 Structured Columns:
  *   1. Institutional Identity, Campus Coordinates & Social Accounts.
  *   2. Communities & SIGs (Parent SB, EDS Chapter, WIE Affinity Group, SIGs).
- *   3. Quick Navigation (Events, Leadership, Achievements, Gallery, Publications, Projects).
- *   4. Resources & Governance (Newsletters, Reports, Donate link, Admin Portal).
+ *   3. Quick Navigation (Events, Leadership, Achievements, Gallery, Publications).
+ *   4. Resources, Support, Theme Switcher & Officer Access.
  * - Dynamic copyright year evaluation (`new Date().getFullYear()`).
  * - Enforces required IEEE trademark disclaimer text and institutional attribution.
  * 
@@ -23,39 +24,39 @@ export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-ink dark:bg-black text-white pt-16 pb-12 border-t border-warm-300/20 dark:border-gray-800" aria-label="Institutional Footer">
+    <footer className="bg-gray-950 dark:bg-black text-white pt-16 pb-12 border-t border-gray-800" aria-label="Institutional Footer">
       <Container size="wide">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-white/10 dark:border-gray-800">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-gray-800">
           {/* Column 1: Institutional Identity */}
           <div className="space-y-4">
             <Link href="/" className="inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ieee-light rounded">
               <Image 
-                src="/main_student_branch_logo.png" 
+                src="/ieee_mait_sb_dark_mode_logo.png" 
                 alt="IEEE MAIT Student Branch Logo" 
                 width={300} 
                 height={80} 
-                className="w-auto h-14 object-contain filter brightness-0 invert opacity-90 hover:opacity-100 transition-opacity"
+                className="w-auto h-14 object-contain opacity-95 hover:opacity-100 transition-opacity"
                 unoptimized
               />
             </Link>
             <div className="accent-rule bg-ieee-blue my-2" aria-hidden="true" />
-            <p className="text-xs text-warm-300 dark:text-gray-400 leading-relaxed font-sans">
+            <p className="text-xs text-gray-400 leading-relaxed font-sans">
               IEEE Student Branch at Maharaja Agrasen Institute of Technology. Advancing technological innovation, research excellence, and empowering student engineers since 2005.
             </p>
-            <div className="space-y-1.5 pt-1 text-xs text-warm-300 dark:text-gray-400">
+            <div className="space-y-1.5 pt-1 text-xs text-gray-400">
               <div className="flex items-center gap-2">
-                <span className="text-warm-400 dark:text-gray-500">Campus:</span>
+                <span className="text-gray-500">Campus:</span>
                 <span>PSP Area, Sector-22, Rohini, Delhi-110086</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-warm-400 dark:text-gray-500">Section:</span>
-                <span className="text-ieee-light font-mono text-[11px]">IEEE Delhi Section (Region 10)</span>
+                <span className="text-gray-500">Section:</span>
+                <span className="text-sky-400 font-mono text-[11px]">IEEE Delhi Section (Region 10)</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-warm-400 dark:text-gray-500">Email:</span>
+                <span className="text-gray-500">Email:</span>
                 <a 
                   href="mailto:mait.ieee.sb@gmail.com" 
-                  className="text-ieee-light hover:underline font-mono text-[11px]"
+                  className="text-sky-400 hover:underline font-mono text-[11px]"
                 >
                   mait.ieee.sb@gmail.com
                 </a>
@@ -124,23 +125,23 @@ export const Footer: React.FC = () => {
           <div className="space-y-4">
             <h3 className="font-serif text-xl font-normal text-white">Communities & SIGs</h3>
             <div className="accent-rule bg-ieee-blue my-2" aria-hidden="true" />
-            <ul className="space-y-2.5 text-sm text-warm-300 dark:text-gray-400 font-sans">
+            <ul className="space-y-2.5 text-sm text-gray-400 font-sans">
               <li>
                 <Link href="/chapters" className="hover:text-white transition-colors flex items-center justify-between group">
                   <span>All Units Overview</span>
-                  <span className="text-[11px] font-mono text-warm-400 group-hover:text-ieee-light">Overview →</span>
+                  <span className="text-[11px] font-mono text-gray-500 group-hover:text-sky-400">Overview →</span>
                 </Link>
               </li>
               <li>
                 <Link href="/chapters/sb" className="hover:text-white transition-colors flex items-center justify-between group">
                   <span>IEEE MAIT Student Branch</span>
-                  <span className="text-[10px] font-mono bg-white/10 px-1.5 py-0.5 rounded text-warm-300">Parent</span>
+                  <span className="text-[10px] font-mono bg-white/10 px-1.5 py-0.5 rounded text-gray-300">Parent</span>
                 </Link>
               </li>
               <li>
                 <Link href="/chapters/eds" className="hover:text-white transition-colors flex items-center justify-between group">
                   <span>IEEE EDS Chapter</span>
-                  <span className="text-[10px] font-mono bg-ieee-blue/40 px-1.5 py-0.5 rounded text-ieee-light">Hardware</span>
+                  <span className="text-[10px] font-mono bg-sky-900/40 px-1.5 py-0.5 rounded text-sky-300">Hardware</span>
                 </Link>
               </li>
               <li>
@@ -149,11 +150,11 @@ export const Footer: React.FC = () => {
                   <span className="text-[10px] font-mono bg-purple-900/40 px-1.5 py-0.5 rounded text-purple-300">Mentorship</span>
                 </Link>
               </li>
-              <li className="pt-2 border-t border-white/10 dark:border-gray-800">
-                <span className="text-[11px] font-mono text-warm-400 dark:text-gray-500 uppercase tracking-wider block mb-1">
+              <li className="pt-2 border-t border-gray-800">
+                <span className="text-[11px] font-mono text-gray-500 uppercase tracking-wider block mb-1">
                   Special Interest Groups:
                 </span>
-                <span className="text-xs text-warm-300 dark:text-gray-400">
+                <span className="text-xs text-gray-400">
                   DSA · Web & Dev · AI/ML · Hardware/IoT
                 </span>
               </li>
@@ -164,7 +165,7 @@ export const Footer: React.FC = () => {
           <div className="space-y-4">
             <h3 className="font-serif text-xl font-normal text-white">Quick Navigation</h3>
             <div className="accent-rule bg-ieee-blue my-2" aria-hidden="true" />
-            <ul className="space-y-2.5 text-sm text-warm-300 dark:text-gray-400 font-sans">
+            <ul className="space-y-2.5 text-sm text-gray-400 font-sans">
               <li>
                 <Link href="/events" className="hover:text-white transition-colors">
                   Events & Technical Workshops
@@ -191,18 +192,18 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/join" className="text-ieee-light hover:underline font-medium flex items-center gap-1">
+                <Link href="/join" className="text-sky-400 hover:underline font-medium flex items-center gap-1">
                   <span>Join IEEE MAIT →</span>
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 4: Resources & Support */}
+          {/* Column 4: Resources, Support & Theme Switcher */}
           <div className="space-y-4">
             <h3 className="font-serif text-xl font-normal text-white">Resources & Support</h3>
             <div className="accent-rule bg-ieee-blue my-2" aria-hidden="true" />
-            <ul className="space-y-2.5 text-sm text-warm-300 dark:text-gray-400 font-sans">
+            <ul className="space-y-2.5 text-sm text-gray-400 font-sans">
               <li>
                 <Link href="/resources" className="hover:text-white transition-colors">
                   Digital Library & Newsletters
@@ -218,44 +219,50 @@ export const Footer: React.FC = () => {
                   Contact & Inquiries
                 </Link>
               </li>
-              <li>
+              <li className="pt-1">
                 <a
                   href="https://www.ieee.org/membership/join/index.html"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-amber-400 hover:text-amber-300 flex items-center gap-1 font-medium"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[2px] bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 hover:text-amber-200 text-xs font-mono font-semibold transition-all"
+                  title="Donate / Support IEEE MAIT Student Branch"
                 >
-                  <span>Donate / Support Branch</span>
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span>Donate to Branch</span>
+                  <svg className="w-3.5 h-3.5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </a>
               </li>
-              <li className="pt-2 border-t border-white/10 dark:border-gray-800">
-                <Link href="/admin" className="text-xs text-warm-400 dark:text-gray-500 hover:text-warm-200 transition-colors flex items-center gap-1.5">
+              <li className="pt-2 border-t border-gray-800 flex items-center justify-between">
+                <Link href="/admin" className="text-xs text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1.5">
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
-                  <span>Officer Portal Login</span>
+                  <span>Officer Portal</span>
                 </Link>
+
+                {/* Theme Toggle Button in Footer */}
+                <div className="flex items-center">
+                  <ThemeToggle showLabel className="bg-white/10 hover:bg-white/20 border-white/10 text-white hover:text-sky-300" />
+                </div>
               </li>
             </ul>
           </div>
         </div>
 
         {/* Legal Disclaimers & Copyright */}
-        <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-warm-300/80 dark:text-gray-400 gap-4">
+        <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-gray-400 gap-4">
           <div className="text-center md:text-left">
-            <p className="font-medium text-warm-200 dark:text-gray-300">
+            <p className="font-medium text-gray-300">
               IEEE MAIT Student Branch · Maharaja Agrasen Institute of Technology
             </p>
-            <p className="text-warm-400 dark:text-gray-500 mt-0.5 font-mono text-[11px]">
+            <p className="text-gray-500 mt-0.5 font-mono text-[11px]">
               Affiliated with IEEE Delhi Section · Region 10 (Asia-Pacific) · Established 2005
             </p>
           </div>
           <div className="text-center md:text-right space-y-0.5 font-sans">
             <p>© {currentYear} IEEE MAIT Student Branch. All rights reserved.</p>
-            <p className="text-[11px] text-warm-400 dark:text-gray-500">
+            <p className="text-[11px] text-gray-500">
               IEEE is a registered trademark of the Institute of Electrical and Electronics Engineers, Inc.
             </p>
           </div>

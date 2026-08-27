@@ -36,18 +36,27 @@ export const ChapterHero: React.FC<ChapterHeroProps> = ({
 }) => {
   const isAffinityGroup = type.toLowerCase().includes('affinity') || slug === 'wie';
 
-  const resolvedLogo =
+  const lightLogo =
     logoUrl ||
     (slug === 'eds'
-      ? '/eds_mait_logo.png'
+      ? '/eds_mait_sb_light_mode_logo.png'
       : slug === 'wie'
-      ? '/wie_ag_mait_logo.png'
+      ? '/wie_mait_light_mode_logo.png'
       : slug === 'sb'
-      ? '/main_student_branch_logo.png'
+      ? '/ieee_mait_sb_light_mode_logo.png'
       : null);
 
+  const darkLogo =
+    slug === 'eds'
+      ? '/eds_mait_sb_dark_mode_logo.png'
+      : slug === 'wie'
+      ? '/wie_mait_dark_mode_logo.png'
+      : slug === 'sb'
+      ? '/ieee_mait_sb_dark_mode_logo.png'
+      : lightLogo;
+
   return (
-    <section className="relative border-b border-warm-200 bg-warm-100/50 py-12 sm:py-16 overflow-hidden">
+    <section className="relative border-b border-warm-200 dark:border-gray-800 bg-warm-100/50 dark:bg-gray-900/40 py-12 sm:py-16 overflow-hidden">
       {/* Background Cover Image if available */}
       {coverImageUrl && (
         <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
@@ -70,19 +79,19 @@ export const ChapterHero: React.FC<ChapterHeroProps> = ({
               <span
                 className={`font-mono text-xs uppercase tracking-wider font-semibold px-2.5 py-1 rounded-[2px] ${
                   isAffinityGroup
-                    ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                    : 'bg-ieee-subtle text-ieee-blue border border-ieee-blue/20'
+                    ? 'bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
+                    : 'bg-ieee-subtle dark:bg-sky-950 text-ieee-blue dark:text-sky-400 border border-ieee-blue/20 dark:border-sky-800'
                 }`}
               >
                 {type}
               </span>
               {parentSociety && (
-                <span className="font-mono text-xs text-warm-400">
-                  Affiliated with <strong className="text-ink font-semibold">{parentSociety}</strong>
+                <span className="font-mono text-xs text-warm-400 dark:text-gray-400">
+                  Affiliated with <strong className="text-ink dark:text-gray-200 font-semibold">{parentSociety}</strong>
                 </span>
               )}
               {establishedYear && (
-                <span className="font-mono text-xs text-warm-300">
+                <span className="font-mono text-xs text-warm-300 dark:text-gray-500">
                   · Est. {establishedYear}
                 </span>
               )}
@@ -90,20 +99,31 @@ export const ChapterHero: React.FC<ChapterHeroProps> = ({
 
             {/* Logo and/or Heading */}
             <div className="space-y-2">
-              {resolvedLogo ? (
+              {lightLogo ? (
                 <div className="py-2 flex items-center">
                   <Image
-                    src={resolvedLogo}
+                    src={lightLogo}
                     alt={`${name} Logo`}
                     width={320}
                     height={100}
-                    className="w-auto max-h-20 object-contain"
-                    unoptimized={resolvedLogo.startsWith('/')}
+                    className="w-auto max-h-20 object-contain dark:hidden"
+                    unoptimized={lightLogo.startsWith('/')}
                     priority
                   />
+                  {darkLogo && (
+                    <Image
+                      src={darkLogo}
+                      alt={`${name} Logo`}
+                      width={320}
+                      height={100}
+                      className="w-auto max-h-20 object-contain hidden dark:block"
+                      unoptimized={darkLogo.startsWith('/')}
+                      priority
+                    />
+                  )}
                 </div>
               ) : (
-                <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-ink font-normal leading-[1.1] tracking-tight">
+                <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-ink dark:text-gray-100 font-normal leading-[1.1] tracking-tight">
                   {name}
                 </h1>
               )}

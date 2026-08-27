@@ -6,8 +6,8 @@ import React from 'react';
 interface BadgeProps {
   /** Badge text or icon content */
   children: React.ReactNode;
-  /** Visual variant: ieee (IEEE Blue subtle), mait (MAIT Warm subtle), neutral / default (warm gray), outline */
-  variant?: 'ieee' | 'mait' | 'neutral' | 'outline' | 'default';
+  /** Visual variant: ieee, mait, wie, eds, sig, neutral / default, outline */
+  variant?: 'ieee' | 'mait' | 'wie' | 'eds' | 'sig' | 'neutral' | 'outline' | 'default';
   /** Size scale */
   size?: 'sm' | 'md';
   /** Custom CSS classes */
@@ -15,7 +15,7 @@ interface BadgeProps {
 }
 
 /**
- * Monospaced uppercase category badge indicator.
+ * Monospaced uppercase category badge indicator with full Light/Dark mode support.
  */
 export const Badge: React.FC<BadgeProps> = ({
   children,
@@ -23,13 +23,16 @@ export const Badge: React.FC<BadgeProps> = ({
   size = 'sm',
   className = '',
 }) => {
-  const baseStyles = 'inline-flex items-center font-mono uppercase tracking-wider rounded-[2px] border';
+  const baseStyles = 'inline-flex items-center font-mono uppercase tracking-wider rounded-[2px] border transition-colors duration-150';
 
   const selectedVariant = variant === 'default' ? 'neutral' : variant;
 
   const variantStyles = {
     ieee: 'bg-ieee-subtle text-ieee-blue border-ieee-blue/20',
     mait: 'bg-mait-subtle text-mait-warm border-mait-warm/20',
+    wie: 'bg-wie-subtle text-wie-purple border-wie-purple/20',
+    eds: 'bg-eds-subtle text-eds-blue border-eds-blue/20',
+    sig: 'bg-amber-50 dark:bg-amber-950/40 text-sig-amber border-sig-amber/20',
     neutral: 'bg-warm-100 text-ink-muted border-warm-200',
     outline: 'bg-transparent text-ink border-warm-300',
   };
@@ -40,7 +43,7 @@ export const Badge: React.FC<BadgeProps> = ({
   };
 
   return (
-    <span className={`${baseStyles} ${variantStyles[selectedVariant]} ${sizeStyles[size]} ${className}`}>
+    <span className={`${baseStyles} ${variantStyles[selectedVariant] || variantStyles.neutral} ${sizeStyles[size]} ${className}`}>
       {children}
     </span>
   );
