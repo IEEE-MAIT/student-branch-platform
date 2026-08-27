@@ -2,10 +2,10 @@
 
 /**
  * @file src/components/content/ShareWidget.tsx
- * @description Interactive social share and copy link widget for articles and publications.
+ * @description Interactive social share and copy link widget for articles and publications with react-icons.
  * 
  * FEATURES:
- * - Direct share links for LinkedIn, X/Twitter, and WhatsApp.
+ * - Direct share links for LinkedIn, X/Twitter, and WhatsApp with react-icons.
  * - 1-Click "Copy Link" button with animated feedback state.
  * - Fully accessible and compliant with light/dark theme tokens.
  * 
@@ -14,6 +14,8 @@
  */
 
 import React, { useState } from 'react';
+import { FiLink, FiCheck, FiExternalLink } from 'react-icons/fi';
+import { FaLinkedinIn, FaXTwitter, FaWhatsapp } from 'react-icons/fa6';
 
 interface ShareWidgetProps {
   url: string;
@@ -60,14 +62,15 @@ export const ShareWidget: React.FC<ShareWidgetProps> = ({ url, title, className 
         <button
           type="button"
           onClick={handleCopy}
-          className={`px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 ${
+          className={`px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer ${
             copied
               ? 'bg-emerald-50 dark:bg-emerald-950 border-emerald-400 text-emerald-700 dark:text-emerald-300 font-bold shadow-xs'
               : 'bg-white dark:bg-gray-800 border-warm-200 dark:border-gray-700 text-ink dark:text-gray-200 hover:bg-warm-50 dark:hover:bg-gray-700'
           }`}
           aria-label="Copy Publication URL to Clipboard"
         >
-          <span>{copied ? '✓ Copied Link' : '🔗 Copy Link'}</span>
+          {copied ? <FiCheck className="w-3.5 h-3.5" /> : <FiLink className="w-3.5 h-3.5" />}
+          <span>{copied ? 'Copied Link' : 'Copy Link'}</span>
         </button>
 
         {/* LinkedIn Share */}
@@ -75,10 +78,12 @@ export const ShareWidget: React.FC<ShareWidgetProps> = ({ url, title, className 
           href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-3 py-1.5 rounded-lg border border-warm-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-warm-50 dark:hover:bg-gray-700 text-ink dark:text-gray-200 transition-colors flex items-center gap-1"
+          className="px-3 py-1.5 rounded-lg border border-warm-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-[#0A66C2] hover:text-white hover:border-[#0A66C2] text-ink dark:text-gray-200 transition-colors flex items-center gap-1.5"
+          aria-label="Share on LinkedIn"
         >
+          <FaLinkedinIn className="w-3.5 h-3.5" />
           <span>LinkedIn</span>
-          <span className="text-[10px]">↗</span>
+          <FiExternalLink className="w-3 h-3 opacity-70" />
         </a>
 
         {/* X / Twitter Share */}
@@ -86,10 +91,12 @@ export const ShareWidget: React.FC<ShareWidgetProps> = ({ url, title, className 
           href={`https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareTitle}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-3 py-1.5 rounded-lg border border-warm-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-warm-50 dark:hover:bg-gray-700 text-ink dark:text-gray-200 transition-colors flex items-center gap-1"
+          className="px-3 py-1.5 rounded-lg border border-warm-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-black hover:text-white hover:border-black text-ink dark:text-gray-200 transition-colors flex items-center gap-1.5"
+          aria-label="Share on X"
         >
+          <FaXTwitter className="w-3.5 h-3.5" />
           <span>X / Twitter</span>
-          <span className="text-[10px]">↗</span>
+          <FiExternalLink className="w-3 h-3 opacity-70" />
         </a>
 
         {/* WhatsApp Share */}
@@ -97,10 +104,12 @@ export const ShareWidget: React.FC<ShareWidgetProps> = ({ url, title, className 
           href={`https://api.whatsapp.com/send?text=${shareTitle}%20${shareUrl}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-3 py-1.5 rounded-lg border border-warm-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-warm-50 dark:hover:bg-gray-700 text-ink dark:text-gray-200 transition-colors flex items-center gap-1"
+          className="px-3 py-1.5 rounded-lg border border-warm-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-[#25D366] hover:text-white hover:border-[#25D366] text-ink dark:text-gray-200 transition-colors flex items-center gap-1.5"
+          aria-label="Share on WhatsApp"
         >
+          <FaWhatsapp className="w-3.5 h-3.5" />
           <span>WhatsApp</span>
-          <span className="text-[10px]">↗</span>
+          <FiExternalLink className="w-3 h-3 opacity-70" />
         </a>
       </div>
     </div>

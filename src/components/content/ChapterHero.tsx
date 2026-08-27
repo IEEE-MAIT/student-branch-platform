@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Container } from '@/components/layout/Container';
 import { Button } from '@/components/ui/Button';
 import { ChapterSocialLinks } from './ChapterSocialLinks';
+import { FiArrowRight } from 'react-icons/fi';
 
 interface ChapterHeroProps {
   name: string;
@@ -137,8 +138,9 @@ export const ChapterHero: React.FC<ChapterHeroProps> = ({
 
             {/* CTA and Social Links Row */}
             <div className="pt-2 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 flex-wrap">
-              <Button href="/join" variant="primary" size="md">
-                Join {isAffinityGroup ? 'WIE Affinity Group' : name} →
+              <Button href="/join" variant="primary" size="md" className="flex items-center gap-1.5">
+                <span>Join {isAffinityGroup ? 'WIE Affinity Group' : name}</span>
+                <FiArrowRight className="w-4 h-4" />
               </Button>
 
               <ChapterSocialLinks

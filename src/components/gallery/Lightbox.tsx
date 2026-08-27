@@ -2,7 +2,7 @@
 
 /**
  * @file src/components/gallery/Lightbox.tsx
- * @description Fullscreen modal Lightbox viewer for photo albums with keyboard navigation.
+ * @description Fullscreen modal Lightbox viewer for photo albums with react-icons and keyboard navigation.
  * 
  * DESIGN & ACCESSIBILITY SPECIFICATIONS:
  * - Full-screen backdrop overlay (`bg-black/95 backdrop-blur-md`).
@@ -16,6 +16,7 @@
 
 import React, { useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import { FiChevronLeft, FiChevronRight, FiX } from 'react-icons/fi';
 
 export interface LightboxPhoto {
   id: string;
@@ -89,10 +90,11 @@ export const Lightbox: React.FC<LightboxProps> = ({
         </span>
         <button
           onClick={onClose}
-          className="text-warm-300 hover:text-white p-2 text-sm font-mono focus:outline-hidden hover:bg-white/10 rounded-[2px] transition-colors cursor-pointer"
+          className="text-warm-300 hover:text-white p-2 text-xs font-mono focus:outline-hidden hover:bg-white/10 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
           aria-label="Close Lightbox"
         >
-          ✕ Close (Esc)
+          <FiX className="w-4 h-4" />
+          <span>Close (Esc)</span>
         </button>
       </div>
 
@@ -101,10 +103,10 @@ export const Lightbox: React.FC<LightboxProps> = ({
         {/* Previous Image Button */}
         <button
           onClick={handlePrev}
-          className="absolute left-2 sm:left-6 z-20 p-3.5 text-white bg-black/60 hover:bg-ieee-blue/80 border border-white/20 rounded-[2px] transition-colors cursor-pointer text-xl"
+          className="absolute left-2 sm:left-6 z-20 p-3 text-white bg-black/60 hover:bg-ieee-blue/80 border border-white/20 rounded-full transition-colors cursor-pointer"
           aria-label="Previous Photo"
         >
-          ‹
+          <FiChevronLeft className="w-6 h-6" />
         </button>
 
         {/* Display Frame */}
@@ -137,10 +139,10 @@ export const Lightbox: React.FC<LightboxProps> = ({
         {/* Next Image Button */}
         <button
           onClick={handleNext}
-          className="absolute right-2 sm:right-6 z-20 p-3.5 text-white bg-black/60 hover:bg-ieee-blue/80 border border-white/20 rounded-[2px] transition-colors cursor-pointer text-xl"
+          className="absolute right-2 sm:right-6 z-20 p-3 text-white bg-black/60 hover:bg-ieee-blue/80 border border-white/20 rounded-full transition-colors cursor-pointer"
           aria-label="Next Photo"
         >
-          ›
+          <FiChevronRight className="w-6 h-6" />
         </button>
       </div>
 

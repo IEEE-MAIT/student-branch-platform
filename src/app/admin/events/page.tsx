@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { FiX, FiArrowRight } from 'react-icons/fi';
 
 export default function AdminEventsPage() {
   const [events, setEvents] = useState<any[]>([]);
@@ -412,10 +413,10 @@ export default function AdminEventsPage() {
                     <button
                       type="button"
                       onClick={() => removeGalleryImage(idx)}
-                      className="absolute top-1 right-1 bg-red-600/90 text-white p-1 rounded-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                      className="absolute top-1 right-1 bg-red-600/90 text-white p-1 rounded-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
                       title="Remove Photo"
                     >
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                      <FiX className="w-3 h-3" />
                     </button>
                   </div>
                 ))}
@@ -438,9 +439,10 @@ export default function AdminEventsPage() {
         <div className="flex gap-3">
           <button
             type="submit"
-            className="px-6 py-2.5 bg-ieee-blue text-white font-mono text-xs font-bold uppercase tracking-wider rounded-[2px]"
+            className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-ieee-blue text-white font-mono text-xs font-bold uppercase tracking-wider rounded-[2px]"
           >
-            {editingId ? 'Update Event Record →' : 'Publish Event Record →'}
+            <span>{editingId ? 'Update Event Record' : 'Publish Event Record'}</span>
+            <FiArrowRight className="w-3.5 h-3.5" />
           </button>
           {editingId && (
             <button

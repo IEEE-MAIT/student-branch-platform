@@ -15,6 +15,16 @@ import {
 } from '@/lib/api';
 import Link from '@/components/ui/AppLink';
 import Image from 'next/image';
+import {
+  FiArrowLeft,
+  FiArrowRight,
+  FiExternalLink,
+  FiStar,
+  FiFileText,
+  FiCode,
+  FiRadio,
+  FiCalendar,
+} from 'react-icons/fi';
 
 export async function generateStaticParams() {
   const events = await getDynamicEvents();
@@ -124,30 +134,33 @@ END:VCALENDAR`;
             href="/events"
             className="inline-flex items-center gap-1.5 font-mono text-xs text-warm-400 dark:text-gray-400 hover:text-ieee-blue dark:hover:text-sky-400 mb-8 transition-colors"
           >
-            <span>← Back to Events & Workshops Hub</span>
+            <FiArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Events &amp; Workshops Hub</span>
           </Link>
 
           {/* Status, Flagship & Unit Badges */}
           <div className="flex items-center gap-2 mb-4 flex-wrap">
             {isOngoing && (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-mono text-xs font-bold uppercase tracking-wider animate-pulse border border-emerald-300 dark:border-emerald-800">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                ● Live Now
+                <FiRadio className="w-3 h-3 text-emerald-500" />
+                <span>Live Now</span>
               </span>
             )}
             {isUpcoming && (
-              <span className="font-mono text-xs font-bold uppercase px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                ● Upcoming Session
+              <span className="font-mono text-xs font-bold uppercase px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 inline-flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span>Upcoming Session</span>
               </span>
             )}
             {isPast && (
               <span className="font-mono text-xs font-bold uppercase px-3 py-1 rounded-full bg-warm-100 dark:bg-gray-800 text-warm-500 dark:text-gray-400 border border-warm-200 dark:border-gray-700">
-                ● Past Event Dossier
+                Past Event Dossier
               </span>
             )}
             {isFlagship && (
               <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 font-mono text-xs font-bold uppercase tracking-wider border border-amber-300 dark:border-amber-700 shadow-xs">
-                ⭐ Flagship Event
+                <FiStar className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                <span>Flagship Event</span>
               </span>
             )}
             {event.category && <Badge variant="ieee">{event.category}</Badge>}
@@ -166,7 +179,7 @@ END:VCALENDAR`;
                 className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-sky-50 dark:bg-sky-950 text-ieee-blue dark:text-sky-300 font-mono text-xs font-medium border border-sky-200 dark:border-sky-800 hover:bg-sky-100 dark:hover:bg-sky-900 transition-colors"
               >
                 <span>IEEE vTools Verified</span>
-                <span className="text-[10px]">↗</span>
+                <FiExternalLink className="w-2.5 h-2.5" />
               </a>
             )}
           </div>
@@ -275,13 +288,15 @@ END:VCALENDAR`;
                           href={event.virtualLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors shadow-sm"
+                          className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors shadow-sm"
                         >
-                          Join Live Room →
+                          <span>Join Live Room</span>
+                          <FiArrowRight className="w-3.5 h-3.5" />
                         </a>
                       )}
-                      <Button href={event.registrationLink || '/join'} variant="primary" size="lg">
-                        Register for Workshop →
+                      <Button href={event.registrationLink || '/join'} variant="primary" size="lg" className="flex items-center gap-1.5">
+                        <span>Register for Workshop</span>
+                        <FiArrowRight className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
@@ -300,9 +315,9 @@ END:VCALENDAR`;
                         Post-Event Documentation
                       </span>
                       <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal border-b border-warm-200 dark:border-gray-800 pb-2">
-                        Story & Technical Report
+                        Story &amp; Technical Report
                       </h3>
-                      <div className="border border-warm-200 dark:border-gray-800 bg-warm-50/40 dark:bg-gray-900/40 p-6 sm:p-7 rounded-xl space-y-4 hover:border-ieee-blue/30 dark:hover:border-sky-500/30 transition-all group">
+                      <div className="border border-warm-200 dark:border-gray-800 bg-warm-50/40 dark:bg-gray-900/40 p-6 sm:p-7 rounded-xl space-y-4 hover:border-ieee-blue/30 dark:hover:border-sky-500/30 transition-all group shadow-xs">
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-mono text-xs text-ieee-blue dark:text-sky-400 font-semibold uppercase">
                             {relatedStory.publishedDate || relatedStory.date} · {relatedStory.readingTime || '4 min read'}
@@ -322,7 +337,8 @@ END:VCALENDAR`;
                             href={`/publications/${relatedStory.slug}`}
                             className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-ieee-blue dark:text-sky-400 hover:underline"
                           >
-                            <span>Read Full Report & Key Takeaways →</span>
+                            <span>Read Full Report &amp; Key Takeaways</span>
+                            <FiArrowRight className="w-3.5 h-3.5" />
                           </Link>
                         </div>
                       </div>
@@ -332,35 +348,38 @@ END:VCALENDAR`;
                   {/* Workshop Materials & Downloads */}
                   <div className="space-y-4">
                     <span className="font-mono text-xs font-semibold text-ieee-blue dark:text-sky-400 uppercase tracking-widest block">
-                      Digital Library & Resources
+                      Digital Library &amp; Resources
                     </span>
                     <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal border-b border-warm-200 dark:border-gray-800 pb-2">
-                      Workshop Materials & Code Repositories
+                      Workshop Materials &amp; Code Repositories
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="p-5 border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl space-y-2">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs text-ieee-blue dark:text-sky-400">📄 Slide Deck</span>
+                      <div className="p-5 border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl space-y-2 shadow-xs">
+                        <div className="flex items-center gap-1.5 text-xs font-mono text-ieee-blue dark:text-sky-400 font-semibold">
+                          <FiFileText className="w-3.5 h-3.5" />
+                          <span>Slide Deck</span>
                         </div>
                         <h4 className="font-serif text-base text-ink dark:text-gray-100 font-normal">
-                          Presentation Slides & Lab Notes
+                          Presentation Slides &amp; Lab Notes
                         </h4>
                         <p className="text-xs text-warm-400 dark:text-gray-400">
                           Complete technical slide deck and theory references curated by the workshop leads.
                         </p>
                         <div className="pt-2">
-                          <Link href="/resources" className="text-xs font-mono font-semibold text-ieee-blue dark:text-sky-400 hover:underline">
-                            Browse Resources Archive →
+                          <Link href="/resources" className="text-xs font-mono font-semibold text-ieee-blue dark:text-sky-400 hover:underline flex items-center gap-1">
+                            <span>Browse Resources Archive</span>
+                            <FiArrowRight className="w-3.5 h-3.5" />
                           </Link>
                         </div>
                       </div>
 
-                      <div className="p-5 border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl space-y-2">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs text-warm-500 dark:text-gray-400">💻 Source Code</span>
+                      <div className="p-5 border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl space-y-2 shadow-xs">
+                        <div className="flex items-center gap-1.5 text-xs font-mono text-warm-500 dark:text-gray-400 font-semibold">
+                          <FiCode className="w-3.5 h-3.5" />
+                          <span>Source Code</span>
                         </div>
                         <h4 className="font-serif text-base text-ink dark:text-gray-100 font-normal">
-                          GitHub Repository & Schematics
+                          GitHub Repository &amp; Schematics
                         </h4>
                         <p className="text-xs text-warm-400 dark:text-gray-400">
                           Starter templates, Python notebooks, and KiCad PCB schematics for this event.
@@ -370,9 +389,10 @@ END:VCALENDAR`;
                             href="https://github.com/IEEE-MAIT"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-xs font-mono font-semibold text-warm-500 dark:text-gray-300 hover:text-ink dark:hover:text-white hover:underline"
+                            className="inline-flex items-center gap-1 text-xs font-mono font-semibold text-warm-500 dark:text-gray-300 hover:text-ink dark:hover:text-white hover:underline"
                           >
-                            Open on GitHub →
+                            <span>Open on GitHub</span>
+                            <FiExternalLink className="w-3 h-3" />
                           </a>
                         </div>
                       </div>
@@ -385,9 +405,9 @@ END:VCALENDAR`;
             {/* Event Logistics Sidebar */}
             <aside className="lg:col-span-4 space-y-8">
               {/* Logistics & Schedule Card */}
-              <div className="border border-warm-200 dark:border-gray-800 bg-warm-50/50 dark:bg-gray-900/50 p-6 rounded-xl space-y-6">
+              <div className="border border-warm-200 dark:border-gray-800 bg-warm-50/50 dark:bg-gray-900/50 p-6 rounded-xl space-y-6 shadow-xs">
                 <h4 className="font-serif text-xl text-ink dark:text-gray-100 font-normal border-b border-warm-200 dark:border-gray-800 pb-3">
-                  Logistics & Schedule
+                  Logistics &amp; Schedule
                 </h4>
                 <div className="space-y-4 text-xs font-mono">
                   <div>
@@ -406,8 +426,9 @@ END:VCALENDAR`;
                   </div>
                   <div>
                     <span className="text-warm-400 dark:text-gray-500 block uppercase">Organizing Unit</span>
-                    <Link href={`/chapters/${unitSlug}`} className="text-ieee-blue dark:text-sky-400 font-semibold text-sm hover:underline block mt-0.5">
-                      {event.unit} →
+                    <Link href={`/chapters/${unitSlug}`} className="text-ieee-blue dark:text-sky-400 font-semibold text-sm hover:underline flex items-center gap-1 mt-0.5">
+                      <span>{event.unit}</span>
+                      <FiArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
                   <div>
@@ -424,7 +445,7 @@ END:VCALENDAR`;
                         className="text-ieee-blue dark:text-sky-400 font-semibold text-xs hover:underline inline-flex items-center gap-1 mt-0.5"
                       >
                         <span>View Official vTools Dossier</span>
-                        <span>↗</span>
+                        <FiExternalLink className="w-2.5 h-2.5" />
                       </a>
                     </div>
                   )}
@@ -437,13 +458,14 @@ END:VCALENDAR`;
                     download={`${event.slug}.ics`}
                     className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-mono border border-warm-300 dark:border-gray-700 hover:border-ieee-blue dark:hover:border-sky-400 text-ink dark:text-gray-200 hover:text-ieee-blue dark:hover:text-sky-400 bg-white dark:bg-gray-800 rounded-lg transition-colors shadow-xs"
                   >
-                    <span>📅 Add to Calendar (.ics)</span>
+                    <FiCalendar className="w-3.5 h-3.5" />
+                    <span>Add to Calendar (.ics)</span>
                   </a>
                 </div>
               </div>
 
               {/* Organizing Unit Quick Bio */}
-              <div className="border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 rounded-xl space-y-3">
+              <div className="border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 rounded-xl space-y-3 shadow-xs">
                 <span className="font-mono text-[10px] text-warm-400 dark:text-gray-400 uppercase tracking-widest block">
                   Organizing Society
                 </span>
@@ -456,9 +478,10 @@ END:VCALENDAR`;
                 <div className="pt-2">
                   <Link
                     href={`/chapters/${unitSlug}`}
-                    className="text-xs font-mono font-semibold text-ieee-blue dark:text-sky-400 hover:underline"
+                    className="text-xs font-mono font-semibold text-ieee-blue dark:text-sky-400 hover:underline flex items-center gap-1"
                   >
-                    View Chapter Sub-Portal →
+                    <span>View Chapter Sub-Portal</span>
+                    <FiArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
               </div>

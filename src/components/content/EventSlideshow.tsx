@@ -2,7 +2,7 @@
 
 /**
  * @file src/components/content/EventSlideshow.tsx
- * @description Interactive photo carousel & documentary slideshow for IEEE MAIT event pages.
+ * @description Interactive photo carousel & documentary slideshow for IEEE MAIT event pages with react-icons.
  * 
  * FEATURES:
  * - Responsive 16:9 carousel with Next/Prev and touch swipe support.
@@ -17,6 +17,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
+import { FiChevronLeft, FiChevronRight, FiX, FiMaximize2, FiPlay, FiPause, FiCamera } from 'react-icons/fi';
 
 export interface SlideshowPhoto {
   id?: string;
@@ -133,19 +134,21 @@ export const EventSlideshow: React.FC<EventSlideshowProps> = ({
           <button
             type="button"
             onClick={() => setIsPlaying(!isPlaying)}
-            className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded-full border border-warm-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-warm-100 dark:hover:bg-gray-700 text-ink dark:text-gray-200 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded-full border border-warm-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-warm-100 dark:hover:bg-gray-700 text-ink dark:text-gray-200 transition-colors cursor-pointer"
             aria-label={isPlaying ? 'Pause Slideshow' : 'Play Slideshow'}
           >
-            <span>{isPlaying ? '⏸ Pause' : '▶ Auto-play'}</span>
+            {isPlaying ? <FiPause className="w-3.5 h-3.5" /> : <FiPlay className="w-3.5 h-3.5" />}
+            <span>{isPlaying ? 'Pause' : 'Auto-play'}</span>
           </button>
 
           <button
             type="button"
             onClick={() => setIsLightboxOpen(true)}
-            className="inline-flex items-center gap-1 px-3 py-1 text-xs font-mono rounded-full border border-warm-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-warm-100 dark:hover:bg-gray-700 text-ink dark:text-gray-200 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded-full border border-warm-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-warm-100 dark:hover:bg-gray-700 text-ink dark:text-gray-200 transition-colors cursor-pointer"
             aria-label="View Fullscreen"
           >
-            <span>⛶ Fullscreen</span>
+            <FiMaximize2 className="w-3.5 h-3.5" />
+            <span>Fullscreen</span>
           </button>
         </div>
       </div>
@@ -175,11 +178,9 @@ export const EventSlideshow: React.FC<EventSlideshowProps> = ({
             type="button"
             onClick={prevSlide}
             aria-label="Previous Slide"
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm opacity-80 group-hover:opacity-100 hover:scale-105 active:scale-95 transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-sky-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm opacity-80 group-hover:opacity-100 hover:scale-105 active:scale-95 transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-sky-400 cursor-pointer"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-            </svg>
+            <FiChevronLeft className="w-5 h-5" />
           </button>
         )}
 
@@ -189,11 +190,9 @@ export const EventSlideshow: React.FC<EventSlideshowProps> = ({
             type="button"
             onClick={nextSlide}
             aria-label="Next Slide"
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm opacity-80 group-hover:opacity-100 hover:scale-105 active:scale-95 transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-sky-400"
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm opacity-80 group-hover:opacity-100 hover:scale-105 active:scale-95 transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-sky-400 cursor-pointer"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-            </svg>
+            <FiChevronRight className="w-5 h-5" />
           </button>
         )}
 
@@ -204,8 +203,9 @@ export const EventSlideshow: React.FC<EventSlideshowProps> = ({
               {currentPhoto.caption}
             </p>
             {currentPhoto.photographer && (
-              <span className="font-mono text-[11px] text-sky-300 block mt-1">
-                📸 Photo: {currentPhoto.photographer}
+              <span className="font-mono text-[11px] text-sky-300 flex items-center gap-1 mt-1">
+                <FiCamera className="w-3 h-3" />
+                <span>Photo: {currentPhoto.photographer}</span>
               </span>
             )}
           </div>
@@ -220,7 +220,7 @@ export const EventSlideshow: React.FC<EventSlideshowProps> = ({
               key={photo.id || idx}
               type="button"
               onClick={() => goToSlide(idx)}
-              className={`relative w-20 h-14 rounded-lg overflow-hidden shrink-0 border-2 transition-all duration-200 ${
+              className={`relative w-20 h-14 rounded-lg overflow-hidden shrink-0 border-2 transition-all duration-200 cursor-pointer ${
                 idx === currentIndex
                   ? 'border-ieee-blue dark:border-sky-400 scale-105 shadow-md ring-2 ring-sky-400/20'
                   : 'border-warm-200 dark:border-gray-700 opacity-60 hover:opacity-100 hover:border-warm-400'
@@ -254,12 +254,10 @@ export const EventSlideshow: React.FC<EventSlideshowProps> = ({
             <button
               type="button"
               onClick={() => setIsLightboxOpen(false)}
-              className="p-2 text-white/80 hover:text-white rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              className="p-2 text-white/80 hover:text-white rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
               aria-label="Close Lightbox"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <FiX className="w-6 h-6" />
             </button>
           </div>
 
@@ -280,21 +278,17 @@ export const EventSlideshow: React.FC<EventSlideshowProps> = ({
                   type="button"
                   onClick={prevSlide}
                   aria-label="Previous Slide"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm hover:scale-105 active:scale-95 transition-all shadow-xl"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm hover:scale-105 active:scale-95 transition-all shadow-xl cursor-pointer"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-                  </svg>
+                  <FiChevronLeft className="w-6 h-6" />
                 </button>
                 <button
                   type="button"
                   onClick={nextSlide}
                   aria-label="Next Slide"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm hover:scale-105 active:scale-95 transition-all shadow-xl"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm hover:scale-105 active:scale-95 transition-all shadow-xl cursor-pointer"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                  </svg>
+                  <FiChevronRight className="w-6 h-6" />
                 </button>
               </>
             )}

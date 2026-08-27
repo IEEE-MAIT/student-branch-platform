@@ -27,6 +27,7 @@ import { getDynamicPublicationBySlug, getDynamicPublications } from '@/lib/api';
 import Link from '@/components/ui/AppLink';
 import Image from 'next/image';
 import { ShareWidget } from '@/components/content/ShareWidget';
+import { FiExternalLink, FiArrowLeft } from 'react-icons/fi';
 
 export async function generateStaticParams() {
   const publications = await getDynamicPublications();
@@ -221,9 +222,10 @@ export default async function PublicationDetailPage({ params }: PublicationPageP
                 href={publication.externalLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 bg-white dark:bg-gray-800 hover:bg-warm-100 dark:hover:bg-gray-700 text-ink dark:text-gray-200 border border-warm-300 dark:border-gray-600 font-mono text-xs font-semibold rounded-lg transition-colors shrink-0"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-gray-800 hover:bg-warm-100 dark:hover:bg-gray-700 text-ink dark:text-gray-200 border border-warm-300 dark:border-gray-600 font-mono text-xs font-semibold rounded-lg transition-colors shrink-0"
               >
-                View on Original Platform ↗
+                <span>View on Original Platform</span>
+                <FiExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>
           )}
@@ -271,9 +273,10 @@ export default async function PublicationDetailPage({ params }: PublicationPageP
           <div className="mt-12 pt-8 border-t border-warm-200 dark:border-gray-800 flex justify-between items-center flex-wrap gap-4">
             <Link
               href="/publications"
-              className="text-xs font-mono text-ieee-blue dark:text-sky-400 hover:underline font-semibold"
+              className="text-xs font-mono text-ieee-blue dark:text-sky-400 hover:underline font-semibold flex items-center gap-1"
             >
-              ← Back to All Publications
+              <FiArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to All Publications</span>
             </Link>
             <span className="font-mono text-xs text-warm-400 dark:text-gray-500">
               IEEE MAIT Editorial Desk

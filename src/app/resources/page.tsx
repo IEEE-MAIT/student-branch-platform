@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/Button';
 import { getDynamicResources } from '@/lib/api';
 import type { Metadata } from 'next';
 import Link from '@/components/ui/AppLink';
+import { FiExternalLink } from 'react-icons/fi';
 
 export const revalidate = 3600; // ISR Cache 1 hour
 
@@ -381,9 +382,10 @@ export default async function ResourcesPage() {
                         href={kit.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-mono text-xs font-semibold text-ieee-blue hover:underline"
+                        className="font-mono text-xs font-semibold text-ieee-blue hover:underline inline-flex items-center gap-1"
                       >
-                        Access Repository ↗
+                        <span>Access Repository</span>
+                        <FiExternalLink className="w-3 h-3" />
                       </a>
                     </div>
                   </div>

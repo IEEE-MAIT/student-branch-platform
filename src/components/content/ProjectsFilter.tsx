@@ -2,15 +2,15 @@
 
 /**
  * @file src/components/content/ProjectsFilter.tsx
- * @description Interactive filtering and search engine for IEEE MAIT Technical Projects.
+ * @description Interactive filtering and search engine for IEEE MAIT Technical Projects with react-icons.
  * 
  * FEATURES:
- * - Status Filter Tabs: All | Active Development | Completed | Featured
- * - Domain Selector Pills: All | Hardware & Embedded | AI / ML | Web & Cloud | VLSI
- * - Unit Filter Pills: All | SB | EDS Chapter | WIE AG
- * - Live Search across title, summary, and tech tags
- * - Interactive Project Cards with GitHub & Demo CTAs
- * - Responsive Pagination
+ * - Status Filter Tabs: All | Active Development | Completed | Featured with react-icons.
+ * - Domain Selector Pills: All | Hardware & Embedded | AI / ML | Web & Cloud | VLSI.
+ * - Unit Filter Pills: All | SB | EDS Chapter | WIE AG.
+ * - Live Search across title, summary, and tech tags.
+ * - Interactive Project Cards with GitHub & Demo CTAs.
+ * - Responsive Pagination.
  * 
  * @author IEEE MAIT Webmaster
  * @license MIT
@@ -20,6 +20,8 @@ import React, { useState, useMemo } from 'react';
 import Link from '@/components/ui/AppLink';
 import { Badge } from '../ui/Badge';
 import { Pagination } from '../ui/Pagination';
+import { FiSearch, FiX, FiCheck, FiStar, FiRadio, FiCpu, FiExternalLink, FiArrowRight } from 'react-icons/fi';
+import { FaGithub } from 'react-icons/fa6';
 
 export interface ProjectItem {
   id: string;
@@ -37,85 +39,82 @@ export interface ProjectItem {
   tags?: string[] | null;
   status: string; // Ongoing | Completed | Upcoming
   featured?: boolean;
-  chapter?: { name: string; slug: string } | null;
-  sig?: { name: string; slug: string } | null;
+  chapter?: {
+    id: string;
+    name: string;
+    slug: string;
+  } | null;
 }
 
 interface ProjectsFilterProps {
   initialProjects: ProjectItem[];
 }
 
-export function ProjectsFilter({ initialProjects }: ProjectsFilterProps) {
+const ITEMS_PER_PAGE = 6;
+
+export const ProjectsFilter: React.FC<ProjectsFilterProps> = ({ initialProjects }) => {
   const [activeStatus, setActiveStatus] = useState<string>('ALL');
   const [selectedDomain, setSelectedDomain] = useState<string>('ALL');
   const [selectedUnit, setSelectedUnit] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const ITEMS_PER_PAGE = 6;
 
-  // Real-time filtering engine
-  const filteredProjects = useMemo(() => {
-    return initialProjects.filter((item) => {
-      // 1. Status Filter
-      if (activeStatus !== 'ALL') {
-        if (activeStatus === 'Featured' && !item.featured) return false;
-        if (activeStatus === 'Ongoing' && item.status?.toLowerCase() !== 'ongoing') return false;
-        if (activeStatus === 'Completed' && item.status?.toLowerCase() !== 'completed') return false;
-      }
-
-      // 2. Domain Filter
-      if (selectedDomain !== 'ALL') {
-        const itemTags = (item.tags || []).map((t) => t.toLowerCase());
-        const itemTitle = item.title.toLowerCase();
-        const itemSummary = item.summary.toLowerCase();
-
-        if (selectedDomain === 'hardware') {
-          const match = itemTags.some((t) => t.includes('pcb') || t.includes('hardware') || t.includes('stm32') || t.includes('embedded') || t.includes('robotics')) || itemTitle.includes('rover') || itemSummary.includes('hardware');
-          if (!match) return false;
-        } else if (selectedDomain === 'ai-ml') {
-          const match = itemTags.some((t) => t.includes('ai') || t.includes('ml') || t.includes('tinyml') || t.includes('tensorflow') || t.includes('sensor')) || itemTitle.includes('ai') || itemSummary.includes('acoustic');
-          if (!match) return false;
-        } else if (selectedDomain === 'vlsi') {
-          const match = itemTags.some((t) => t.includes('vlsi') || t.includes('verilog') || t.includes('fpga') || t.includes('risc-v') || t.includes('silicon')) || itemTitle.includes('risc-v');
-          if (!match) return false;
-        } else if (selectedDomain === 'web') {
-          const match = itemTags.some((t) => t.includes('next.js') || t.includes('web') || t.includes('typescript') || t.includes('prisma')) || itemTitle.includes('platform');
-          if (!match) return false;
-        }
-      }
-
-      // 3. Unit Filter
-      if (selectedUnit !== 'ALL') {
-        const chapterSlug = (item.chapter?.slug || item.chapterSlug || item.chapterId || '').toLowerCase();
-        if (selectedUnit === 'sb' && !chapterSlug.includes('sb') && !chapterSlug.includes('branch')) return false;
-        if (selectedUnit === 'eds' && !chapterSlug.includes('eds')) return false;
-        if (selectedUnit === 'wie' && !chapterSlug.includes('wie')) return false;
-      }
-
-      // 4. Keyword Search Filter
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
-        const matchTitle = item.title.toLowerCase().includes(q);
-        const matchSummary = item.summary.toLowerCase().includes(q);
-        const matchTags = (item.tags || []).some((t) => t.toLowerCase().includes(q));
-        if (!matchTitle && !matchSummary && !matchTags) return false;
-      }
-
-      return true;
-    });
-  }, [initialProjects, activeStatus, selectedDomain, selectedUnit, searchQuery]);
-
-  // Tab counters
+  // Status counts
   const counts = useMemo(() => {
     return {
       all: initialProjects.length,
-      ongoing: initialProjects.filter((p) => (p.status || '').toLowerCase() === 'ongoing').length,
-      completed: initialProjects.filter((p) => (p.status || '').toLowerCase() === 'completed').length,
+      ongoing: initialProjects.filter((p) => p.status?.toLowerCase() === 'ongoing').length,
+      completed: initialProjects.filter((p) => p.status?.toLowerCase() === 'completed').length,
       featured: initialProjects.filter((p) => p.featured).length,
     };
   }, [initialProjects]);
 
-  // Pagination
+  // Filtered dataset
+  const filteredProjects = useMemo(() => {
+    return initialProjects.filter((project) => {
+      // 1. Status Filter
+      if (activeStatus === 'Ongoing' && project.status?.toLowerCase() !== 'ongoing') return false;
+      if (activeStatus === 'Completed' && project.status?.toLowerCase() !== 'completed') return false;
+      if (activeStatus === 'Featured' && !project.featured) return false;
+
+      // 2. Unit Filter
+      if (selectedUnit !== 'ALL') {
+        const pSlug = (project.chapter?.slug || project.chapterSlug || '').toLowerCase();
+        if (selectedUnit === 'sb' && pSlug !== 'sb' && pSlug !== '') return false;
+        if (selectedUnit === 'eds' && !pSlug.includes('eds')) return false;
+        if (selectedUnit === 'wie' && !pSlug.includes('wie')) return false;
+      }
+
+      // 3. Domain Filter
+      if (selectedDomain !== 'ALL') {
+        const textToSearch = [
+          project.title,
+          project.summary,
+          ...(project.tags || []),
+        ].join(' ').toLowerCase();
+
+        if (selectedDomain === 'hardware' && !textToSearch.includes('hardware') && !textToSearch.includes('iot') && !textToSearch.includes('embedded') && !textToSearch.includes('stm32') && !textToSearch.includes('esp32')) return false;
+        if (selectedDomain === 'ai-ml' && !textToSearch.includes('ai') && !textToSearch.includes('ml') && !textToSearch.includes('vision') && !textToSearch.includes('neural') && !textToSearch.includes('tinyml')) return false;
+        if (selectedDomain === 'vlsi' && !textToSearch.includes('vlsi') && !textToSearch.includes('risc') && !textToSearch.includes('verilog') && !textToSearch.includes('fpga')) return false;
+        if (selectedDomain === 'web' && !textToSearch.includes('web') && !textToSearch.includes('cloud') && !textToSearch.includes('fullstack') && !textToSearch.includes('next.js')) return false;
+      }
+
+      // 4. Keyword Search Query
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchesTitle = project.title.toLowerCase().includes(q);
+        const matchesSummary = project.summary.toLowerCase().includes(q);
+        const matchesTags = (project.tags || []).some((t) => t.toLowerCase().includes(q));
+        const matchesYear = project.year.toLowerCase().includes(q);
+
+        if (!matchesTitle && !matchesSummary && !matchesTags && !matchesYear) return false;
+      }
+
+      return true;
+    });
+  }, [initialProjects, activeStatus, selectedUnit, selectedDomain, searchQuery]);
+
+  // Pagination slice
   const totalPages = Math.ceil(filteredProjects.length / ITEMS_PER_PAGE);
   const paginatedProjects = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -127,36 +126,40 @@ export function ProjectsFilter({ initialProjects }: ProjectsFilterProps) {
       {/* 1. Status Filter Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-warm-200 dark:border-gray-800">
         {[
-          { id: 'ALL', label: 'All Projects', count: counts.all },
-          { id: 'Ongoing', label: '● In Active Development', count: counts.ongoing },
-          { id: 'Completed', label: '✓ Completed & Published', count: counts.completed },
-          ...(counts.featured > 0 ? [{ id: 'Featured', label: '⭐ Flagship Builds', count: counts.featured }] : []),
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => {
-              setActiveStatus(tab.id);
-              setCurrentPage(1);
-            }}
-            className={`px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 shrink-0 flex items-center gap-1.5 ${
-              activeStatus === tab.id
-                ? 'bg-ieee-blue dark:bg-sky-600 text-white shadow-sm font-bold'
-                : 'bg-warm-50 dark:bg-gray-900 border border-warm-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:border-ieee-blue/40'
-            }`}
-          >
-            <span>{tab.label}</span>
-            <span
-              className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono ${
+          { id: 'ALL', label: 'All Projects', count: counts.all, icon: null },
+          { id: 'Ongoing', label: 'In Active Development', count: counts.ongoing, icon: FiRadio, iconColor: 'text-emerald-500' },
+          { id: 'Completed', label: 'Completed & Published', count: counts.completed, icon: FiCheck, iconColor: 'text-sky-500' },
+          ...(counts.featured > 0 ? [{ id: 'Featured', label: 'Flagship Builds', count: counts.featured, icon: FiStar, iconColor: 'text-amber-500' }] : []),
+        ].map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => {
+                setActiveStatus(tab.id);
+                setCurrentPage(1);
+              }}
+              className={`px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 shrink-0 flex items-center gap-1.5 cursor-pointer ${
                 activeStatus === tab.id
-                  ? 'bg-white/20 text-white'
-                  : 'bg-warm-200/60 dark:bg-gray-800 text-warm-500 dark:text-gray-400'
+                  ? 'bg-ieee-blue dark:bg-sky-600 text-white shadow-sm font-bold'
+                  : 'bg-warm-50 dark:bg-gray-900 border border-warm-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:border-ieee-blue/40'
               }`}
             >
-              {tab.count}
-            </span>
-          </button>
-        ))}
+              {Icon && <Icon className={`w-3 h-3 ${activeStatus === tab.id ? 'text-white' : tab.iconColor}`} />}
+              <span>{tab.label}</span>
+              <span
+                className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono ${
+                  activeStatus === tab.id
+                    ? 'bg-white/20 text-white'
+                    : 'bg-warm-200/60 dark:bg-gray-800 text-warm-500 dark:text-gray-400'
+                }`}
+              >
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* 2. Filter & Search Controls Bar */}
@@ -164,9 +167,7 @@ export function ProjectsFilter({ initialProjects }: ProjectsFilterProps) {
         {/* Search Input */}
         <div className="relative flex-1 min-w-[240px]">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-warm-400 dark:text-gray-500">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <FiSearch className="w-4 h-4" />
           </div>
           <input
             type="text"
@@ -182,9 +183,9 @@ export function ProjectsFilter({ initialProjects }: ProjectsFilterProps) {
             <button
               type="button"
               onClick={() => setSearchQuery('')}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-warm-400 hover:text-ink dark:hover:text-white text-xs"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-warm-400 hover:text-ink dark:hover:text-white text-xs cursor-pointer"
             >
-              ✕
+              <FiX className="w-4 h-4" />
             </button>
           )}
         </div>
@@ -206,7 +207,7 @@ export function ProjectsFilter({ initialProjects }: ProjectsFilterProps) {
                 setSelectedDomain(item.value);
                 setCurrentPage(1);
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${
                 selectedDomain === item.value
                   ? 'bg-ieee-subtle dark:bg-sky-950 text-ieee-blue dark:text-sky-400 border border-ieee-blue/40 font-bold shadow-xs'
                   : 'bg-white dark:bg-gray-800 border border-warm-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-warm-300'
@@ -233,9 +234,10 @@ export function ProjectsFilter({ initialProjects }: ProjectsFilterProps) {
               setSearchQuery('');
               setCurrentPage(1);
             }}
-            className="text-ieee-blue dark:text-sky-400 hover:underline font-mono"
+            className="text-ieee-blue dark:text-sky-400 hover:underline font-mono flex items-center gap-1 cursor-pointer"
           >
-            Reset all filters ✕
+            <span>Reset all filters</span>
+            <FiX className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
@@ -255,13 +257,14 @@ export function ProjectsFilter({ initialProjects }: ProjectsFilterProps) {
                     {project.chapter && <Badge variant="neutral">{project.chapter.name}</Badge>}
                   </div>
                   <span
-                    className={`font-mono text-[11px] font-bold ${
+                    className={`font-mono text-[11px] font-bold flex items-center gap-1 ${
                       project.status?.toLowerCase() === 'ongoing'
                         ? 'text-emerald-600 dark:text-emerald-400'
                         : 'text-warm-500 dark:text-gray-400'
                     }`}
                   >
-                    ● {project.status}
+                    <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                    <span>{project.status}</span>
                   </span>
                 </div>
 
@@ -298,9 +301,12 @@ export function ProjectsFilter({ initialProjects }: ProjectsFilterProps) {
                       href={project.githubUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-warm-500 hover:text-ink dark:hover:text-white flex items-center gap-1 transition-colors"
+                      className="text-warm-500 hover:text-ink dark:hover:text-white flex items-center gap-1.5 transition-colors"
+                      aria-label="View on GitHub"
                     >
-                      <span>GitHub ↗</span>
+                      <FaGithub className="w-3.5 h-3.5" />
+                      <span>GitHub</span>
+                      <FiExternalLink className="w-3 h-3 opacity-70" />
                     </a>
                   )}
                   {project.demoUrl && (
@@ -308,9 +314,11 @@ export function ProjectsFilter({ initialProjects }: ProjectsFilterProps) {
                       href={project.demoUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-warm-500 hover:text-ink dark:hover:text-white flex items-center gap-1 transition-colors"
+                      className="text-warm-500 hover:text-ink dark:hover:text-white flex items-center gap-1.5 transition-colors"
+                      aria-label="View Live Demo"
                     >
-                      <span>Demo ↗</span>
+                      <span>Demo</span>
+                      <FiExternalLink className="w-3 h-3 opacity-70" />
                     </a>
                   )}
                 </div>
@@ -320,7 +328,7 @@ export function ProjectsFilter({ initialProjects }: ProjectsFilterProps) {
                   className="text-ieee-blue dark:text-sky-400 font-bold hover:underline flex items-center gap-1 uppercase tracking-wider text-[11px]"
                 >
                   <span>Case Study</span>
-                  <span>→</span>
+                  <FiArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>
@@ -328,7 +336,9 @@ export function ProjectsFilter({ initialProjects }: ProjectsFilterProps) {
         </div>
       ) : (
         <div className="p-12 border border-warm-200 dark:border-gray-800 bg-warm-50/50 dark:bg-gray-900/50 rounded-xl text-center space-y-3">
-          <span className="text-3xl">🛠️</span>
+          <div className="w-12 h-12 rounded-xl bg-ieee-subtle dark:bg-sky-950 flex items-center justify-center text-ieee-blue dark:text-sky-400 mx-auto">
+            <FiCpu className="w-6 h-6" />
+          </div>
           <h4 className="font-serif text-lg text-ink dark:text-gray-200 font-normal">
             No matching technical projects found
           </h4>
@@ -344,26 +354,22 @@ export function ProjectsFilter({ initialProjects }: ProjectsFilterProps) {
               setSearchQuery('');
               setCurrentPage(1);
             }}
-            className="mt-2 inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-ieee-blue text-white text-xs font-semibold shadow-xs"
+            className="px-4 py-2 bg-ieee-blue hover:bg-ieee-dark text-white rounded-lg text-xs font-mono font-semibold transition-colors inline-block cursor-pointer shadow-xs"
           >
-            Reset Filters
+            Reset All Filters
           </button>
         </div>
       )}
 
       {/* 4. Pagination */}
-      {totalPages > 1 && (
-        <div className="pt-4 flex justify-center">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={(page) => {
-              setCurrentPage(page);
-              window.scrollTo({ top: 300, behavior: 'smooth' });
-            }}
-          />
-        </div>
-      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={(page) => {
+          setCurrentPage(page);
+          window.scrollTo({ top: 300, behavior: 'smooth' });
+        }}
+      />
     </div>
   );
-}
+};

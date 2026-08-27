@@ -2,10 +2,10 @@
 
 /**
  * @file src/components/content/EventsFilter.tsx
- * @description State-of-the-art interactive filter and search engine for IEEE MAIT events.
+ * @description State-of-the-art interactive filter and search engine for IEEE MAIT events with react-icons.
  * 
  * FEATURES:
- * - Status Tabs: All | Upcoming | Live / Ongoing | Flagships | Past Archive.
+ * - Status Tabs: All | Upcoming | Live / Ongoing | Flagships | Past Archive with react-icons.
  * - Unit Filter Pills: All Units | IEEE MAIT SB | EDS Chapter | WIE AG.
  * - Live keyword search with instant filtering across titles, venues, and topics.
  * - Category Dropdown selector.
@@ -19,6 +19,7 @@
 import React, { useState, useMemo } from 'react';
 import { EventPreview } from './EventPreview';
 import { Pagination } from '../ui/Pagination';
+import { FiSearch, FiX, FiRadio, FiStar, FiCalendar, FiClock } from 'react-icons/fi';
 
 export interface EventItem {
   id: string;
@@ -44,46 +45,50 @@ export function EventsFilter({ initialEvents }: { initialEvents: EventItem[] }) 
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const ITEMS_PER_PAGE = 6;
+  const itemsPerPage = 6;
 
-  // Real-time filtering engine
+  // Compute tab counts
+  const tabCounts = useMemo(() => {
+    return {
+      all: initialEvents.length,
+      upcoming: initialEvents.filter((e) => e.status?.toLowerCase() === 'upcoming' && !e.isLive).length,
+      ongoing: initialEvents.filter((e) => e.isLive || e.status?.toLowerCase() === 'ongoing').length,
+      flagship: initialEvents.filter((e) => e.eventType?.toLowerCase() === 'flagship' || e.category?.toLowerCase().includes('flagship')).length,
+      past: initialEvents.filter((e) => e.status?.toLowerCase() === 'past' && !e.isLive).length,
+    };
+  }, [initialEvents]);
+
+  // Dynamic filter pipeline
   const filteredEvents = useMemo(() => {
     return initialEvents.filter((event) => {
-      // 1. Status / Tab Filter
-      if (activeTab === 'UPCOMING') {
-        if (event.status?.toLowerCase() !== 'upcoming') return false;
-      } else if (activeTab === 'ONGOING') {
-        const isLive = event.isLive || event.status?.toLowerCase() === 'ongoing';
-        if (!isLive) return false;
-      } else if (activeTab === 'FLAGSHIP') {
-        const isFlagship =
-          event.eventType?.toLowerCase() === 'flagship' ||
-          event.category?.toLowerCase().includes('flagship');
-        if (!isFlagship) return false;
-      } else if (activeTab === 'PAST') {
-        if (event.status?.toLowerCase() === 'upcoming') return false;
-      }
+      // 1. Tab Status Filter
+      if (activeTab === 'UPCOMING' && (event.status?.toLowerCase() !== 'upcoming' || event.isLive)) return false;
+      if (activeTab === 'ONGOING' && !event.isLive && event.status?.toLowerCase() !== 'ongoing') return false;
+      if (activeTab === 'FLAGSHIP' && event.eventType?.toLowerCase() !== 'flagship' && !event.category?.toLowerCase().includes('flagship')) return false;
+      if (activeTab === 'PAST' && (event.status?.toLowerCase() !== 'past' || event.isLive)) return false;
 
       // 2. Unit Filter
       if (selectedUnit !== 'ALL') {
-        const eventUnitSlug = event.unitSlug || (event.unit?.toLowerCase().includes('wie') ? 'wie' : event.unit?.toLowerCase().includes('eds') ? 'eds' : 'sb');
-        if (eventUnitSlug !== selectedUnit) return false;
+        const u = (event.unitSlug || event.unit || '').toLowerCase();
+        if (selectedUnit === 'sb' && u !== 'sb' && !u.includes('student branch') && u !== 'main') return false;
+        if (selectedUnit === 'eds' && !u.includes('eds')) return false;
+        if (selectedUnit === 'wie' && !u.includes('wie')) return false;
       }
 
       // 3. Category Filter
-      if (selectedCategory !== 'ALL' && event.category !== selectedCategory) {
-        return false;
+      if (selectedCategory !== 'ALL') {
+        if (event.category !== selectedCategory) return false;
       }
 
-      // 4. Keyword Search Filter
+      // 4. Keyword Search Query
       if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase().trim();
-        const matchTitle = event.title?.toLowerCase().includes(query);
-        const matchVenue = event.venue?.toLowerCase().includes(query);
-        const matchDesc = event.description?.toLowerCase().includes(query);
-        const matchCategory = event.category?.toLowerCase().includes(query);
-        const matchUnit = event.unit?.toLowerCase().includes(query);
-        if (!matchTitle && !matchVenue && !matchDesc && !matchCategory && !matchUnit) {
+        const query = searchQuery.toLowerCase();
+        const matchesTitle = event.title.toLowerCase().includes(query);
+        const matchesVenue = (event.venue || '').toLowerCase().includes(query);
+        const matchesDesc = (event.description || '').toLowerCase().includes(query);
+        const matchesUnit = (event.unit || '').toLowerCase().includes(query);
+
+        if (!matchesTitle && !matchesVenue && !matchesDesc && !matchesUnit) {
           return false;
         }
       }
@@ -92,27 +97,14 @@ export function EventsFilter({ initialEvents }: { initialEvents: EventItem[] }) 
     });
   }, [initialEvents, activeTab, selectedUnit, selectedCategory, searchQuery]);
 
-  // Tab counters
-  const tabCounts = useMemo(() => {
-    return {
-      all: initialEvents.length,
-      upcoming: initialEvents.filter((e) => e.status?.toLowerCase() === 'upcoming').length,
-      ongoing: initialEvents.filter((e) => e.isLive || e.status?.toLowerCase() === 'ongoing').length,
-      flagship: initialEvents.filter((e) => e.eventType?.toLowerCase() === 'flagship' || e.category?.toLowerCase().includes('flagship')).length,
-      past: initialEvents.filter((e) => e.status?.toLowerCase() !== 'upcoming').length,
-    };
-  }, [initialEvents]);
-
-  // Pagination calculation
-  const totalPages = Math.ceil(filteredEvents.length / ITEMS_PER_PAGE);
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
   const paginatedEvents = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredEvents.slice(start, start + ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredEvents.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredEvents, currentPage]);
 
-  const featuredEvent = (activeTab === 'UPCOMING' || activeTab === 'FLAGSHIP' || activeTab === 'ALL') && paginatedEvents.length > 0 && currentPage === 1
-    ? paginatedEvents[0]
-    : null;
+  const featuredEvent = activeTab === 'ALL' && paginatedEvents.length > 0 && currentPage === 1 ? paginatedEvents[0] : null;
   const listEvents = featuredEvent ? paginatedEvents.slice(1) : paginatedEvents;
 
   return (
@@ -120,37 +112,41 @@ export function EventsFilter({ initialEvents }: { initialEvents: EventItem[] }) 
       {/* 1. Status Tabs Navigation */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-warm-200 dark:border-gray-800">
         {[
-          { id: 'ALL', label: 'All Events', count: tabCounts.all },
-          { id: 'UPCOMING', label: 'Upcoming', count: tabCounts.upcoming },
-          { id: 'ONGOING', label: '● Live Now', count: tabCounts.ongoing, isLive: true },
-          { id: 'FLAGSHIP', label: '⭐ Flagships', count: tabCounts.flagship },
-          { id: 'PAST', label: 'Past Archive', count: tabCounts.past },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => {
-              setActiveTab(tab.id as any);
-              setCurrentPage(1);
-            }}
-            className={`px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 shrink-0 flex items-center gap-1.5 ${
-              activeTab === tab.id
-                ? 'bg-ieee-blue dark:bg-sky-600 text-white shadow-sm font-bold'
-                : 'bg-warm-50 dark:bg-gray-900 border border-warm-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:border-ieee-blue/40 dark:hover:border-sky-500/40'
-            }`}
-          >
-            <span>{tab.label}</span>
-            <span
-              className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono ${
+          { id: 'ALL', label: 'All Events', count: tabCounts.all, icon: null },
+          { id: 'UPCOMING', label: 'Upcoming', count: tabCounts.upcoming, icon: FiClock, iconColor: 'text-sky-500' },
+          { id: 'ONGOING', label: 'Live Now', count: tabCounts.ongoing, isLive: true, icon: FiRadio, iconColor: 'text-red-500' },
+          { id: 'FLAGSHIP', label: 'Flagships', count: tabCounts.flagship, icon: FiStar, iconColor: 'text-amber-500' },
+          { id: 'PAST', label: 'Past Archive', count: tabCounts.past, icon: FiCalendar, iconColor: 'text-warm-500' },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => {
+                setActiveTab(tab.id as any);
+                setCurrentPage(1);
+              }}
+              className={`px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 shrink-0 flex items-center gap-1.5 cursor-pointer ${
                 activeTab === tab.id
-                  ? 'bg-white/20 text-white'
-                  : 'bg-warm-200/60 dark:bg-gray-800 text-warm-500 dark:text-gray-400'
+                  ? 'bg-ieee-blue dark:bg-sky-600 text-white shadow-sm font-bold'
+                  : 'bg-warm-50 dark:bg-gray-900 border border-warm-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:border-ieee-blue/40 dark:hover:border-sky-500/40'
               }`}
             >
-              {tab.count}
-            </span>
-          </button>
-        ))}
+              {Icon && <Icon className={`w-3 h-3 ${activeTab === tab.id ? 'text-white' : tab.iconColor}`} />}
+              <span>{tab.label}</span>
+              <span
+                className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono ${
+                  activeTab === tab.id
+                    ? 'bg-white/20 text-white'
+                    : 'bg-warm-200/60 dark:bg-gray-800 text-warm-500 dark:text-gray-400'
+                }`}
+              >
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* 2. Interactive Filter & Search Bar */}
@@ -158,9 +154,7 @@ export function EventsFilter({ initialEvents }: { initialEvents: EventItem[] }) 
         {/* Search Input */}
         <div className="relative flex-1 min-w-[240px]">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-warm-400 dark:text-gray-500">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <FiSearch className="w-4 h-4" />
           </div>
           <input
             type="text"
@@ -176,10 +170,10 @@ export function EventsFilter({ initialEvents }: { initialEvents: EventItem[] }) 
             <button
               type="button"
               onClick={() => setSearchQuery('')}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-warm-400 hover:text-ink dark:hover:text-white text-xs"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-warm-400 hover:text-ink dark:hover:text-white text-xs cursor-pointer"
               aria-label="Clear Search"
             >
-              ✕
+              <FiX className="w-4 h-4" />
             </button>
           )}
         </div>
@@ -200,7 +194,7 @@ export function EventsFilter({ initialEvents }: { initialEvents: EventItem[] }) 
                 setSelectedUnit(item.value);
                 setCurrentPage(1);
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${
                 selectedUnit === item.value
                   ? 'bg-ieee-subtle dark:bg-sky-950 text-ieee-blue dark:text-sky-400 border border-ieee-blue/40 font-bold shadow-xs'
                   : 'bg-white dark:bg-gray-800 border border-warm-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-warm-300'
@@ -247,9 +241,10 @@ export function EventsFilter({ initialEvents }: { initialEvents: EventItem[] }) 
               setSearchQuery('');
               setCurrentPage(1);
             }}
-            className="text-ieee-blue dark:text-sky-400 hover:underline font-mono"
+            className="text-ieee-blue dark:text-sky-400 hover:underline font-mono flex items-center gap-1 cursor-pointer"
           >
-            Reset all filters ✕
+            <span>Reset all filters</span>
+            <FiX className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
@@ -305,7 +300,9 @@ export function EventsFilter({ initialEvents }: { initialEvents: EventItem[] }) 
 
         {filteredEvents.length === 0 && (
           <div className="p-12 border border-warm-200 dark:border-gray-800 bg-warm-50/50 dark:bg-gray-900/50 rounded-xl text-center space-y-3">
-            <span className="text-3xl">📅</span>
+            <div className="w-12 h-12 rounded-xl bg-ieee-subtle dark:bg-sky-950 flex items-center justify-center text-ieee-blue dark:text-sky-400 mx-auto">
+              <FiCalendar className="w-6 h-6" />
+            </div>
             <h4 className="font-serif text-lg text-ink dark:text-gray-200 font-normal">
               No matching events found
             </h4>
@@ -321,27 +318,23 @@ export function EventsFilter({ initialEvents }: { initialEvents: EventItem[] }) 
                 setSearchQuery('');
                 setCurrentPage(1);
               }}
-              className="mt-2 inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-ieee-blue text-white text-xs font-semibold shadow-xs"
+              className="px-4 py-2 bg-ieee-blue hover:bg-ieee-dark text-white rounded-lg text-xs font-mono font-semibold transition-colors inline-block cursor-pointer shadow-xs"
             >
-              Reset Filters
+              Reset All Filters
             </button>
           </div>
         )}
       </div>
 
       {/* 4. Pagination */}
-      {totalPages > 1 && (
-        <div className="pt-4 flex justify-center">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={(page) => {
-              setCurrentPage(page);
-              window.scrollTo({ top: 300, behavior: 'smooth' });
-            }}
-          />
-        </div>
-      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={(page) => {
+          setCurrentPage(page);
+          window.scrollTo({ top: 300, behavior: 'smooth' });
+        }}
+      />
     </div>
   );
 }

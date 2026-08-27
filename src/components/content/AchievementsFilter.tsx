@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { AchievementRow } from './AchievementRow';
+import { FiSearch, FiX } from 'react-icons/fi';
 
 export interface AchievementItem {
   id: string;
@@ -69,21 +70,22 @@ export function AchievementsFilter({ initialAchievements }: { initialAchievement
   return (
     <div>
       {/* Category Filter & Search Strip */}
-      <div className="bg-warm-100/50 border border-warm-200 p-4 sm:p-5 rounded-[2px] mb-8 space-y-4">
+      <div className="bg-warm-100/50 dark:bg-gray-900/50 border border-warm-200 dark:border-gray-800 p-4 sm:p-5 rounded-xl mb-8 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           {/* Category Pill Buttons */}
           <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
-            <span className="text-warm-400 font-semibold uppercase tracking-wider mr-1 text-[11px]">
+            <span className="text-warm-400 dark:text-gray-400 font-semibold uppercase tracking-wider mr-1 text-[11px]">
               Filter:
             </span>
             {categories.map((cat) => (
               <button
                 key={cat.value}
+                type="button"
                 onClick={() => setSelectedCategory(cat.value)}
-                className={`px-3 py-1.5 rounded-[2px] transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                   selectedCategory === cat.value
-                    ? 'bg-ieee-blue text-white font-bold shadow-xs'
-                    : 'bg-white border border-warm-200 text-ink hover:border-ieee-blue hover:text-ieee-blue'
+                    ? 'bg-ieee-blue dark:bg-sky-600 text-white font-bold shadow-xs'
+                    : 'bg-white dark:bg-gray-800 border border-warm-200 dark:border-gray-700 text-ink dark:text-gray-200 hover:border-ieee-blue hover:text-ieee-blue dark:hover:text-sky-300'
                 }`}
               >
                 {cat.label}
@@ -98,22 +100,17 @@ export function AchievementsFilter({ initialAchievements }: { initialAchievement
               placeholder="Search awards, years, recipients..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white border border-warm-200 px-3 py-1.5 pl-8 text-xs font-sans text-ink placeholder:text-warm-400 rounded-[2px] focus:outline-hidden focus:border-ieee-blue"
+              className="w-full bg-white dark:bg-gray-800 border border-warm-200 dark:border-gray-700 px-3 py-1.5 pl-8 text-xs font-sans text-ink dark:text-gray-100 placeholder:text-warm-400 dark:placeholder:text-gray-500 rounded-lg focus:outline-hidden focus:border-ieee-blue"
             />
-            <svg
-              className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-warm-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <FiSearch className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-warm-400 dark:text-gray-500 pointer-events-none" />
             {searchQuery && (
               <button
+                type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-warm-400 hover:text-ink text-xs font-mono"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-warm-400 hover:text-ink dark:hover:text-white text-xs font-mono cursor-pointer"
+                aria-label="Clear search"
               >
-                ✕
+                <FiX className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
@@ -121,7 +118,7 @@ export function AchievementsFilter({ initialAchievements }: { initialAchievement
       </div>
 
       {/* Ledger Table */}
-      <div className="border-t border-warm-200 divide-y divide-warm-200">
+      <div className="border-t border-warm-200 dark:border-gray-800 divide-y divide-warm-200 dark:divide-gray-800">
         {filteredAchievements.map((item) => (
           <AchievementRow
             key={item.id}
@@ -137,9 +134,9 @@ export function AchievementsFilter({ initialAchievements }: { initialAchievement
         ))}
 
         {filteredAchievements.length === 0 && (
-          <div className="p-12 text-center font-sans text-sm text-warm-400 border-b border-warm-200 space-y-2">
-            <p className="font-serif text-lg text-ink font-normal">No matching records found</p>
-            <p className="text-xs text-warm-400 font-mono">
+          <div className="p-12 text-center font-sans text-sm text-warm-400 dark:text-gray-400 border-b border-warm-200 dark:border-gray-800 space-y-2">
+            <p className="font-serif text-lg text-ink dark:text-gray-200 font-normal">No matching records found</p>
+            <p className="text-xs text-warm-400 dark:text-gray-400 font-mono">
               Try adjusting your search query or selecting a different category filter.
             </p>
           </div>

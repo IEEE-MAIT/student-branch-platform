@@ -2,7 +2,7 @@
 
 /**
  * @file src/app/admin/layout.tsx
- * @description Nested Admin Portal Layout with Sidebar, Session Validation, and RBAC support.
+ * @description Nested Admin Portal Layout with Sidebar, Session Validation, react-icons, and RBAC support.
  *
  * @author IEEE MAIT Webmaster
  * @license MIT
@@ -15,22 +15,41 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
 import { Badge } from '@/components/ui/Badge';
+import {
+  FiGrid,
+  FiCalendar,
+  FiCpu,
+  FiLayers,
+  FiCompass,
+  FiAward,
+  FiUsers,
+  FiBookOpen,
+  FiImage,
+  FiFileText,
+  FiFolder,
+  FiClock,
+  FiSettings,
+  FiShield,
+  FiLock,
+  FiLogOut,
+  FiArrowRight,
+} from 'react-icons/fi';
 
 const ADMIN_NAV = [
-  { label: 'Overview', href: '/admin' },
-  { label: 'Events & Workshops', href: '/admin/events' },
-  { label: 'Technical Projects', href: '/admin/projects' },
-  { label: 'Special Interest Groups', href: '/admin/sigs' },
-  { label: 'Opportunities & Grants', href: '/admin/opportunities' },
-  { label: 'Achievements Ledger', href: '/admin/achievements' },
-  { label: 'People & Roster', href: '/admin/people' },
-  { label: 'Publications & Articles', href: '/admin/stories' },
-  { label: 'Photo Galleries', href: '/admin/galleries' },
-  { label: 'Resources & Documents', href: '/admin/resources' },
-  { label: 'Media Library & Assets', href: '/admin/assets' },
-  { label: 'Milestones Timeline', href: '/admin/milestones' },
-  { label: 'Site Settings', href: '/admin/settings' },
-  { label: 'Audit Logs', href: '/admin/audit-logs' },
+  { label: 'Overview', href: '/admin', icon: FiGrid },
+  { label: 'Events & Workshops', href: '/admin/events', icon: FiCalendar },
+  { label: 'Technical Projects', href: '/admin/projects', icon: FiCpu },
+  { label: 'Special Interest Groups', href: '/admin/sigs', icon: FiLayers },
+  { label: 'Opportunities & Grants', href: '/admin/opportunities', icon: FiCompass },
+  { label: 'Achievements Ledger', href: '/admin/achievements', icon: FiAward },
+  { label: 'People & Roster', href: '/admin/people', icon: FiUsers },
+  { label: 'Publications & Articles', href: '/admin/stories', icon: FiBookOpen },
+  { label: 'Photo Galleries', href: '/admin/galleries', icon: FiImage },
+  { label: 'Resources & Documents', href: '/admin/resources', icon: FiFileText },
+  { label: 'Media Library & Assets', href: '/admin/assets', icon: FiFolder },
+  { label: 'Milestones Timeline', href: '/admin/milestones', icon: FiClock },
+  { label: 'Site Settings', href: '/admin/settings', icon: FiSettings },
+  { label: 'Audit Logs', href: '/admin/audit-logs', icon: FiShield },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -107,7 +126,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="max-w-md mx-auto border border-warm-200 dark:border-gray-800 p-8 rounded-xl bg-white dark:bg-gray-900 shadow-xs">
               <div className="flex items-center justify-between mb-4">
                 <Badge variant="ieee">IEEE MAIT CMS</Badge>
-                <span className="font-mono text-xs text-warm-400 dark:text-gray-400">Protected Portal</span>
+                <span className="font-mono text-xs text-warm-400 dark:text-gray-400 flex items-center gap-1">
+                  <FiLock className="w-3 h-3" />
+                  <span>Protected Portal</span>
+                </span>
               </div>
 
               <h1 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal mb-2">Officer Authentication</h1>
@@ -152,9 +174,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
                 <button
                   type="submit"
-                  className="w-full py-3 bg-ieee-blue hover:bg-ieee-dark dark:bg-sky-600 dark:hover:bg-sky-700 text-white font-mono text-xs font-bold uppercase tracking-wider rounded-lg transition-colors shadow-xs cursor-pointer"
+                  className="w-full py-3 bg-ieee-blue hover:bg-ieee-dark dark:bg-sky-600 dark:hover:bg-sky-700 text-white font-mono text-xs font-bold uppercase tracking-wider rounded-lg transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                 >
-                  Authenticate Session →
+                  <span>Authenticate Session</span>
+                  <FiArrowRight className="w-3.5 h-3.5" />
                 </button>
               </form>
             </div>
@@ -192,9 +215,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </span>
               <button
                 onClick={handleLogout}
-                className="font-mono text-xs text-red-600 dark:text-red-400 hover:underline font-semibold cursor-pointer"
+                className="font-mono text-xs text-red-600 dark:text-red-400 hover:underline font-semibold cursor-pointer flex items-center gap-1"
               >
-                Sign Out
+                <FiLogOut className="w-3.5 h-3.5" />
+                <span>Sign Out</span>
               </button>
             </div>
           </div>
@@ -209,17 +233,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </div>
                 {ADMIN_NAV.map((item: any) => {
                   const isActive = pathname === item.href;
+                  const Icon = item.icon;
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`block px-3 py-2 text-xs font-mono rounded-lg transition-colors ${
+                      className={`flex items-center gap-2.5 px-3 py-2 text-xs font-mono rounded-lg transition-colors ${
                         isActive
                           ? 'bg-ieee-blue text-white font-bold dark:bg-sky-600'
                           : 'text-warm-600 dark:text-gray-300 hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ink dark:hover:text-white'
                       }`}
                     >
-                      {item.label}
+                      <Icon className="w-3.5 h-3.5 shrink-0" />
+                      <span>{item.label}</span>
                     </Link>
                   );
                 })}

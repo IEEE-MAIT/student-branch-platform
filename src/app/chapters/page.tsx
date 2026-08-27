@@ -16,6 +16,7 @@ import { StatMetric } from '@/components/content/StatMetric';
 import { ChapterFilterGrid } from '@/components/content/ChapterFilterGrid';
 import { Button } from '@/components/ui/Button';
 import { getDynamicChapters, getDynamicProjects, getDynamicInitiatives } from '@/lib/api';
+import { FiArrowRight } from 'react-icons/fi';
 
 export const metadata = {
   title: 'Communities & Chapters | IEEE MAIT Student Branch',
@@ -147,8 +148,9 @@ export default async function ChaptersPage() {
                   Join IEEE MAIT today and activate your chapter and affinity group affiliations.
                 </p>
               </div>
-              <Button href="/join" variant="primary" size="md" className="shrink-0">
-                Join IEEE MAIT →
+              <Button href="/join" variant="primary" size="md" className="shrink-0 flex items-center gap-1.5">
+                <span>Join IEEE MAIT</span>
+                <FiArrowRight className="w-4 h-4" />
               </Button>
             </div>
           </section>

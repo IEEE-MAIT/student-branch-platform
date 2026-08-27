@@ -23,6 +23,7 @@ import {
   getDynamicProjects,
   getDynamicInitiatives,
 } from '@/lib/api';
+import { FiArrowRight } from 'react-icons/fi';
 
 export async function generateStaticParams() {
   const chapters = await getDynamicChapters();
@@ -246,8 +247,9 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
                     IEEE Women in Engineering provides travel grants to attend flagship IEEE conferences, student project funding awards, and leadership development bursaries. Our advisory cell assists student authors in preparing award-winning proposals.
                   </p>
                   <div className="pt-2 flex flex-wrap gap-4">
-                    <Button href="/contact" variant="primary" size="md" className="!bg-purple-700 hover:!bg-purple-800">
-                      Request Application Review →
+                    <Button href="/contact" variant="primary" size="md" className="!bg-purple-700 hover:!bg-purple-800 flex items-center gap-1.5">
+                      <span>Request Application Review</span>
+                      <FiArrowRight className="w-4 h-4" />
                     </Button>
                     <Button href="/publications/empowering-women-in-engineering-roadmap" variant="secondary" size="md" className="!border-purple-300 !text-purple-800">
                       Read 2026 Roadmap
@@ -326,7 +328,7 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
                         iconName={init.iconName}
                         accentColor={chapter.accentColor || undefined}
                         actionHref="/join"
-                        actionText="Join Initiative →"
+                        actionText="Join Initiative"
                       />
                     ))}
                   </div>
@@ -509,8 +511,9 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
 
               {/* Action Band */}
               <div className="pt-4 flex items-center gap-4">
-                <Button href="/join" variant="primary" size="lg">
-                  Join {chapter.name} →
+                <Button href="/join" variant="primary" size="lg" className="flex items-center gap-1.5">
+                  <span>Join {chapter.name}</span>
+                  <FiArrowRight className="w-4 h-4" />
                 </Button>
                 <Button href="/chapters" variant="secondary" size="lg">
                   Browse All Units

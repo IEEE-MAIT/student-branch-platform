@@ -330,7 +330,7 @@ export const getDynamicPeopleByAcademicYear = cache(async (year: string) => {
 export const getDynamicSiteSettings = cache(async () => {
   const defaultSettings = {
     announcementMessage: 'Membership Drive 2025–26 is officially open!',
-    announcementLinkText: 'Register Now →',
+    announcementLinkText: 'Register Now',
     announcementLinkHref: '/join',
     announcementActive: true,
     donateUrl: 'https://www.ieee.org/membership/join/index.html',

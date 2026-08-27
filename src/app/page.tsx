@@ -20,6 +20,7 @@ import {
   getDynamicPeople, 
   getDynamicGalleries 
 } from '@/lib/api';
+import { FiArrowRight, FiExternalLink } from 'react-icons/fi';
 
 export const metadata: Metadata = {
   title: 'IEEE MAIT Student Branch · Advancing Technology for Humanity',
@@ -114,8 +115,9 @@ export default async function HomePage() {
 
               {/* Action Buttons */}
               <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
-                <Button href="/join" variant="primary" size="lg" className="w-full sm:w-auto justify-center">
-                  Join IEEE MAIT →
+                <Button href="/join" variant="primary" size="lg" className="w-full sm:w-auto justify-center flex items-center gap-2">
+                  <span>Join IEEE MAIT</span>
+                  <FiArrowRight className="w-4 h-4" />
                 </Button>
                 <Button href="/about" variant="secondary" size="lg" className="w-full sm:w-auto justify-center">
                   Explore Our Work
@@ -201,8 +203,9 @@ export default async function HomePage() {
               )}
 
               <div className="pt-4 flex justify-between items-center border-t border-warm-200 dark:border-gray-800">
-                <Link href="/events" className="text-xs font-mono text-ieee-blue dark:text-sky-400 font-semibold hover:underline flex items-center gap-1">
-                  <span>View Full Events Archive →</span>
+                <Link href="/events" className="text-xs font-mono text-ieee-blue dark:text-sky-400 font-semibold hover:underline flex items-center gap-1.5">
+                  <span>View Full Events Archive</span>
+                  <FiArrowRight className="w-3.5 h-3.5" />
                 </Link>
                 <span className="font-mono text-xs text-warm-400 dark:text-gray-400">Live Database Feed</span>
               </div>
@@ -242,8 +245,9 @@ export default async function HomePage() {
             </div>
 
             <div className="pt-8 flex justify-between items-center border-t border-warm-200 dark:border-gray-800 mt-8">
-              <Link href="/chapters" className="text-xs font-mono text-ieee-blue dark:text-sky-400 font-semibold hover:underline flex items-center gap-1">
-                <span>Explore All Communities & Sub-Portals →</span>
+              <Link href="/chapters" className="text-xs font-mono text-ieee-blue dark:text-sky-400 font-semibold hover:underline flex items-center gap-1.5">
+                <span>Explore All Communities & Sub-Portals</span>
+                <FiArrowRight className="w-3.5 h-3.5" />
               </Link>
               <span className="font-mono text-xs text-warm-400 dark:text-gray-400">
                 {chaptersList.length} Chartered Units
@@ -275,8 +279,9 @@ export default async function HomePage() {
               ))}
 
               <div className="pt-6 flex justify-between items-center">
-                <Link href="/achievements" className="text-xs font-mono text-ieee-blue dark:text-sky-400 font-semibold hover:underline flex items-center gap-1">
-                  <span>View Full Achievements Ledger →</span>
+                <Link href="/achievements" className="text-xs font-mono text-ieee-blue dark:text-sky-400 font-semibold hover:underline flex items-center gap-1.5">
+                  <span>View Full Achievements Ledger</span>
+                  <FiArrowRight className="w-3.5 h-3.5" />
                 </Link>
                 <span className="font-mono text-xs text-warm-400 dark:text-gray-400">Delhi Section Record</span>
               </div>
@@ -315,8 +320,9 @@ export default async function HomePage() {
               </div>
 
               <div className="pt-8 flex justify-between items-center border-t border-warm-200 dark:border-gray-800 mt-8">
-                <Link href="/people" className="text-xs font-mono text-ieee-blue dark:text-sky-400 font-semibold hover:underline flex items-center gap-1">
-                  <span>View Full Leadership Directory & Archive →</span>
+                <Link href="/people" className="text-xs font-mono text-ieee-blue dark:text-sky-400 font-semibold hover:underline flex items-center gap-1.5">
+                  <span>View Full Leadership Directory & Archive</span>
+                  <FiArrowRight className="w-3.5 h-3.5" />
                 </Link>
                 <span className="font-mono text-xs text-warm-400 dark:text-gray-400">{BRANCH_STATS.activeMembers} Active Members</span>
               </div>
@@ -336,8 +342,9 @@ export default async function HomePage() {
                   Real Moments, Real Work
                 </h2>
               </div>
-              <Link href="/gallery" className="text-xs font-mono text-ieee-blue dark:text-sky-400 hover:text-ieee-dark dark:hover:text-sky-300 hover:underline font-semibold shrink-0">
-                View Full Photo Gallery →
+              <Link href="/gallery" className="text-xs font-mono text-ieee-blue dark:text-sky-400 hover:text-ieee-dark dark:hover:text-sky-300 hover:underline font-semibold shrink-0 flex items-center gap-1.5">
+                <span>View Full Photo Gallery</span>
+                <FiArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
 
@@ -380,7 +387,7 @@ export default async function HomePage() {
                       <span className="font-mono text-[10px] text-ieee-blue dark:text-sky-400 uppercase tracking-wider font-semibold">
                         {item.subtitle}
                       </span>
-                      <span className="text-xs text-warm-400 dark:text-gray-500 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors">↗</span>
+                      <FiExternalLink className="w-3.5 h-3.5 text-warm-400 dark:text-gray-500 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors" />
                     </div>
                     <div>
                       <h4 className="font-serif text-sm text-ink dark:text-white group-hover:text-ieee-blue dark:group-hover:text-sky-300 transition-colors leading-snug">
@@ -413,8 +420,9 @@ export default async function HomePage() {
                 Connect with {BRANCH_STATS.activeMembers} engineers, access IEEE&apos;s global network of 460,000+ technologists, and build hands-on skills in hardware, AI, and leadership.
               </p>
               <div className="flex flex-wrap justify-center gap-4 pt-2">
-                <Button href="/join" variant="primary" size="lg" className="shadow-md">
-                  Start Your Membership →
+                <Button href="/join" variant="primary" size="lg" className="shadow-md flex items-center gap-2">
+                  <span>Start Your Membership</span>
+                  <FiArrowRight className="w-4 h-4" />
                 </Button>
                 <Button href="/contact" variant="secondary" size="lg">
                   Ask a Question

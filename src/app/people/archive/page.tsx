@@ -1,6 +1,6 @@
 /**
  * @file src/app/people/archive/page.tsx
- * @description Leadership Archive Directory — Historical ExeCom records by academic year (2005–present).
+ * @description Leadership Archive Directory — Historical ExeCom records by academic year with react-icons.
  * 
  * @author IEEE MAIT Webmaster
  * @license MIT
@@ -13,6 +13,7 @@ import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import Link from '@/components/ui/AppLink';
+import { FiCalendar, FiArrowRight } from 'react-icons/fi';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -65,7 +66,9 @@ export default function PeopleArchivePage() {
                     className="flex items-center justify-between px-6 py-4.5 bg-white dark:bg-gray-900 hover:bg-warm-50 dark:hover:bg-gray-800/60 transition-colors group"
                   >
                     <div className="flex items-center gap-3.5">
-                      <span className="text-base">📅</span>
+                      <div className="w-8 h-8 rounded-lg bg-ieee-subtle dark:bg-sky-950 flex items-center justify-center text-ieee-blue dark:text-sky-400">
+                        <FiCalendar className="w-4 h-4" />
+                      </div>
                       <div>
                         <span className="font-mono text-sm font-bold text-ink dark:text-gray-100 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors">
                           Academic Session {year.label}
@@ -80,9 +83,9 @@ export default function PeopleArchivePage() {
                         </span>
                       )}
                     </div>
-                    <span className="font-mono text-xs text-warm-400 dark:text-gray-400 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors flex items-center gap-1">
+                    <span className="font-mono text-xs text-warm-400 dark:text-gray-400 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors flex items-center gap-1.5">
                       <span>View Roster</span>
-                      <span>→</span>
+                      <FiArrowRight className="w-3.5 h-3.5" />
                     </span>
                   </Link>
                 ))}

@@ -2,6 +2,7 @@ import React from 'react';
 import Link from '@/components/ui/AppLink';
 import Image from 'next/image';
 import { Badge } from '../ui/Badge';
+import { FiArrowRight, FiStar, FiMapPin, FiExternalLink } from 'react-icons/fi';
 
 /**
  * Props for EventPreview component.
@@ -40,7 +41,7 @@ export interface EventPreviewProps {
 }
 
 /**
- * Event Preview List Item & Featured Hero Component.
+ * Event Preview List Item & Featured Hero Component with react-icons.
  * Supports both large featured event card layout and compact ruled list rows.
  */
 export const EventPreview: React.FC<EventPreviewProps> = ({
@@ -77,7 +78,8 @@ export const EventPreview: React.FC<EventPreviewProps> = ({
               )}
               {isFlagship && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 font-mono text-[10px] font-bold uppercase tracking-wider border border-amber-300 dark:border-amber-700 shadow-xs">
-                  ⭐ Flagship Event
+                  <FiStar className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                  <span>Flagship Event</span>
                 </span>
               )}
               {category && <Badge variant="ieee">{category}</Badge>}
@@ -85,7 +87,7 @@ export const EventPreview: React.FC<EventPreviewProps> = ({
               {vtoolsLink && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/80 text-ieee-blue dark:text-sky-300 font-mono text-[10px] font-medium border border-sky-200 dark:border-sky-800">
                   <span>vTools Verified</span>
-                  <span className="text-[8px]">↗</span>
+                  <FiExternalLink className="w-2.5 h-2.5" />
                 </span>
               )}
             </div>
@@ -108,8 +110,9 @@ export const EventPreview: React.FC<EventPreviewProps> = ({
           </div>
 
           <div className="pt-4 border-t border-warm-200 dark:border-gray-800 flex items-center justify-between flex-wrap gap-4">
-            <div className="text-xs text-warm-400 dark:text-gray-400 font-mono">
-              📍 {venue}
+            <div className="text-xs text-warm-500 dark:text-gray-400 font-mono flex items-center gap-1.5">
+              <FiMapPin className="w-3.5 h-3.5 text-ieee-blue dark:text-sky-400" />
+              <span>{venue}</span>
             </div>
 
             <Link
@@ -117,9 +120,7 @@ export const EventPreview: React.FC<EventPreviewProps> = ({
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-ieee-blue dark:text-sky-400 hover:text-ieee-dark dark:hover:text-sky-300 uppercase tracking-wider transition-colors"
             >
               <span>View Details & Register</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
+              <FiArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
@@ -158,8 +159,9 @@ export const EventPreview: React.FC<EventPreviewProps> = ({
               </span>
             )}
             {isFlagship && (
-              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-mono text-[9px] font-bold uppercase border border-amber-300 dark:border-amber-800">
-                ⭐ Flagship
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-mono text-[9px] font-bold uppercase border border-amber-300 dark:border-amber-800">
+                <FiStar className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" />
+                <span>Flagship</span>
               </span>
             )}
           </div>
@@ -179,9 +181,10 @@ export const EventPreview: React.FC<EventPreviewProps> = ({
 
       <Link
         href={`/events/${slug}`}
-        className="text-xs font-mono font-medium text-ieee-blue dark:text-sky-400 hover:underline shrink-0 self-end sm:self-center"
+        className="text-xs font-mono font-medium text-ieee-blue dark:text-sky-400 hover:underline shrink-0 self-end sm:self-center flex items-center gap-1"
       >
-        View →
+        <span>View</span>
+        <FiArrowRight className="w-3 h-3" />
       </Link>
     </div>
   );

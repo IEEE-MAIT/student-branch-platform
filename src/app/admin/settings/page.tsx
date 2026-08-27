@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { FiArrowRight } from 'react-icons/fi';
 
 export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -118,7 +119,7 @@ export default function AdminSettingsPage() {
                   type="text"
                   value={announcementLinkText}
                   onChange={(e) => setAnnouncementLinkText(e.target.value)}
-                  placeholder="E.g., Register Now →"
+                  placeholder="E.g., Register Now"
                   className="w-full px-3 py-2 border border-warm-200 rounded-[2px] focus:outline-none focus:border-ieee-blue"
                 />
                 <p className="text-[10px] text-warm-400 mt-1">Clickable text at the end of the message.</p>
@@ -142,9 +143,10 @@ export default function AdminSettingsPage() {
             <button
               type="submit"
               disabled={saving}
-              className="px-6 py-2.5 bg-ieee-blue text-white font-mono text-xs font-bold uppercase tracking-wider rounded-[2px] disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-ieee-blue text-white font-mono text-xs font-bold uppercase tracking-wider rounded-[2px] disabled:opacity-50"
             >
-              {saving ? 'Saving...' : 'Save Settings →'}
+              <span>{saving ? 'Saving...' : 'Save Settings'}</span>
+              {!saving && <FiArrowRight className="w-3.5 h-3.5" />}
             </button>
           </div>
         </form>

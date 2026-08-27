@@ -2,15 +2,15 @@
 
 /**
  * @file src/components/content/PublicationsFilter.tsx
- * @description Interactive filtering and search engine for IEEE MAIT Publications.
+ * @description Interactive filtering and search engine for IEEE MAIT Publications with react-icons.
  * 
  * FEATURES:
- * - Category Tabs: All | Tech Tuesday | Newsletters | Articles | Event Reports
- * - Unit Filter Pills: All Units | IEEE MAIT SB | EDS Chapter | WIE AG
- * - Real-time keyword search across titles, authors, and excerpts
- * - Featured article spotlight hero
- * - Responsive 2-column publication cards grid
- * - Dynamic pagination & counters
+ * - Category Tabs: All | Tech Tuesday | Newsletters | Articles | Event Reports with react-icons.
+ * - Unit Filter Pills: All Units | IEEE MAIT SB | EDS Chapter | WIE AG.
+ * - Real-time keyword search across titles, authors, and excerpts.
+ * - Featured article spotlight hero.
+ * - Responsive 2-column publication cards grid.
+ * - Dynamic pagination & counters.
  * 
  * @author IEEE MAIT Webmaster
  * @license MIT
@@ -21,6 +21,17 @@ import Link from '@/components/ui/AppLink';
 import Image from 'next/image';
 import { Badge } from '../ui/Badge';
 import { Pagination } from '../ui/Pagination';
+import {
+  FiSearch,
+  FiX,
+  FiArrowRight,
+  FiZap,
+  FiBookOpen,
+  FiFileText,
+  FiFolder,
+  FiStar,
+  FiClock,
+} from 'react-icons/fi';
 
 export interface PublicationItem {
   id: string;
@@ -47,48 +58,43 @@ interface PublicationsFilterProps {
   initialPublications: PublicationItem[];
 }
 
+const ITEMS_PER_PAGE = 6;
+
 export function PublicationsFilter({ initialPublications }: PublicationsFilterProps) {
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
   const [selectedUnit, setSelectedUnit] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const ITEMS_PER_PAGE = 6;
 
-  // Real-time filtering engine
+  // Filtered dataset
   const filteredPublications = useMemo(() => {
     return initialPublications.filter((item) => {
-      // 1. Category / Type Filter
+      // 1. Category Filter
       if (activeCategory !== 'ALL') {
-        const itemType = (item.type || item.category || '').toLowerCase();
-        const target = activeCategory.toLowerCase();
-        if (!itemType.includes(target) && !target.includes(itemType)) {
-          return false;
-        }
+        const itemCat = (item.type || item.category || '').toLowerCase();
+        if (activeCategory === 'Tech Tuesday' && !itemCat.includes('tech') && !itemCat.includes('tuesday')) return false;
+        if (activeCategory === 'Newsletter' && !itemCat.includes('newsletter')) return false;
+        if (activeCategory === 'Article' && !itemCat.includes('article') && !itemCat.includes('guide')) return false;
+        if (activeCategory === 'Report' && !itemCat.includes('report')) return false;
       }
 
       // 2. Unit Filter
       if (selectedUnit !== 'ALL') {
         const itemUnit = (item.unit || '').toLowerCase();
-        if (selectedUnit === 'sb' && !itemUnit.includes('sb') && !itemUnit.includes('branch') && !itemUnit.includes('mait')) {
-          return false;
-        }
-        if (selectedUnit === 'eds' && !itemUnit.includes('eds') && !itemUnit.includes('electron')) {
-          return false;
-        }
-        if (selectedUnit === 'wie' && !itemUnit.includes('wie') && !itemUnit.includes('women')) {
-          return false;
-        }
+        if (selectedUnit === 'sb' && itemUnit !== 'sb' && !itemUnit.includes('student branch')) return false;
+        if (selectedUnit === 'eds' && !itemUnit.includes('eds')) return false;
+        if (selectedUnit === 'wie' && !itemUnit.includes('wie')) return false;
       }
 
-      // 3. Keyword Search Filter
+      // 3. Keyword Search
       if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
-        const matchTitle = item.title?.toLowerCase().includes(q);
-        const matchAuthor = item.author?.toLowerCase().includes(q);
-        const matchExcerpt = item.excerpt?.toLowerCase().includes(q);
-        const matchCategory = (item.type || item.category)?.toLowerCase().includes(q);
-        const matchUnit = item.unit?.toLowerCase().includes(q);
-        if (!matchTitle && !matchAuthor && !matchExcerpt && !matchCategory && !matchUnit) {
+        const q = searchQuery.toLowerCase();
+        const matchesTitle = item.title.toLowerCase().includes(q);
+        const matchesAuthor = (item.author || '').toLowerCase().includes(q);
+        const matchesExcerpt = (item.excerpt || '').toLowerCase().includes(q);
+        const matchesTags = (item.tags || []).some((t) => t.toLowerCase().includes(q));
+
+        if (!matchesTitle && !matchesAuthor && !matchesExcerpt && !matchesTags) {
           return false;
         }
       }
@@ -125,37 +131,41 @@ export function PublicationsFilter({ initialPublications }: PublicationsFilterPr
       {/* 1. Category Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-warm-200 dark:border-gray-800">
         {[
-          { id: 'ALL', label: 'All Publications', count: counts.all },
-          { id: 'Tech Tuesday', label: '⚡ Tech Tuesday', count: counts.techTuesday },
-          { id: 'Newsletter', label: '📰 Newsletters', count: counts.newsletters },
-          { id: 'Article', label: '💡 Articles & Guides', count: counts.articles },
-          { id: 'Report', label: '📄 Event Reports', count: counts.reports },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => {
-              setActiveCategory(tab.id);
-              setCurrentPage(1);
-            }}
-            className={`px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 shrink-0 flex items-center gap-1.5 ${
-              activeCategory === tab.id
-                ? 'bg-ieee-blue dark:bg-sky-600 text-white shadow-sm font-bold'
-                : 'bg-warm-50 dark:bg-gray-900 border border-warm-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:border-ieee-blue/40 dark:hover:border-sky-500/40'
-            }`}
-          >
-            <span>{tab.label}</span>
-            <span
-              className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono ${
+          { id: 'ALL', label: 'All Publications', count: counts.all, icon: null },
+          { id: 'Tech Tuesday', label: 'Tech Tuesday', count: counts.techTuesday, icon: FiZap, iconColor: 'text-amber-500' },
+          { id: 'Newsletter', label: 'Newsletters', count: counts.newsletters, icon: FiBookOpen, iconColor: 'text-sky-500' },
+          { id: 'Article', label: 'Articles & Guides', count: counts.articles, icon: FiFileText, iconColor: 'text-emerald-500' },
+          { id: 'Report', label: 'Event Reports', count: counts.reports, icon: FiFolder, iconColor: 'text-purple-500' },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => {
+                setActiveCategory(tab.id);
+                setCurrentPage(1);
+              }}
+              className={`px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 shrink-0 flex items-center gap-1.5 cursor-pointer ${
                 activeCategory === tab.id
-                  ? 'bg-white/20 text-white'
-                  : 'bg-warm-200/60 dark:bg-gray-800 text-warm-500 dark:text-gray-400'
+                  ? 'bg-ieee-blue dark:bg-sky-600 text-white shadow-sm font-bold'
+                  : 'bg-warm-50 dark:bg-gray-900 border border-warm-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:border-ieee-blue/40 dark:hover:border-sky-500/40'
               }`}
             >
-              {tab.count}
-            </span>
-          </button>
-        ))}
+              {Icon && <Icon className={`w-3.5 h-3.5 ${activeCategory === tab.id ? 'text-white' : tab.iconColor}`} />}
+              <span>{tab.label}</span>
+              <span
+                className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono ${
+                  activeCategory === tab.id
+                    ? 'bg-white/20 text-white'
+                    : 'bg-warm-200/60 dark:bg-gray-800 text-warm-500 dark:text-gray-400'
+                }`}
+              >
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* 2. Interactive Filter & Search Bar */}
@@ -163,9 +173,7 @@ export function PublicationsFilter({ initialPublications }: PublicationsFilterPr
         {/* Search Input */}
         <div className="relative flex-1 min-w-[240px]">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-warm-400 dark:text-gray-500">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <FiSearch className="w-4 h-4" />
           </div>
           <input
             type="text"
@@ -181,10 +189,10 @@ export function PublicationsFilter({ initialPublications }: PublicationsFilterPr
             <button
               type="button"
               onClick={() => setSearchQuery('')}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-warm-400 hover:text-ink dark:hover:text-white text-xs"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-warm-400 hover:text-ink dark:hover:text-white text-xs cursor-pointer"
               aria-label="Clear Search"
             >
-              ✕
+              <FiX className="w-4 h-4" />
             </button>
           )}
         </div>
@@ -205,7 +213,7 @@ export function PublicationsFilter({ initialPublications }: PublicationsFilterPr
                 setSelectedUnit(item.value);
                 setCurrentPage(1);
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${
                 selectedUnit === item.value
                   ? 'bg-ieee-subtle dark:bg-sky-950 text-ieee-blue dark:text-sky-400 border border-ieee-blue/40 font-bold shadow-xs'
                   : 'bg-white dark:bg-gray-800 border border-warm-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-warm-300'
@@ -231,126 +239,116 @@ export function PublicationsFilter({ initialPublications }: PublicationsFilterPr
               setSearchQuery('');
               setCurrentPage(1);
             }}
-            className="text-ieee-blue dark:text-sky-400 hover:underline font-mono"
+            className="text-ieee-blue dark:text-sky-400 hover:underline font-mono flex items-center gap-1 cursor-pointer"
           >
-            Reset all filters ✕
+            <span>Reset all filters</span>
+            <FiX className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
-      {/* 3. Publications Showcase */}
-      <div className="space-y-8">
-        {/* Featured Spotlight Card */}
+      {/* 3. Publications Grid */}
+      <div className="space-y-6">
+        {/* Spotlight Featured Article */}
         {featuredItem && (
-          <div>
-            <div className="font-mono text-xs font-semibold uppercase tracking-widest text-ieee-blue dark:text-sky-400 mb-3 flex items-center gap-2">
-              <span>Featured Spotlight</span>
-              <span className="w-12 h-[1px] bg-ieee-blue/40" />
-            </div>
+          <div className="border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl p-6 lg:p-8 flex flex-col lg:flex-row gap-8 items-stretch shadow-sm hover:shadow-md transition-all group">
+            <div className="flex-1 flex flex-col justify-between space-y-6">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 flex-wrap text-xs">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-mono text-[10px] font-bold uppercase tracking-wider border border-amber-300 dark:border-amber-800">
+                    <FiStar className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                    <span>Featured Editorial Release</span>
+                  </span>
+                  {featuredItem.category && <Badge variant="ieee">{featuredItem.category}</Badge>}
+                  {featuredItem.unit && <Badge variant="neutral">{featuredItem.unit}</Badge>}
+                </div>
 
-            <div className="border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl p-6 sm:p-8 flex flex-col lg:flex-row gap-8 items-stretch shadow-sm hover:shadow-md transition-all duration-300 group">
-              <div className="flex-1 flex flex-col justify-between space-y-6">
-                <div>
-                  <div className="flex items-center gap-2 mb-3 flex-wrap">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 font-mono text-[10px] font-bold uppercase tracking-wider border border-amber-300 dark:border-amber-700">
-                      ⭐ Featured Release
-                    </span>
-                    <Badge variant="ieee">{featuredItem.type || featuredItem.category || 'Article'}</Badge>
-                    {featuredItem.unit && <Badge variant="neutral">{featuredItem.unit}</Badge>}
-                    {featuredItem.readingTime && (
-                      <span className="font-mono text-xs text-warm-400 dark:text-gray-400">
-                        ⏱ {featuredItem.readingTime}
-                      </span>
-                    )}
-                  </div>
+                <h3 className="font-serif text-2xl sm:text-3xl text-ink dark:text-gray-100 font-normal leading-tight group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors">
+                  <Link href={`/publications/${featuredItem.slug}`}>
+                    {featuredItem.title}
+                  </Link>
+                </h3>
 
-                  <h3 className="font-serif text-2xl sm:text-3xl text-ink dark:text-gray-100 font-normal leading-tight mb-3 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors">
-                    <Link href={`/publications/${featuredItem.slug}`}>
-                      {featuredItem.title}
-                    </Link>
-                  </h3>
-
-                  <p className="text-sm text-warm-500 dark:text-gray-300 leading-relaxed font-sans line-clamp-3 mb-4">
+                {featuredItem.excerpt && (
+                  <p className="text-sm text-warm-500 dark:text-gray-300 font-sans leading-relaxed line-clamp-3">
                     {featuredItem.excerpt}
                   </p>
-                </div>
-
-                <div className="pt-4 border-t border-warm-200 dark:border-gray-800 flex items-center justify-between flex-wrap gap-4">
-                  <div className="text-xs text-warm-400 dark:text-gray-400 font-mono">
-                    By <strong className="text-ink dark:text-gray-200">{featuredItem.author}</strong>
-                    {featuredItem.date || featuredItem.publishedDate ? ` · ${featuredItem.date || featuredItem.publishedDate}` : ''}
-                  </div>
-
-                  <Link
-                    href={`/publications/${featuredItem.slug}`}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-ieee-blue dark:text-sky-400 hover:text-ieee-dark dark:hover:text-sky-300 uppercase tracking-wider transition-colors"
-                  >
-                    <span>Read Publication</span>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                  </Link>
-                </div>
+                )}
               </div>
 
-              {(featuredItem.coverImage || featuredItem.imageUrl || featuredItem.imageSrc) && (
-                <div className="relative w-full lg:w-96 h-64 lg:h-auto min-h-[220px] bg-warm-100 dark:bg-gray-800 rounded-lg overflow-hidden shrink-0">
-                  <Image
-                    src={(featuredItem.coverImage || featuredItem.imageUrl || featuredItem.imageSrc)!}
-                    alt={featuredItem.title}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 384px"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
+              <div className="pt-4 border-t border-warm-200 dark:border-gray-800 flex items-center justify-between flex-wrap gap-4 text-xs font-mono text-warm-400 dark:text-gray-400">
+                <div className="flex items-center gap-3">
+                  <span>{featuredItem.publishedDate || featuredItem.date}</span>
+                  {featuredItem.readingTime && (
+                    <span className="flex items-center gap-1">
+                      <FiClock className="w-3.5 h-3.5" />
+                      <span>{featuredItem.readingTime}</span>
+                    </span>
+                  )}
                 </div>
-              )}
+
+                <Link
+                  href={`/publications/${featuredItem.slug}`}
+                  className="inline-flex items-center gap-1.5 font-semibold text-ieee-blue dark:text-sky-400 hover:text-ieee-dark dark:hover:text-sky-300 uppercase tracking-wider transition-colors"
+                >
+                  <span>Read Full Article</span>
+                  <FiArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
             </div>
+
+            {(featuredItem.coverImage || featuredItem.imageUrl || featuredItem.imageSrc) && (
+              <div className="relative w-full lg:w-96 h-56 lg:h-auto min-h-[220px] bg-warm-100 dark:bg-gray-800 rounded-lg overflow-hidden shrink-0">
+                <Image
+                  src={(featuredItem.coverImage || featuredItem.imageUrl || featuredItem.imageSrc) as string}
+                  alt={featuredItem.title}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 384px"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+            )}
           </div>
         )}
 
-        {/* Publications Grid */}
+        {/* 2-Column List Grid */}
         {listItems.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {listItems.map((item) => (
+            {listItems.map((pub) => (
               <div
-                key={item.id}
-                className="border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl p-6 flex flex-col justify-between space-y-4 hover:border-ieee-blue/40 dark:hover:border-sky-500/40 hover:shadow-md transition-all duration-300 group shadow-xs"
+                key={pub.id}
+                className="border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl p-6 flex flex-col justify-between space-y-6 hover:shadow-lg hover:border-ieee-blue/40 dark:hover:border-sky-500/40 transition-all duration-300 group shadow-xs"
               >
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-2 flex-wrap text-xs">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="ieee">{item.type || item.category || 'Article'}</Badge>
-                      {item.unit && <Badge variant="neutral">{item.unit}</Badge>}
-                    </div>
-                    {item.readingTime && (
-                      <span className="font-mono text-[11px] text-warm-400 dark:text-gray-400">
-                        {item.readingTime}
-                      </span>
-                    )}
+                  <div className="flex items-center gap-2 flex-wrap text-xs">
+                    <Badge variant="ieee">{pub.type || pub.category || 'Article'}</Badge>
+                    {pub.unit && <Badge variant="neutral">{pub.unit}</Badge>}
+                    <span className="font-mono text-[11px] text-warm-400 dark:text-gray-400 ml-auto">
+                      {pub.publishedDate || pub.date}
+                    </span>
                   </div>
 
                   <h3 className="font-serif text-xl text-ink dark:text-gray-100 font-normal leading-snug group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors">
-                    <Link href={`/publications/${item.slug}`}>
-                      {item.title}
+                    <Link href={`/publications/${pub.slug}`}>
+                      {pub.title}
                     </Link>
                   </h3>
 
-                  <p className="text-xs sm:text-sm text-warm-500 dark:text-gray-300 font-sans leading-relaxed line-clamp-3">
-                    {item.excerpt}
-                  </p>
+                  {pub.excerpt && (
+                    <p className="text-xs sm:text-sm text-warm-500 dark:text-gray-300 font-sans leading-relaxed line-clamp-3">
+                      {pub.excerpt}
+                    </p>
+                  )}
                 </div>
 
-                <div className="pt-4 border-t border-warm-200 dark:border-gray-800 flex items-center justify-between text-xs font-mono">
-                  <div className="text-warm-400 dark:text-gray-400">
-                    <span>{item.author}</span>
-                    {item.date || item.publishedDate ? ` · ${item.date || item.publishedDate}` : ''}
-                  </div>
-
+                <div className="pt-4 border-t border-warm-200 dark:border-gray-800 flex items-center justify-between text-xs font-mono text-warm-400 dark:text-gray-400">
+                  <span className="line-clamp-1">{pub.author ? `By ${pub.author}` : 'IEEE MAIT Editorial'}</span>
                   <Link
-                    href={`/publications/${item.slug}`}
-                    className="text-ieee-blue dark:text-sky-400 font-semibold hover:underline flex items-center gap-1"
+                    href={`/publications/${pub.slug}`}
+                    className="text-ieee-blue dark:text-sky-400 font-bold hover:underline flex items-center gap-1 uppercase tracking-wider text-[11px] shrink-0"
                   >
-                    <span>Read →</span>
+                    <span>Read</span>
+                    <FiArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
               </div>
@@ -360,12 +358,14 @@ export function PublicationsFilter({ initialPublications }: PublicationsFilterPr
 
         {filteredPublications.length === 0 && (
           <div className="p-12 border border-warm-200 dark:border-gray-800 bg-warm-50/50 dark:bg-gray-900/50 rounded-xl text-center space-y-3">
-            <span className="text-3xl">📚</span>
+            <div className="w-12 h-12 rounded-xl bg-ieee-subtle dark:bg-sky-950 flex items-center justify-center text-ieee-blue dark:text-sky-400 mx-auto">
+              <FiBookOpen className="w-6 h-6" />
+            </div>
             <h4 className="font-serif text-lg text-ink dark:text-gray-200 font-normal">
               No matching publications found
             </h4>
             <p className="text-xs text-warm-400 dark:text-gray-400 max-w-sm mx-auto">
-              We couldn&apos;t find any publications matching your selected filters or search terms. Try clearing the search query or switching tabs.
+              We couldn&apos;t find any articles matching your selected category or query. Try clearing the search bar.
             </p>
             <button
               type="button"
@@ -375,27 +375,23 @@ export function PublicationsFilter({ initialPublications }: PublicationsFilterPr
                 setSearchQuery('');
                 setCurrentPage(1);
               }}
-              className="mt-2 inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-ieee-blue text-white text-xs font-semibold shadow-xs"
+              className="px-4 py-2 bg-ieee-blue hover:bg-ieee-dark text-white rounded-lg text-xs font-mono font-semibold transition-colors inline-block cursor-pointer shadow-xs"
             >
-              Reset Filters
+              Reset All Filters
             </button>
           </div>
         )}
       </div>
 
       {/* 4. Pagination */}
-      {totalPages > 1 && (
-        <div className="pt-4 flex justify-center">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={(page) => {
-              setCurrentPage(page);
-              window.scrollTo({ top: 300, behavior: 'smooth' });
-            }}
-          />
-        </div>
-      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={(page) => {
+          setCurrentPage(page);
+          window.scrollTo({ top: 300, behavior: 'smooth' });
+        }}
+      />
     </div>
   );
 }

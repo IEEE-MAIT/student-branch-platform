@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { FiArrowRight } from 'react-icons/fi';
 
 export default function AdminGalleriesPage() {
   const [galleries, setGalleries] = useState<any[]>([]);
@@ -175,9 +176,10 @@ export default function AdminGalleriesPage() {
 
         <button
           type="submit"
-          className="px-6 py-2.5 bg-ieee-blue text-white font-mono text-xs font-bold uppercase tracking-wider rounded-[2px]"
+          className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-ieee-blue text-white font-mono text-xs font-bold uppercase tracking-wider rounded-[2px]"
         >
-          Create Album →
+          <span>Create Album</span>
+          <FiArrowRight className="w-3.5 h-3.5" />
         </button>
       </form>
 

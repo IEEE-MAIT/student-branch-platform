@@ -10,6 +10,7 @@ import { PersonCard } from '@/components/content/PersonCard';
 import { getDynamicAchievementById, getDynamicAchievements } from '@/lib/api';
 import Link from '@/components/ui/AppLink';
 import Image from 'next/image';
+import { FiArrowLeft, FiArrowRight } from 'react-icons/fi';
 
 export async function generateStaticParams() {
   const achievements = await getDynamicAchievements();
@@ -18,48 +19,38 @@ export async function generateStaticParams() {
   }));
 }
 
-interface AchievementPageProps {
-  params: Promise<{ id: string }>;
-}
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const achievement = await getDynamicAchievementById(id);
 
-export const revalidate = 60; // ISR Cache
-
-export async function generateMetadata({ params }: AchievementPageProps) {
-  const resolvedParams = await params;
-  const achievement = await getDynamicAchievementById(resolvedParams.id);
-  if (!achievement) return { title: 'Achievement Not Found — IEEE MAIT' };
+  if (!achievement) {
+    return {
+      title: 'Achievement Record Not Found | IEEE MAIT',
+    };
+  }
 
   return {
-    title: `${achievement.title} | IEEE MAIT Achievements`,
-    description:
-      achievement.description ||
-      `Achievement conferred in ${achievement.year} by ${achievement.conferredBy || 'IEEE Delhi Section'}.`,
-    openGraph: {
-      title: achievement.title,
-      description:
-        achievement.description ||
-        `Achievement conferred in ${achievement.year} by ${achievement.conferredBy || 'IEEE Delhi Section'}.`,
-      type: 'article',
-      siteName: 'IEEE MAIT Student Branch',
-      ...(achievement.imageSrc && { images: [{ url: achievement.imageSrc }] }),
-    },
+    title: `${achievement.title} (${achievement.year}) | IEEE MAIT Honors`,
+    description: achievement.description || `Honors and recognition conferred to IEEE MAIT in ${achievement.year}.`,
   };
 }
 
-export default async function AchievementDetailPage({ params }: AchievementPageProps) {
-  const resolvedParams = await params;
-  const achievement = await getDynamicAchievementById(resolvedParams.id);
+export default async function AchievementDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const achievement = await getDynamicAchievementById(id);
 
   if (!achievement) {
     notFound();
   }
 
-  // Resolve team members / student recipients
-  const creditedPeople = achievement.people || [];
-  const unitLower = (achievement.unitOrTeam || '').toLowerCase();
-  const unitSlug = unitLower.includes('wie')
+  // Resolve team/unit slug
+  const unitSlug = achievement.unitOrTeam?.toLowerCase().includes('wie')
     ? 'wie'
-    : unitLower.includes('eds')
+    : achievement.unitOrTeam?.toLowerCase().includes('eds')
     ? 'eds'
     : 'sb';
 
@@ -67,14 +58,15 @@ export default async function AchievementDetailPage({ params }: AchievementPageP
     <>
       <Navbar />
 
-      <main className="flex-1 py-16 sm:py-24 bg-white page-enter">
+      <main className="flex-1 py-16 sm:py-24 bg-white dark:bg-gray-950 transition-colors duration-200 page-enter">
         <Container size="default">
           {/* Back Navigation */}
           <Link
             href="/achievements"
-            className="inline-flex items-center gap-1.5 font-mono text-xs text-warm-400 hover:text-ieee-blue mb-8 transition-colors"
+            className="inline-flex items-center gap-1.5 font-mono text-xs text-warm-400 dark:text-gray-400 hover:text-ieee-blue dark:hover:text-sky-400 mb-8 transition-colors"
           >
-            <span>← Back to Achievements Ledger</span>
+            <FiArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Achievements Ledger</span>
           </Link>
 
           {/* Badges */}
@@ -83,7 +75,7 @@ export default async function AchievementDetailPage({ params }: AchievementPageP
             {achievement.category && <Badge variant="neutral">{achievement.category}</Badge>}
             {achievement.unitOrTeam && (
               <Link href={`/chapters/${unitSlug}`}>
-                <Badge variant="neutral" className="hover:bg-warm-200 transition-colors">
+                <Badge variant="neutral" className="hover:bg-warm-200 dark:hover:bg-gray-700 transition-colors">
                   {achievement.unitOrTeam}
                 </Badge>
               </Link>
@@ -97,115 +89,95 @@ export default async function AchievementDetailPage({ params }: AchievementPageP
             <div className="lg:col-span-8 space-y-12">
               {/* Cover Image / Award Certificate Photo */}
               {achievement.imageSrc && (
-                <div className="relative w-full h-80 sm:h-96 rounded-[2px] overflow-hidden border border-warm-200 bg-warm-100/40">
+                <div className="relative w-full h-80 sm:h-96 rounded-xl overflow-hidden border border-warm-200 dark:border-gray-800 bg-warm-100/40 dark:bg-gray-900/40 shadow-xs">
                   <Image
                     src={achievement.imageSrc}
                     alt={achievement.title}
                     fill
-                    sizes="(max-width: 1024px) 100vw, 768px"
+                    sizes="(max-width: 1024px) 100vw, 800px"
                     className="object-contain p-4"
                     priority
                   />
                 </div>
               )}
 
-              {/* Citation & Detailed Description */}
-              <div className="space-y-4">
-                <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-widest block">
-                  Official Citation
-                </span>
-                <h3 className="font-serif text-2xl sm:text-3xl text-ink font-normal border-b border-warm-200 pb-2">
-                  Conferral Details
+              {/* Narrative & Impact */}
+              <div className="prose max-w-none text-ink dark:text-gray-200 font-sans leading-relaxed space-y-4">
+                <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal border-b border-warm-200 dark:border-gray-800 pb-2">
+                  Achievement Narrative &amp; Significance
                 </h3>
-                <p className="text-base text-warm-400 leading-relaxed font-sans whitespace-pre-wrap">
+                <p className="text-base leading-relaxed text-warm-600 dark:text-gray-300">
                   {achievement.description ||
-                    `This honor was awarded to ${achievement.unitOrTeam || 'IEEE MAIT Student Branch'} in recognition of outstanding technical contributions, student leadership excellence, and sustained participation across IEEE Delhi Section and international events in ${achievement.year}.`}
+                    'This honor represents a landmark institutional recognition conferred upon the IEEE MAIT Student Branch for sustained technical leadership, student research, and high-impact regional initiatives.'}
                 </p>
               </div>
 
-              {/* Credited Student Recipients / Team Members */}
-              {creditedPeople.length > 0 && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between border-b border-warm-200 pb-2">
-                    <div>
-                      <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-widest block">
-                        Recognition Recipients
-                      </span>
-                      <h3 className="font-serif text-2xl text-ink font-normal mt-0.5">
-                        Credited Team Members
-                      </h3>
-                    </div>
-                    <span className="font-mono text-xs text-warm-400">
-                      {creditedPeople.length} Recipients
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {creditedPeople.map((item: any, idx: number) => {
-                      const p = item.person || item;
-                      return (
-                        <PersonCard
-                          key={p.id || idx}
-                          name={p.name}
-                          role={p.role || 'Recipient'}
-                          department={p.department}
-                          imageUrl={p.imageUrl}
-                          imageSrc={p.imageSrc}
-                          linkedIn={p.linkedIn || p.linkedin}
-                          github={p.github}
-                          email={p.email}
-                          size="compact"
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Award & Ceremony Photos */}
+              {/* Multi-Photo Document Gallery */}
               {achievement.images && achievement.images.length > 0 && (
-                <div className="space-y-4">
-                  <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-widest block">
-                    Photographic Record
-                  </span>
-                  <h3 className="font-serif text-2xl text-ink font-normal border-b border-warm-200 pb-2">
-                    Award Ceremony & Trophy Gallery
+                <div className="space-y-4 border-t border-warm-200 dark:border-gray-800 pt-8">
+                  <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal">
+                    Ceremony &amp; Documentary Photographs
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                    {achievement.images.map((img: string, idx: number) => (
-                      <a
-                        href={img}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    {achievement.images.map((imgUrl: string, idx: number) => (
+                      <div
                         key={idx}
-                        className="block group overflow-hidden border border-warm-200 rounded-[2px] bg-warm-100 aspect-[4/3] relative"
+                        className="relative h-44 rounded-xl overflow-hidden border border-warm-200 dark:border-gray-800 bg-warm-100/30 dark:bg-gray-900/40 group shadow-xs"
                       >
                         <Image
-                          src={img}
-                          alt={`${achievement.title} photo ${idx + 1}`}
+                          src={imgUrl}
+                          alt={`${achievement.title} Photo ${idx + 1}`}
                           fill
-                          sizes="(max-width: 640px) 50vw, 33vw"
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          sizes="(max-width: 768px) 50vw, 260px"
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
-                      </a>
+                      </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Associated Event Link if applicable */}
+              {/* Key Student Recipients / Project Leads */}
+              {achievement.recipients && achievement.recipients.length > 0 && (
+                <div className="space-y-4 border-t border-warm-200 dark:border-gray-800 pt-8">
+                  <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal">
+                    Key Recipients &amp; Team Members
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {achievement.recipients.map((person: any) => (
+                      <PersonCard
+                        key={person.id}
+                        name={person.name}
+                        role={person.role}
+                        category={person.category}
+                        department={person.department}
+                        imageUrl={person.imageUrl}
+                        imageSrc={person.imageSrc}
+                        linkedIn={person.linkedIn || person.linkedin}
+                        github={person.github}
+                        email={person.email}
+                        bio={person.bio}
+                        size="standard"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Associated Event Link */}
               {achievement.event && (
-                <div className="border border-warm-200 bg-warm-50/50 p-6 rounded-[2px] flex items-center justify-between gap-4">
+                <div className="p-6 border border-warm-200 dark:border-gray-800 bg-warm-50/50 dark:bg-gray-900/50 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
                   <div>
-                    <span className="font-mono text-[10px] text-ieee-blue uppercase tracking-wider block font-semibold">
+                    <span className="font-mono text-[10px] text-ieee-blue dark:text-sky-400 uppercase tracking-wider block font-semibold">
                       Associated Event
                     </span>
-                    <h4 className="font-serif text-xl text-ink font-normal mt-0.5">
+                    <h4 className="font-serif text-xl text-ink dark:text-gray-100 font-normal mt-0.5">
                       {achievement.event.title}
                     </h4>
                   </div>
-                  <Button href={`/events/${achievement.event.slug}`} variant="secondary" size="md">
-                    View Event Dossier →
+                  <Button href={`/events/${achievement.event.slug}`} variant="secondary" size="md" className="flex items-center gap-1.5">
+                    <span>View Event Dossier</span>
+                    <FiArrowRight className="w-4 h-4" />
                   </Button>
                 </div>
               )}
@@ -214,64 +186,67 @@ export default async function AchievementDetailPage({ params }: AchievementPageP
             {/* Sidebar Column */}
             <aside className="lg:col-span-4 space-y-8">
               {/* Recognition Ledger Specification */}
-              <div className="border border-warm-200 bg-warm-100/40 p-6 rounded-[2px] space-y-6">
-                <h4 className="font-serif text-xl text-ink font-normal border-b border-warm-200 pb-3">
+              <div className="border border-warm-200 dark:border-gray-800 bg-warm-100/40 dark:bg-gray-900/40 p-6 rounded-xl space-y-6 shadow-xs">
+                <h4 className="font-serif text-xl text-ink dark:text-gray-100 font-normal border-b border-warm-200 dark:border-gray-800 pb-3">
                   Ledger Record
                 </h4>
                 <div className="space-y-4 text-xs font-mono">
                   <div>
-                    <span className="text-warm-400 block uppercase">Conferred Year</span>
-                    <span className="text-ink font-semibold text-sm">{achievement.year}</span>
+                    <span className="text-warm-400 dark:text-gray-400 block uppercase">Conferred Year</span>
+                    <span className="text-ink dark:text-gray-100 font-semibold text-sm">{achievement.year}</span>
                   </div>
                   {achievement.conferredBy && (
                     <div>
-                      <span className="text-warm-400 block uppercase">Conferred By</span>
-                      <span className="text-ink font-semibold text-sm">{achievement.conferredBy}</span>
+                      <span className="text-warm-400 dark:text-gray-400 block uppercase">Conferred By</span>
+                      <span className="text-ink dark:text-gray-100 font-semibold text-sm">{achievement.conferredBy}</span>
                     </div>
                   )}
                   {achievement.unitOrTeam && (
                     <div>
-                      <span className="text-warm-400 block uppercase">Recipient Unit / Team</span>
+                      <span className="text-warm-400 dark:text-gray-400 block uppercase">Recipient Unit / Team</span>
                       <Link
                         href={`/chapters/${unitSlug}`}
-                        className="text-ieee-blue font-semibold text-sm hover:underline block mt-0.5"
+                        className="text-ieee-blue dark:text-sky-400 font-semibold text-sm hover:underline flex items-center gap-1 mt-0.5"
                       >
-                        {achievement.unitOrTeam} →
+                        <span>{achievement.unitOrTeam}</span>
+                        <FiArrowRight className="w-3.5 h-3.5" />
                       </Link>
                     </div>
                   )}
                   {achievement.category && (
                     <div>
-                      <span className="text-warm-400 block uppercase">Category Classification</span>
-                      <span className="text-ink font-semibold text-sm">{achievement.category}</span>
+                      <span className="text-warm-400 dark:text-gray-400 block uppercase">Category Classification</span>
+                      <span className="text-ink dark:text-gray-100 font-semibold text-sm">{achievement.category}</span>
                     </div>
                   )}
                   <div>
-                    <span className="text-warm-400 block uppercase">Verification Status</span>
-                    <span className="text-emerald-700 font-semibold text-xs bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-[2px] inline-block mt-0.5">
-                      ● Verified Institutional Record
+                    <span className="text-warm-400 dark:text-gray-400 block uppercase">Verification Status</span>
+                    <span className="text-emerald-700 dark:text-emerald-300 font-semibold text-xs bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mt-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      <span>Verified Institutional Record</span>
                     </span>
                   </div>
                 </div>
               </div>
 
               {/* Institutional Attribution Card */}
-              <div className="border border-warm-200 bg-white p-6 rounded-[2px] space-y-3">
-                <span className="font-mono text-[10px] text-warm-400 uppercase tracking-widest block">
+              <div className="border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 rounded-xl space-y-3 shadow-xs">
+                <span className="font-mono text-[10px] text-warm-400 dark:text-gray-400 uppercase tracking-widest block">
                   Branch Archive
                 </span>
-                <h4 className="font-serif text-lg text-ink font-normal">
+                <h4 className="font-serif text-lg text-ink dark:text-gray-100 font-normal">
                   IEEE MAIT Honors Registry
                 </h4>
-                <p className="text-xs text-warm-400 font-sans leading-relaxed">
+                <p className="text-xs text-warm-500 dark:text-gray-400 font-sans leading-relaxed">
                   Maintained by the Student Branch Executive Committee to honor exemplary student innovations and section recognitions.
                 </p>
                 <div className="pt-2">
                   <Link
                     href="/achievements"
-                    className="text-xs font-mono font-semibold text-ieee-blue hover:underline"
+                    className="text-xs font-mono font-semibold text-ieee-blue dark:text-sky-400 hover:underline flex items-center gap-1"
                   >
-                    Explore Full Achievements Ledger →
+                    <span>Explore Full Achievements Ledger</span>
+                    <FiArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
               </div>

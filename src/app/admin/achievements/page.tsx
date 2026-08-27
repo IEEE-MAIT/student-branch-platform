@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { FiX, FiArrowRight } from 'react-icons/fi';
 
 export default function AdminAchievementsPage() {
   const [achievements, setAchievements] = useState<any[]>([]);
@@ -264,10 +265,10 @@ export default function AdminAchievementsPage() {
                     <button
                       type="button"
                       onClick={() => removeGalleryImage(idx)}
-                      className="text-red-400 hover:text-red-300 px-1"
+                      className="text-red-400 hover:text-red-300 px-1 cursor-pointer"
                       title="Remove Photo"
                     >
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                      <FiX className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
@@ -278,9 +279,10 @@ export default function AdminAchievementsPage() {
 
         <button
           type="submit"
-          className="px-6 py-2.5 bg-ieee-blue text-white font-mono text-xs font-bold uppercase tracking-wider rounded-[2px]"
+          className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-ieee-blue text-white font-mono text-xs font-bold uppercase tracking-wider rounded-[2px]"
         >
-          Add to Ledger →
+          <span>Add to Ledger</span>
+          <FiArrowRight className="w-3.5 h-3.5" />
         </button>
       </form>
 

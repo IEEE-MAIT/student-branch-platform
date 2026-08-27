@@ -2,7 +2,7 @@
 
 /**
  * @file src/app/admin/page.tsx
- * @description Admin Dashboard Overview / Command Center landing page.
+ * @description Admin Dashboard Overview / Command Center landing page with react-icons.
  *
  * @author IEEE MAIT Webmaster
  * @license MIT
@@ -10,6 +10,18 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from '@/components/ui/AppLink';
+import {
+  FiCalendar,
+  FiCpu,
+  FiLayers,
+  FiCompass,
+  FiAward,
+  FiUsers,
+  FiBookOpen,
+  FiFileText,
+  FiClock,
+  FiArrowRight,
+} from 'react-icons/fi';
 
 export default function AdminOverviewPage() {
   const [stats, setStats] = useState({
@@ -50,6 +62,18 @@ export default function AdminOverviewPage() {
     });
   }, []);
 
+  const metrics = [
+    { label: 'Events Registered', count: stats.events, href: '/admin/events', icon: FiCalendar },
+    { label: 'Technical Projects', count: stats.projects, href: '/admin/projects', icon: FiCpu },
+    { label: 'Special Interest Groups', count: stats.sigs, href: '/admin/sigs', icon: FiLayers },
+    { label: 'Opportunities & Grants', count: stats.opportunities, href: '/admin/opportunities', icon: FiCompass },
+    { label: 'Achievements Ledger', count: stats.achievements, href: '/admin/achievements', icon: FiAward },
+    { label: 'Roster Members', count: stats.people, href: '/admin/people', icon: FiUsers },
+    { label: 'Publications & Articles', count: stats.stories, href: '/admin/stories', icon: FiBookOpen },
+    { label: 'Public Resources', count: stats.resources, href: '/admin/resources', icon: FiFileText },
+    { label: 'Milestone Records', count: stats.milestones, href: '/admin/milestones', icon: FiClock },
+  ];
+
   return (
     <div className="space-y-8">
       <div>
@@ -61,30 +85,27 @@ export default function AdminOverviewPage() {
 
       {/* Grid Metrics */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        {[
-          { label: 'Events Registered', count: stats.events, href: '/admin/events' },
-          { label: 'Technical Projects', count: stats.projects, href: '/admin/projects' },
-          { label: 'Special Interest Groups', count: stats.sigs, href: '/admin/sigs' },
-          { label: 'Opportunities & Grants', count: stats.opportunities, href: '/admin/opportunities' },
-          { label: 'Achievements Ledger', count: stats.achievements, href: '/admin/achievements' },
-          { label: 'Roster Members', count: stats.people, href: '/admin/people' },
-          { label: 'Publications & Articles', count: stats.stories, href: '/admin/stories' },
-          { label: 'Public Resources', count: stats.resources, href: '/admin/resources' },
-          { label: 'Milestone Records', count: stats.milestones, href: '/admin/milestones' },
-        ].map((item, idx) => (
-          <Link
-            key={idx}
-            href={item.href}
-            className="p-5 border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl hover:border-ieee-blue dark:hover:border-sky-500 hover:-translate-y-0.5 transition-all group space-y-2 block shadow-xs"
-          >
-            <span className="font-mono text-3xl font-bold text-ieee-blue dark:text-sky-400 block">
-              {item.count}
-            </span>
-            <span className="font-mono text-xs text-warm-500 dark:text-gray-400 group-hover:text-ink dark:group-hover:text-white transition-colors block">
-              {item.label} →
-            </span>
-          </Link>
-        ))}
+        {metrics.map((item, idx) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={idx}
+              href={item.href}
+              className="p-5 border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl hover:border-ieee-blue dark:hover:border-sky-500 hover:-translate-y-0.5 transition-all group space-y-2 block shadow-xs"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-3xl font-bold text-ieee-blue dark:text-sky-400 block">
+                  {item.count}
+                </span>
+                <Icon className="w-5 h-5 text-warm-300 dark:text-gray-600 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors" />
+              </div>
+              <span className="font-mono text-xs text-warm-500 dark:text-gray-400 group-hover:text-ink dark:group-hover:text-white transition-colors flex items-center justify-between">
+                <span>{item.label}</span>
+                <FiArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </span>
+            </Link>
+          );
+        })}
       </div>
 
       {/* Operational Guidelines */}

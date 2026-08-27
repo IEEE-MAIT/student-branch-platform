@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/Badge';
 import { getDynamicSIGs } from '@/lib/api';
 import Link from '@/components/ui/AppLink';
 import type { Metadata } from 'next';
+import { FiArrowRight } from 'react-icons/fi';
 
 export const metadata: Metadata = {
   title: 'Special Interest Groups (SIGs) | IEEE MAIT Student Branch',
@@ -115,7 +116,7 @@ export default async function SIGsPage() {
                       className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-ieee-blue dark:text-sky-400 hover:underline uppercase tracking-wider"
                     >
                       <span>Explore SIG Hub</span>
-                      <span>→</span>
+                      <FiArrowRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>
                 </div>
@@ -134,9 +135,10 @@ export default async function SIGsPage() {
             <div className="pt-2 flex justify-center gap-4 flex-wrap">
               <Link
                 href="/opportunities"
-                className="px-5 py-2.5 bg-ieee-blue hover:bg-ieee-dark dark:bg-sky-600 dark:hover:bg-sky-700 text-white font-mono text-xs font-bold rounded-lg shadow-xs transition-colors"
+                className="px-5 py-2.5 bg-ieee-blue hover:bg-ieee-dark dark:bg-sky-600 dark:hover:bg-sky-700 text-white font-mono text-xs font-bold rounded-lg shadow-xs transition-colors inline-flex items-center gap-1.5"
               >
-                View Volunteer Openings →
+                <span>View Volunteer Openings</span>
+                <FiArrowRight className="w-3.5 h-3.5" />
               </Link>
               <Link
                 href="/contact"

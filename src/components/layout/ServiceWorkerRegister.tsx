@@ -2,13 +2,14 @@
 
 /**
  * @file src/components/layout/ServiceWorkerRegister.tsx
- * @description Registers PWA Service Worker on client mount and displays an offline status indicator.
+ * @description Registers PWA Service Worker on client mount and displays an offline status indicator with react-icons.
  * 
  * @author IEEE MAIT Webmaster & Open Source Contributors
  * @license MIT
  */
 
 import React, { useEffect, useState } from 'react';
+import { FiWifiOff } from 'react-icons/fi';
 
 /**
  * Client component managing PWA Service Worker lifecycle and network connection alerts.
@@ -55,7 +56,8 @@ export const ServiceWorkerRegister: React.FC = () => {
       role="status"
       aria-live="polite"
     >
-      <span>⚡ Offline Mode: Displaying cached IEEE MAIT platform content.</span>
+      <FiWifiOff className="w-4 h-4 shrink-0" />
+      <span>Offline Mode: Displaying cached IEEE MAIT platform content.</span>
     </div>
   );
 };

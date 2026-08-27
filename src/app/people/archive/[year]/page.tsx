@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/Button';
 import { getDynamicPeopleByAcademicYear } from '@/lib/api';
 import { PEOPLE_DATA } from '@/lib/data';
 import Link from '@/components/ui/AppLink';
+import { FiArrowRight, FiArrowLeft } from 'react-icons/fi';
 
 interface LeadershipArchiveYearPageProps {
   params: Promise<{ year: string }>;
@@ -218,8 +219,9 @@ export default async function LeadershipArchiveYearPage({ params }: LeadershipAr
                 Official branch report detailing symposiums, financial audits, technical competitions, and executive transitions for {displayYear}.
               </p>
             </div>
-            <Button href="/resources" variant="secondary" size="md" className="shrink-0 font-mono text-xs">
-              View Activity Reports →
+            <Button href="/resources" variant="secondary" size="md" className="shrink-0 font-mono text-xs flex items-center gap-1.5">
+              <span>View Activity Reports</span>
+              <FiArrowRight className="w-3.5 h-3.5" />
             </Button>
           </div>
 
@@ -345,7 +347,8 @@ export default async function LeadershipArchiveYearPage({ params }: LeadershipAr
               href="/people/archive"
               className="inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-ieee-blue dark:text-sky-400 hover:underline"
             >
-              ← Back to All Leadership Archive Years
+              <FiArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to All Leadership Archive Years</span>
             </Link>
             <span className="font-mono text-xs text-warm-400 dark:text-gray-500">
               IEEE MAIT Institutional Record · Est. 2005

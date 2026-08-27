@@ -7,7 +7,7 @@
  * SPECIFICATIONS:
  * - Positioned at top of root layout above header navigation.
  * - Dismissable dismiss action with persistent sessionStorage visibility check.
- * - High-contrast styling with action CTA link and smooth fade-in.
+ * - High-contrast styling with action CTA link and smooth fade-in using react-icons.
  * 
  * @author IEEE MAIT Webmaster
  * @license MIT
@@ -15,6 +15,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from '@/components/ui/AppLink';
+import { FiX, FiArrowRight } from 'react-icons/fi';
 
 export const AnnouncementBanner: React.FC = () => {
   const [visible, setVisible] = useState(false);
@@ -65,10 +66,10 @@ export const AnnouncementBanner: React.FC = () => {
         {settings.announcementLinkHref && settings.announcementLinkText && (
           <Link
             href={settings.announcementLinkHref}
-            className="underline hover:text-sky-200 font-semibold tracking-wide ml-1 inline-flex items-center gap-0.5"
+            className="underline hover:text-sky-200 font-semibold tracking-wide ml-1 inline-flex items-center gap-1"
           >
             <span>{settings.announcementLinkText}</span>
-            <span aria-hidden="true">→</span>
+            <FiArrowRight className="w-3 h-3" />
           </Link>
         )}
       </div>
@@ -79,9 +80,7 @@ export const AnnouncementBanner: React.FC = () => {
         aria-label="Dismiss Announcement"
         title="Dismiss Announcement"
       >
-        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
+        <FiX className="w-3.5 h-3.5" />
       </button>
     </aside>
   );

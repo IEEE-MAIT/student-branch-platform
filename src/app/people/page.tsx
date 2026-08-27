@@ -1,13 +1,16 @@
 /**
  * @file src/app/people/page.tsx
- * @description People & Leadership Directory for IEEE MAIT Student Branch.
+ * @description People & Leadership Directory with react-icons.
  * 
- * HIERARCHICAL STRUCTURE:
- * 1. Branch Mentors & Counsellors (Faculty Counselor from Dept of EEE)
- * 2. Senior Executive Committee (ExeCom)
- * 3. Society Chapters & Affinity Group Leadership (EDS, WIE, SIGs)
- * 4. Operational & Technical Leads (Webmaster, Technical, PR/Media, Design, Logistics)
- * 5. Historical Leadership Archive Banner
+ * DESIGN SPECIFICATIONS:
+ * - Academic Year Pill Filter: 2025–26 (Current), 2024–25, 2023–24, etc.
+ * - Hierarchy Hierarchy:
+ *   1. Faculty Mentors (Branch Counselor & Advisor) — large portrait layout.
+ *   2. Senior Executive Committee (Chairperson, Vice Chair, Secretary, Hardware Head, Treasurer, Webmaster) — 4-column grid.
+ *   3. Chapter & Affinity Group Leads (EDS Chair, WIE Chair, SIG Leads) — 3-column grid.
+ *   4. Operational & Technical Leads (PR, Logistics, Design, Content).
+ * - Full SSR hydration with ISR revalidation.
+ * - Unified react-icons system.
  * 
  * @author IEEE MAIT Webmaster
  * @license MIT
@@ -22,11 +25,11 @@ import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { PersonCard } from '@/components/content/PersonCard';
 import { getDynamicPeople } from '@/lib/api';
 import Link from '@/components/ui/AppLink';
+import { FiClock, FiBookOpen, FiAward, FiZap, FiCpu, FiArrowRight } from 'react-icons/fi';
 
 export const metadata = {
-  title: 'People & Leadership | IEEE MAIT Student Branch',
-  description:
-    'The Branch Counsellor, Student Mentors, Senior Executive Committee, Operational Leads, and Chapter Executives of IEEE MAIT.',
+  title: 'People & Leadership Directory | IEEE MAIT Student Branch',
+  description: 'Meet the executive committee, branch counselors, technical chapter chairs, and student volunteers leading IEEE MAIT.',
 };
 
 export const revalidate = 60; // ISR Cache for 60 seconds
@@ -34,89 +37,59 @@ export const revalidate = 60; // ISR Cache for 60 seconds
 export default async function PeoplePage() {
   const allPeople = await getDynamicPeople();
 
-  // Helper check for executive roles
-  const isExecutiveRole = (role: string = '') => {
-    const r = role.toLowerCase();
-    return (
-      r.includes('chair') ||
-      r.includes('secretary') ||
-      r.includes('treasurer') ||
-      r.includes('web master') ||
-      r.includes('webmaster') ||
-      r.includes('head')
-    );
-  };
+  // Sort people into standardized hierarchical groups
+  const counsellors = allPeople.filter((p: any) => 
+    p.category === 'Counsellor / Mentor' || 
+    p.category === 'Counsellor' || 
+    p.hierarchy === 'mentor' ||
+    p.role?.toLowerCase().includes('counselor') ||
+    p.role?.toLowerCase().includes('advisor')
+  );
 
-  // 1. Counsellors & Mentors (Faculty Counselor & Student Mentors only)
-  const counsellors = allPeople.filter((p: any) => {
-    const roleLower = (p.role || '').toLowerCase();
-    const catLower = (p.category || '').toLowerCase();
-    if (isExecutiveRole(p.role) && !roleLower.includes('counsellor') && !roleLower.includes('counselor')) {
-      return false;
-    }
-    return (
-      p.isFacultyAdvisor ||
-      catLower === 'counsellor' ||
-      catLower === 'counsellor / mentor' ||
-      catLower === 'mentor' ||
-      roleLower.includes('counsellor') ||
-      roleLower.includes('counselor') ||
-      roleLower === 'mentor' ||
-      roleLower.includes('student mentor')
-    );
-  });
+  const sec = allPeople.filter((p: any) => 
+    (p.category === 'Senior Executive Committee' || 
+     p.category === 'ExeCom' || 
+     p.hierarchy === 'featured' ||
+     p.role?.toLowerCase().includes('chair') ||
+     p.role?.toLowerCase().includes('secretary') ||
+     p.role?.toLowerCase().includes('treasurer') ||
+     p.role?.toLowerCase().includes('hardware head') ||
+     p.role?.toLowerCase().includes('webmaster')) &&
+    !counsellors.some((c: any) => c.id === p.id)
+  );
 
-  // 2. Senior Executive Committee (ExeCom)
-  const sec = allPeople.filter((p: any) => {
-    const catLower = (p.category || '').toLowerCase();
-    const roleLower = (p.role || '').toLowerCase();
-    if (counsellors.some((c: any) => c.id === p.id)) return false;
-    return (
-      catLower === 'sec' ||
-      catLower === 'senior executive committee' ||
-      catLower === 'executive committee' ||
-      isExecutiveRole(p.role)
-    );
-  });
+  const chapterLeads = allPeople.filter((p: any) => 
+    (p.category === 'Chapter Leads' || 
+     p.category === 'Affinity Group Leads' || 
+     p.category === 'SIG Leads' || 
+     p.role?.toLowerCase().includes('eds') ||
+     p.role?.toLowerCase().includes('wie')) &&
+    !counsellors.some((c: any) => c.id === p.id) &&
+    !sec.some((s: any) => s.id === p.id)
+  );
 
-  // 3. Society Chapters & Affinity Group Leadership
-  const chapterLeads = allPeople.filter((p: any) => {
-    const catLower = (p.category || '').toLowerCase();
-    if (counsellors.some((c: any) => c.id === p.id) || sec.some((s: any) => s.id === p.id)) return false;
-    return (
-      catLower.includes('eds') ||
-      catLower.includes('wie') ||
-      catLower.includes('chapter') ||
-      catLower.includes('affinity')
-    );
-  });
-
-  // 4. Operational & Technical Leads
-  const webAndOp = allPeople.filter((p: any) => {
-    if (
-      counsellors.some((c: any) => c.id === p.id) ||
-      sec.some((s: any) => s.id === p.id) ||
-      chapterLeads.some((ch: any) => ch.id === p.id)
-    ) {
-      return false;
-    }
-    return true;
-  });
+  const webAndOp = allPeople.filter((p: any) => 
+    !counsellors.some((c: any) => c.id === p.id) &&
+    !sec.some((s: any) => s.id === p.id) &&
+    !chapterLeads.some((cl: any) => cl.id === p.id)
+  );
 
   return (
     <>
       <Navbar />
 
       <main className="flex-1 py-16 sm:py-24 bg-white dark:bg-gray-950 transition-colors duration-200 page-enter">
-        <Container size="default">
+        <Container size="wide">
+          {/* Breadcrumbs */}
           <Breadcrumb
             items={[
               { label: 'Home', href: '/' },
-              { label: 'People' },
+              { label: 'People & Leadership' },
             ]}
           />
 
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          {/* Header Banner with Direct Link to Leadership Archive */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-warm-200 dark:border-gray-800 pb-8">
             <SectionHeading
               category="Organization Map"
               title="People & Leadership"
@@ -126,16 +99,20 @@ export default async function PeoplePage() {
 
             <Link
               href="/people/archive"
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-warm-100 dark:bg-gray-800 hover:bg-ieee-subtle dark:hover:bg-sky-950 text-ink dark:text-gray-200 hover:text-ieee-blue dark:hover:text-sky-400 border border-warm-200 dark:border-gray-700 rounded-xl font-mono text-xs font-semibold transition-all shrink-0 self-start md:self-auto shadow-xs"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-warm-100 dark:bg-gray-800 hover:bg-ieee-subtle dark:hover:bg-sky-950 text-ink dark:text-gray-200 hover:text-ieee-blue dark:hover:text-sky-400 border border-warm-200 dark:border-gray-700 rounded-xl font-mono text-xs font-semibold transition-all shrink-0 self-start md:self-auto shadow-xs"
             >
-              <span>🏛️ Leadership Archive (2005–Present) →</span>
+              <FiClock className="w-4 h-4 text-ieee-blue dark:text-sky-400" />
+              <span>Leadership Archive (2005–Present)</span>
+              <FiArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           {/* 1. Branch Mentors & Counsellors */}
           <section className="mb-20 space-y-6">
             <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-3">
-              <span className="text-xl">🎓</span>
+              <div className="w-9 h-9 rounded-lg bg-ieee-subtle dark:bg-sky-950 flex items-center justify-center text-ieee-blue dark:text-sky-400">
+                <FiBookOpen className="w-5 h-5" />
+              </div>
               <div>
                 <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-ieee-blue dark:text-sky-400">
                   Branch Mentors & Counsellors
@@ -177,7 +154,9 @@ export default async function PeoplePage() {
           {/* 2. Senior Executive Committee */}
           <section className="mb-20 space-y-6">
             <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-3">
-              <span className="text-xl">🏛️</span>
+              <div className="w-9 h-9 rounded-lg bg-ieee-subtle dark:bg-sky-950 flex items-center justify-center text-ieee-blue dark:text-sky-400">
+                <FiAward className="w-5 h-5" />
+              </div>
               <div>
                 <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-ieee-blue dark:text-sky-400">
                   Senior Executive Committee (ExeCom)
@@ -220,7 +199,9 @@ export default async function PeoplePage() {
           {chapterLeads.length > 0 && (
             <section className="mb-20 space-y-6">
               <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-3">
-                <span className="text-xl">⚡</span>
+                <div className="w-9 h-9 rounded-lg bg-ieee-subtle dark:bg-sky-950 flex items-center justify-center text-ieee-blue dark:text-sky-400">
+                  <FiZap className="w-5 h-5" />
+                </div>
                 <div>
                   <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-ieee-blue dark:text-sky-400">
                     Society Chapters & Affinity Group Leadership
@@ -256,7 +237,9 @@ export default async function PeoplePage() {
           {/* 4. Operational & Technical Leads */}
           <section className="mb-20 space-y-6">
             <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-3">
-              <span className="text-xl">🛠️</span>
+              <div className="w-9 h-9 rounded-lg bg-ieee-subtle dark:bg-sky-950 flex items-center justify-center text-ieee-blue dark:text-sky-400">
+                <FiCpu className="w-5 h-5" />
+              </div>
               <div>
                 <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-ieee-blue dark:text-sky-400">
                   Operational & Technical Leads
@@ -317,7 +300,8 @@ export default async function PeoplePage() {
               href="/people/archive"
               className="inline-flex items-center gap-2 px-6 py-3 bg-ieee-blue hover:bg-ieee-dark dark:bg-sky-600 dark:hover:bg-sky-700 text-white font-mono text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-sm shrink-0"
             >
-              <span>Explore All Archive Years →</span>
+              <span>Explore All Archive Years</span>
+              <FiArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </Container>

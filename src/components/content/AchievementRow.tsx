@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from '@/components/ui/AppLink';
+import { FiArrowRight } from 'react-icons/fi';
 
 /**
  * Props for AchievementRow component.
@@ -26,7 +27,7 @@ interface AchievementRowProps {
 }
 
 /**
- * Chronological Ledger Row Component for Achievements.
+ * Chronological Ledger Row Component for Achievements with react-icons.
  * Formatted as a ruled table entry with year marker column, title, and conferred entity.
  */
 export const AchievementRow: React.FC<AchievementRowProps> = ({
@@ -79,8 +80,9 @@ export const AchievementRow: React.FC<AchievementRowProps> = ({
             {category}
           </span>
         )}
-        <span className="text-ieee-blue dark:text-sky-400 opacity-0 group-hover:opacity-100 transition-opacity ml-2 hidden sm:inline-block">
-          View Details →
+        <span className="text-ieee-blue dark:text-sky-400 opacity-0 group-hover:opacity-100 transition-opacity ml-2 hidden sm:inline-flex items-center gap-1">
+          <span>View Details</span>
+          <FiArrowRight className="w-3.5 h-3.5" />
         </span>
       </div>
     </Link>

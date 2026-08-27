@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { FiArrowRight } from 'react-icons/fi';
 
 export default function AdminPeoplePage() {
   const [people, setPeople] = useState<any[]>([]);
@@ -473,9 +474,10 @@ export default function AdminPeoplePage() {
         <div className="flex items-center gap-3 pt-2">
           <button
             type="submit"
-            className="px-6 py-2.5 bg-ieee-blue text-white font-mono text-xs font-bold uppercase tracking-wider rounded-[2px] hover:bg-ieee-dark transition-colors"
+            className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-ieee-blue text-white font-mono text-xs font-bold uppercase tracking-wider rounded-[2px] hover:bg-ieee-dark transition-colors"
           >
-            {editingId ? 'Update Team Member →' : 'Save to Roster →'}
+            <span>{editingId ? 'Update Team Member' : 'Save to Roster'}</span>
+            <FiArrowRight className="w-3.5 h-3.5" />
           </button>
           {editingId && (
             <button

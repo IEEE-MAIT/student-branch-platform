@@ -2,16 +2,14 @@
 
 /**
  * @file src/components/layout/Navbar.tsx
- * @description State-of-the-art modern navigation header for IEEE MAIT Student Branch platform.
+ * @description Modern, sleek institutional navigation bar for IEEE MAIT Student Branch.
  * 
- * DESIGN & SPECIFICATIONS:
- * - Pure Official Logo brand identity (minimalist, ultra-clean co-branding).
- * - Ultra-modern frosted glassmorphic navigation bar (backdrop-blur-xl).
- * - Interactive capsule nav pills with smooth micro-animations.
- * - Floating rounded-2xl dropdown menus for 'About' and 'Communities'.
- * - Instant Command-K / Ctrl+K quick search capsule.
- * - Vibrant gradient CTA button with tactile active micro-interactions.
- * - Mobile responsive drawer with smooth accordion transitions.
+ * SPECIFICATIONS:
+ * - Pure, clean IEEE MAIT Student Branch Logo on the left.
+ * - Rounded capsule pill-style desktop navigation bar with debounced hover dropdowns.
+ * - Search bar pill with Cmd+K trigger and direct JOIN CTA.
+ * - Mobile responsive drawer menu with accordion sub-sections.
+ * - Uses react-icons for modern, unified icon system.
  * 
  * @author IEEE MAIT Webmaster
  * @license MIT
@@ -20,34 +18,74 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from '@/components/ui/AppLink';
 import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { Container } from './Container';
+import { FiChevronDown, FiSearch, FiMenu, FiX, FiArrowRight } from 'react-icons/fi';
 
 export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [communitiesDropdownOpen, setCommunitiesDropdownOpen] = useState(false);
-
-  // Mobile drawer accordions
   const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
   const [mobileCommunitiesOpen, setMobileCommunitiesOpen] = useState(false);
-
   const pathname = usePathname();
-  const router = useRouter();
   const navRef = useRef<HTMLElement>(null);
-
   const aboutTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const communitiesTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Close menus when route changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setAboutDropdownOpen(false);
+    setCommunitiesDropdownOpen(false);
+    setMobileAboutOpen(false);
+    setMobileCommunitiesOpen(false);
+  }, [pathname]);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [mobileMenuOpen]);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+        setAboutDropdownOpen(false);
+        setCommunitiesDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
+
+  // Keyboard navigation: Escape key closes menus
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setAboutDropdownOpen(false);
+        setCommunitiesDropdownOpen(false);
+        setMobileMenuOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Debounced mouse enter/leave handlers
   const handleAboutEnter = () => {
     if (aboutTimeoutRef.current) clearTimeout(aboutTimeoutRef.current);
-    if (communitiesTimeoutRef.current) clearTimeout(communitiesTimeoutRef.current);
-    setCommunitiesDropdownOpen(false);
     setAboutDropdownOpen(true);
   };
 
   const handleAboutLeave = () => {
-    if (aboutTimeoutRef.current) clearTimeout(aboutTimeoutRef.current);
     aboutTimeoutRef.current = setTimeout(() => {
       setAboutDropdownOpen(false);
     }, 200);
@@ -55,62 +93,14 @@ export const Navbar: React.FC = () => {
 
   const handleCommunitiesEnter = () => {
     if (communitiesTimeoutRef.current) clearTimeout(communitiesTimeoutRef.current);
-    if (aboutTimeoutRef.current) clearTimeout(aboutTimeoutRef.current);
-    setAboutDropdownOpen(false);
     setCommunitiesDropdownOpen(true);
   };
 
   const handleCommunitiesLeave = () => {
-    if (communitiesTimeoutRef.current) clearTimeout(communitiesTimeoutRef.current);
     communitiesTimeoutRef.current = setTimeout(() => {
       setCommunitiesDropdownOpen(false);
     }, 200);
   };
-
-  // Close menus on route change
-  useEffect(() => {
-    setMobileMenuOpen(false);
-    setAboutDropdownOpen(false);
-    setCommunitiesDropdownOpen(false);
-  }, [pathname]);
-
-  // Clean timeouts on unmount
-  useEffect(() => {
-    return () => {
-      if (aboutTimeoutRef.current) clearTimeout(aboutTimeoutRef.current);
-      if (communitiesTimeoutRef.current) clearTimeout(communitiesTimeoutRef.current);
-    };
-  }, []);
-
-  // Lock body scroll when mobile menu is open
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [mobileMenuOpen]);
-
-  // Global Keyboard shortcuts & Escape to close
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        router.push('/search');
-      }
-      if (e.key === 'Escape') {
-        setAboutDropdownOpen(false);
-        setCommunitiesDropdownOpen(false);
-        setMobileMenuOpen(false);
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [router]);
 
   const isActive = (path: string) => {
     if (path === '/') return pathname === '/';
@@ -176,14 +166,9 @@ export const Navbar: React.FC = () => {
                 aria-label="About Menu"
               >
                 <span>About</span>
-                <svg
+                <FiChevronDown
                   className={`w-3 h-3 opacity-60 transition-transform duration-200 ${aboutDropdownOpen ? 'rotate-180 text-ieee-blue dark:text-sky-400 opacity-100' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                />
               </button>
 
               {aboutDropdownOpen && (
@@ -249,14 +234,9 @@ export const Navbar: React.FC = () => {
                 aria-label="Communities Menu"
               >
                 <span>Communities</span>
-                <svg
+                <FiChevronDown
                   className={`w-3 h-3 opacity-60 transition-transform duration-200 ${communitiesDropdownOpen ? 'rotate-180 text-ieee-blue dark:text-sky-400 opacity-100' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                />
               </button>
 
               {communitiesDropdownOpen && (
@@ -375,9 +355,7 @@ export const Navbar: React.FC = () => {
               className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 hover:text-ieee-blue dark:hover:text-sky-400 px-3 py-1.5 border border-warm-200/80 dark:border-gray-800/80 hover:border-ieee-blue/40 rounded-full bg-warm-50/80 dark:bg-gray-900/80 hover:bg-white dark:hover:bg-gray-800 shadow-xs transition-all duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ieee-blue shrink-0"
               aria-label="Search Platform (Shortcut ⌘K or Ctrl+K)"
             >
-              <svg className="w-3.5 h-3.5 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              <FiSearch className="w-3.5 h-3.5 opacity-70 group-hover:opacity-100 transition-opacity" />
               <span className="hidden 2xl:inline">Search...</span>
               <kbd className="flex items-center gap-0.5 px-1.5 py-0.5 bg-white dark:bg-gray-800 border border-warm-200 dark:border-gray-700 rounded-md text-[10px] text-warm-400 dark:text-gray-400 font-mono shadow-xs">
                 ⌘K
@@ -390,7 +368,7 @@ export const Navbar: React.FC = () => {
               className="inline-flex items-center justify-center gap-1.5 px-5 py-2 rounded-full bg-gradient-to-r from-[#00629B] to-[#007CBD] dark:from-[#007CBD] dark:to-[#0284C7] hover:from-[#004975] hover:to-[#00629B] dark:hover:from-[#00629B] dark:hover:to-[#007CBD] text-white text-xs font-bold uppercase tracking-wider shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shrink-0"
             >
               <span>JOIN</span>
-              <span className="text-sky-200">→</span>
+              <FiArrowRight className="w-3.5 h-3.5 text-sky-200" />
             </Link>
           </div>
 
@@ -401,25 +379,19 @@ export const Navbar: React.FC = () => {
               aria-label="Quick Search"
               className="p-2 text-ink dark:text-gray-200 hover:text-ieee-blue dark:hover:text-sky-400 rounded-full hover:bg-warm-100 dark:hover:bg-gray-900"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              <FiSearch className="w-5 h-5" />
             </Link>
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-ink dark:text-gray-200 hover:text-ieee-blue dark:hover:text-sky-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ieee-blue rounded-full hover:bg-warm-100 dark:hover:bg-gray-900 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="p-2 text-ink dark:text-gray-200 hover:text-ieee-blue dark:hover:text-sky-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ieee-blue rounded-full hover:bg-warm-100 dark:hover:bg-gray-900 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
               aria-label={mobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
               aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <FiX className="w-6 h-6" />
               ) : (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+                <FiMenu className="w-6 h-6" />
               )}
             </button>
           </div>
@@ -437,9 +409,7 @@ export const Navbar: React.FC = () => {
               onClick={() => setMobileMenuOpen(false)}
             >
               <div className="flex items-center gap-2">
-                <svg className="w-4 h-4 text-warm-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <FiSearch className="w-4 h-4 text-warm-400" />
                 <span>Search events, people, publications...</span>
               </div>
               <span className="font-mono text-[10px] text-warm-400 border border-warm-200 dark:border-gray-700 px-1.5 py-0.5 rounded bg-white dark:bg-gray-800">⌘K</span>
@@ -453,18 +423,13 @@ export const Navbar: React.FC = () => {
             <button
               type="button"
               onClick={() => setMobileAboutOpen(!mobileAboutOpen)}
-              className="w-full flex items-center justify-between px-4 py-3 text-base font-medium text-ink dark:text-gray-200 bg-warm-50/50 dark:bg-gray-900/50 hover:bg-warm-100 dark:hover:bg-gray-800 min-h-[48px]"
+              className="w-full flex items-center justify-between px-4 py-3 text-base font-medium text-ink dark:text-gray-200 bg-warm-50/50 dark:bg-gray-900/50 hover:bg-warm-100 dark:hover:bg-gray-800 min-h-[48px] cursor-pointer"
               aria-expanded={mobileAboutOpen}
             >
               <span>About IEEE MAIT</span>
-              <svg
+              <FiChevronDown
                 className={`w-4 h-4 text-warm-400 transition-transform duration-200 ${mobileAboutOpen ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              />
             </button>
             {mobileAboutOpen && (
               <div className="bg-white dark:bg-gray-900 px-4 py-2 space-y-1 border-t border-warm-200 dark:border-gray-800 text-sm">
@@ -505,18 +470,13 @@ export const Navbar: React.FC = () => {
             <button
               type="button"
               onClick={() => setMobileCommunitiesOpen(!mobileCommunitiesOpen)}
-              className="w-full flex items-center justify-between px-4 py-3 text-base font-medium text-ink dark:text-gray-200 bg-warm-50/50 dark:bg-gray-900/50 hover:bg-warm-100 dark:hover:bg-gray-800 min-h-[48px]"
+              className="w-full flex items-center justify-between px-4 py-3 text-base font-medium text-ink dark:text-gray-200 bg-warm-50/50 dark:bg-gray-900/50 hover:bg-warm-100 dark:hover:bg-gray-800 min-h-[48px] cursor-pointer"
               aria-expanded={mobileCommunitiesOpen}
             >
               <span>Communities & Chapters</span>
-              <svg
+              <FiChevronDown
                 className={`w-4 h-4 text-warm-400 transition-transform duration-200 ${mobileCommunitiesOpen ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              />
             </button>
             {mobileCommunitiesOpen && (
               <div className="bg-white dark:bg-gray-900 px-4 py-2 space-y-1 border-t border-warm-200 dark:border-gray-800 text-sm">
@@ -623,7 +583,7 @@ export const Navbar: React.FC = () => {
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-[#00629B] to-[#007CBD] dark:from-[#007CBD] dark:to-[#0284C7] text-white font-bold uppercase tracking-wider text-sm shadow-md"
             >
               <span>JOIN</span>
-              <span className="text-sky-200">→</span>
+              <FiArrowRight className="w-4 h-4 text-sky-200" />
             </Link>
           </div>
         </div>

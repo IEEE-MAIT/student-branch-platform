@@ -10,6 +10,7 @@ import { ProjectCard } from '@/components/content/ProjectCard';
 import { InitiativeCard } from '@/components/content/InitiativeCard';
 import { Badge } from '@/components/ui/Badge';
 import Link from '@/components/ui/AppLink';
+import { FiSearch, FiX, FiArrowRight, FiExternalLink } from 'react-icons/fi';
 
 export const STATIC_PAGES = [
   { title: 'Home', description: 'Main landing page of the IEEE MAIT Student Branch', url: '/' },
@@ -266,9 +267,7 @@ export const SearchClient: React.FC<SearchClientProps> = ({
         <div className="max-w-3xl mb-8 relative z-10 group">
           <div className="relative flex items-center">
             <div className="absolute left-4 text-warm-400 group-focus-within:text-ieee-blue dark:group-focus-within:text-sky-400 transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              <FiSearch className="w-5 h-5" />
             </div>
 
             <input
@@ -282,13 +281,12 @@ export const SearchClient: React.FC<SearchClientProps> = ({
 
             {query && (
               <button
+                type="button"
                 onClick={() => setQuery('')}
-                className="absolute right-3 p-1 rounded-full text-warm-400 hover:text-ink dark:hover:text-white hover:bg-warm-100 dark:hover:bg-gray-800 transition-colors"
+                className="absolute right-3 p-1 rounded-full text-warm-400 hover:text-ink dark:hover:text-white hover:bg-warm-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
                 aria-label="Clear search query"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <FiX className="w-4 h-4" />
               </button>
             )}
           </div>
@@ -377,7 +375,10 @@ export const SearchClient: React.FC<SearchClientProps> = ({
                           <h4 className="font-serif text-lg text-ink dark:text-gray-100 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors font-normal">
                             {sig.name}
                           </h4>
-                          <span className="text-xs font-mono text-ieee-blue dark:text-sky-400">Hub →</span>
+                          <span className="text-xs font-mono text-ieee-blue dark:text-sky-400 flex items-center gap-1">
+                            <span>Hub</span>
+                            <FiArrowRight className="w-3 h-3" />
+                          </span>
                         </div>
                         <p className="text-xs text-warm-500 dark:text-gray-400 line-clamp-2">
                           {sig.description}
@@ -392,7 +393,7 @@ export const SearchClient: React.FC<SearchClientProps> = ({
               {searchResults.opportunities.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-2">
-                    <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal">Opportunities & Grants</h3>
+                    <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal">Opportunities &amp; Grants</h3>
                     <span className="bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-full text-xs font-bold font-mono">
                       {searchResults.opportunities.length}
                     </span>
@@ -422,9 +423,10 @@ export const SearchClient: React.FC<SearchClientProps> = ({
                             href={opp.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-block text-xs font-mono text-ieee-blue dark:text-sky-400 font-bold hover:underline"
+                            className="inline-flex items-center gap-1 text-xs font-mono text-ieee-blue dark:text-sky-400 font-bold hover:underline"
                           >
-                            Apply Link ↗
+                            <span>Apply Link</span>
+                            <FiExternalLink className="w-3 h-3" />
                           </a>
                         )}
                       </div>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from '@/components/ui/AppLink';
 import { Badge } from '@/components/ui/Badge';
+import { FiArrowRight, FiExternalLink } from 'react-icons/fi';
 
 export default function AdminOpportunitiesPage() {
   const [opportunities, setOpportunities] = useState<any[]>([]);
@@ -256,9 +257,10 @@ export default function AdminOpportunitiesPage() {
         <div className="pt-2 flex justify-end">
           <button
             type="submit"
-            className="px-5 py-2.5 bg-ieee-blue hover:bg-ieee-dark dark:bg-sky-600 dark:hover:bg-sky-700 text-white font-mono text-xs font-bold rounded-lg transition-colors shadow-xs"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-ieee-blue hover:bg-ieee-dark dark:bg-sky-600 dark:hover:bg-sky-700 text-white font-mono text-xs font-bold rounded-lg transition-colors shadow-xs"
           >
-            Publish Opportunity →
+            <span>Publish Opportunity</span>
+            <FiArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </form>
@@ -267,10 +269,11 @@ export default function AdminOpportunitiesPage() {
       <div className="border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-xs">
         <div className="p-4 border-b border-warm-200 dark:border-gray-800 flex items-center justify-between">
           <span className="font-mono text-xs font-bold uppercase tracking-wider text-ink dark:text-gray-200">
-            Recorded Opportunities & Grants ({opportunities.length})
+            Recorded Opportunities &amp; Grants ({opportunities.length})
           </span>
-          <Link href="/opportunities" target="_blank" className="text-xs font-mono text-ieee-blue dark:text-sky-400 hover:underline">
-            View Public Portal ↗
+          <Link href="/opportunities" target="_blank" className="inline-flex items-center gap-1 text-xs font-mono text-ieee-blue dark:text-sky-400 hover:underline">
+            <span>View Public Portal</span>
+            <FiExternalLink className="w-3 h-3" />
           </Link>
         </div>
 
@@ -318,9 +321,10 @@ export default function AdminOpportunitiesPage() {
                           href={o.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-ieee-blue dark:text-sky-400 hover:underline"
+                          className="inline-flex items-center gap-0.5 text-ieee-blue dark:text-sky-400 hover:underline"
                         >
-                          Link ↗
+                          <span>Link</span>
+                          <FiExternalLink className="w-2.5 h-2.5" />
                         </a>
                       )}
                       <button
