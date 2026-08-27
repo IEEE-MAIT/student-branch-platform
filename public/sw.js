@@ -4,7 +4,8 @@
  * 
  * CACHING STRATEGY:
  * - Pre-caches core static assets and primary routes during installation.
- * - Employs Network-First with Cache Fallback for public pages.
+ * - Employs Stale-While-Revalidate for public API routes.
+ * - Employs Network-First with Cache Fallback for dynamic public pages.
  * - Strictly bypasses admin dashboard, authentication, and officer mutations.
  * - Allows offline viewing of campus event details, contact info, and leadership maps.
  * 
@@ -12,17 +13,22 @@
  * @license MIT
  */
 
-const CACHE_NAME = 'ieee-mait-pwa-v3';
+const CACHE_NAME = 'ieee-mait-pwa-v4';
 const PRECACHE_URLS = [
   '/',
   '/events',
   '/people',
   '/chapters',
   '/achievements',
-  '/stories',
+  '/publications',
+  '/sigs',
+  '/projects',
+  '/opportunities',
   '/gallery',
+  '/resources',
   '/join',
   '/contact',
+  '/search',
   '/favicon.svg',
   '/favicon-dark.svg',
   '/ieee_mait_sb_light_mode_logo.png',
@@ -69,6 +75,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Stale-While-Revalidate for public API calls
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then((cache) => {
+        return cache.match(event.request).then((cachedResponse) => {
+          const fetchPromise = fetch(event.request).then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              cache.put(event.request, networkResponse.clone());
+            }
+            return networkResponse;
+          }).catch(() => cachedResponse);
+
+          return cachedResponse || fetchPromise;
+        });
+      })
+    );
+    return;
+  }
+
+  // Network-First for HTML pages and UI assets
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
@@ -87,7 +113,7 @@ self.addEventListener('fetch', (event) => {
           if (cachedResponse) {
             return cachedResponse;
           }
-          // Return generic offline page if route not in cache
+          // Return generic offline home if route not in cache
           return caches.match('/');
         });
       })

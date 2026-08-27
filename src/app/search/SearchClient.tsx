@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState, useDeferredValue, useMemo } from 'react';
+import React, { useState, useDeferredValue, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Container } from '@/components/layout/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { EventPreview } from '@/components/content/EventPreview';
 import { AchievementRow } from '@/components/content/AchievementRow';
 import { ProjectCard } from '@/components/content/ProjectCard';
 import { InitiativeCard } from '@/components/content/InitiativeCard';
+import { Badge } from '@/components/ui/Badge';
 import Link from '@/components/ui/AppLink';
 
 export const STATIC_PAGES = [
@@ -41,6 +43,8 @@ interface SearchClientProps {
   opportunities?: any[];
 }
 
+const SEARCH_HISTORY_KEY = 'ieee_mait_search_history';
+
 export const SearchClient: React.FC<SearchClientProps> = ({
   events: initialEvents,
   achievements: initialAchievements,
@@ -54,10 +58,63 @@ export const SearchClient: React.FC<SearchClientProps> = ({
   sigs: initialSIGs = [],
   opportunities: initialOpportunities = [],
 }) => {
-  const [query, setQuery] = useState('');
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get('q') || '';
+  const [query, setQuery] = useState(initialQuery);
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const deferredQuery = useDeferredValue(query);
   const isStale = query !== deferredQuery;
+
+  // Load search history from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(SEARCH_HISTORY_KEY);
+      if (stored) {
+        setSearchHistory(JSON.parse(stored));
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Save to search history when user performs a meaningful search
+  useEffect(() => {
+    if (deferredQuery.trim().length > 2) {
+      const q = deferredQuery.trim();
+      setSearchHistory((prev) => {
+        const filtered = prev.filter((item) => item.toLowerCase() !== q.toLowerCase());
+        const updated = [q, ...filtered].slice(0, 6);
+        try {
+          localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(updated));
+        } catch {
+          // ignore
+        }
+        return updated;
+      });
+    }
+  }, [deferredQuery]);
+
+  const clearHistory = () => {
+    setSearchHistory([]);
+    try {
+      localStorage.removeItem(SEARCH_HISTORY_KEY);
+    } catch {
+      // ignore
+    }
+  };
+
+  const removeHistoryItem = (itemToRemove: string) => {
+    setSearchHistory((prev) => {
+      const updated = prev.filter((item) => item !== itemToRemove);
+      try {
+        localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(updated));
+      } catch {
+        // ignore
+      }
+      return updated;
+    });
+  };
 
   const searchResults = useMemo(() => {
     if (!deferredQuery.trim()) {
@@ -72,6 +129,8 @@ export const SearchClient: React.FC<SearchClientProps> = ({
         resources: [],
         projects: [],
         initiatives: [],
+        sigs: [],
+        opportunities: [],
       };
     }
     const q = deferredQuery.toLowerCase();
@@ -105,7 +164,8 @@ export const SearchClient: React.FC<SearchClientProps> = ({
       (s) =>
         s.title?.toLowerCase().includes(q) ||
         s.excerpt?.toLowerCase().includes(q) ||
-        s.author?.toLowerCase().includes(q)
+        s.author?.toLowerCase().includes(q) ||
+        (Array.isArray(s.tags) && s.tags.some((t: string) => t.toLowerCase().includes(q)))
     );
     const people = initialPeople.filter(
       (p) =>
@@ -136,6 +196,20 @@ export const SearchClient: React.FC<SearchClientProps> = ({
         i.description?.toLowerCase().includes(q) ||
         i.targetAudience?.toLowerCase().includes(q)
     );
+    const sigs = initialSIGs.filter(
+      (s) =>
+        s.name?.toLowerCase().includes(q) ||
+        s.description?.toLowerCase().includes(q) ||
+        s.slug?.toLowerCase().includes(q)
+    );
+    const opportunities = initialOpportunities.filter(
+      (o) =>
+        o.title?.toLowerCase().includes(q) ||
+        o.description?.toLowerCase().includes(q) ||
+        o.organisation?.toLowerCase().includes(q) ||
+        o.eligibility?.toLowerCase().includes(q) ||
+        o.category?.toLowerCase().includes(q)
+    );
 
     return {
       pages,
@@ -148,6 +222,8 @@ export const SearchClient: React.FC<SearchClientProps> = ({
       resources,
       projects,
       initiatives,
+      sigs,
+      opportunities,
     };
   }, [
     deferredQuery,
@@ -160,6 +236,8 @@ export const SearchClient: React.FC<SearchClientProps> = ({
     initialResources,
     initialProjects,
     initialInitiatives,
+    initialSIGs,
+    initialOpportunities,
   ]);
 
   const totalResults =
@@ -172,20 +250,22 @@ export const SearchClient: React.FC<SearchClientProps> = ({
     searchResults.galleries.length +
     searchResults.resources.length +
     searchResults.projects.length +
-    searchResults.initiatives.length;
+    searchResults.initiatives.length +
+    searchResults.sigs.length +
+    searchResults.opportunities.length;
 
   return (
-    <main className="flex-1 py-16 sm:py-24 bg-white min-h-screen page-enter">
+    <main className="flex-1 py-16 sm:py-24 bg-white dark:bg-gray-950 min-h-screen page-enter transition-colors duration-200">
       <Container size="default">
         <SectionHeading
-          category="Site-Wide Index"
-          title="Omni-Search Platform"
-          subtitle="Instant cross-platform search across technical events, chapter sub-portals, leadership records, hardware projects, and research publications."
+          category="Site-Wide Omni-Index"
+          title="Global Search Engine"
+          subtitle="Instant cross-platform search across technical events, chapter sub-portals, leadership records, hardware projects, SIG roadmaps, and research publications."
         />
 
-        <div className="max-w-3xl mb-10 relative z-10 group">
+        <div className="max-w-3xl mb-8 relative z-10 group">
           <div className="relative flex items-center">
-            <div className="absolute left-4 text-warm-400 group-focus-within:text-ieee-blue transition-colors">
+            <div className="absolute left-4 text-warm-400 group-focus-within:text-ieee-blue dark:group-focus-within:text-sky-400 transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -196,14 +276,14 @@ export const SearchClient: React.FC<SearchClientProps> = ({
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search events, hardware projects, awards, people, or resources..."
-              className="w-full pl-12 pr-14 py-3.5 text-base border border-warm-300/80 bg-white rounded-[2px] focus:outline-hidden focus:border-ieee-blue focus:ring-1 focus:ring-ieee-blue font-sans shadow-xs transition-all text-ink placeholder:text-warm-400"
+              placeholder="Search events, hardware projects, SIGs, opportunities, people, or awards..."
+              className="w-full pl-12 pr-14 py-3.5 text-base border border-warm-300/80 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl focus:outline-hidden focus:border-ieee-blue dark:focus:border-sky-500 focus:ring-1 focus:ring-ieee-blue font-sans shadow-xs transition-all text-ink dark:text-gray-100 placeholder:text-warm-400 dark:placeholder:text-gray-500"
             />
 
             {query && (
               <button
                 onClick={() => setQuery('')}
-                className="absolute right-3 p-1 rounded-full text-warm-400 hover:text-ink hover:bg-warm-100 transition-colors"
+                className="absolute right-3 p-1 rounded-full text-warm-400 hover:text-ink dark:hover:text-white hover:bg-warm-100 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Clear search query"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,19 +294,54 @@ export const SearchClient: React.FC<SearchClientProps> = ({
           </div>
 
           <div className="flex items-center justify-between mt-3 px-1">
-            <p className="text-xs font-mono text-warm-400">
+            <p className="text-xs font-mono text-warm-400 dark:text-gray-400">
               {query.trim() && (
                 <span>
-                  Found <strong className="text-ink">{totalResults}</strong> result{totalResults !== 1 ? 's' : ''} for &quot;<span className="text-ieee-blue font-semibold">{deferredQuery}</span>&quot;
+                  Found <strong className="text-ink dark:text-gray-100">{totalResults}</strong> result{totalResults !== 1 ? 's' : ''} for &quot;<span className="text-ieee-blue dark:text-sky-400 font-semibold">{deferredQuery}</span>&quot;
                 </span>
               )}
             </p>
             {!query && (
-              <p className="text-xs font-mono text-warm-300 hidden sm:block">
-                Press <kbd className="px-1.5 py-0.5 bg-warm-100 border border-warm-200 rounded font-sans text-[11px] mx-0.5">⌘K</kbd> / <kbd className="px-1.5 py-0.5 bg-warm-100 border border-warm-200 rounded font-sans text-[11px] mx-0.5">Ctrl+K</kbd> to jump here anytime.
+              <p className="text-xs font-mono text-warm-400 dark:text-gray-400 hidden sm:block">
+                Press <kbd className="px-1.5 py-0.5 bg-warm-100 dark:bg-gray-800 border border-warm-200 dark:border-gray-700 rounded font-sans text-[11px] mx-0.5">⌘K</kbd> / <kbd className="px-1.5 py-0.5 bg-warm-100 dark:bg-gray-800 border border-warm-200 dark:border-gray-700 rounded font-sans text-[11px] mx-0.5">Ctrl+K</kbd> to jump here anytime.
               </p>
             )}
           </div>
+
+          {/* Search History Chips */}
+          {!query && searchHistory.length > 0 && (
+            <div className="mt-4 pt-3 border-t border-warm-100 dark:border-gray-800 flex items-center gap-2 flex-wrap text-xs">
+              <span className="font-mono text-[11px] text-warm-400 dark:text-gray-400 font-semibold">Recent:</span>
+              {searchHistory.map((item) => (
+                <div
+                  key={item}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-warm-50 dark:bg-gray-900 border border-warm-200 dark:border-gray-800 rounded-full text-warm-600 dark:text-gray-300 font-mono text-[11px] hover:border-ieee-blue/40"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setQuery(item)}
+                    className="hover:text-ieee-blue dark:hover:text-sky-400"
+                  >
+                    {item}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeHistoryItem(item)}
+                    className="text-warm-400 hover:text-ink dark:hover:text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={clearHistory}
+                className="text-[11px] font-mono text-warm-400 hover:text-red-500 underline ml-auto"
+              >
+                Clear
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Results Container */}
@@ -234,20 +349,96 @@ export const SearchClient: React.FC<SearchClientProps> = ({
           {deferredQuery.trim() ? (
             <div className="space-y-12">
               {totalResults === 0 && (
-                <div className="p-12 text-center border border-warm-200 bg-warm-50/40 rounded-[2px] space-y-2">
-                  <p className="font-serif text-xl text-ink font-normal">No results found</p>
-                  <p className="text-xs text-warm-400 font-sans">
-                    We could not find any records matching &quot;{deferredQuery}&quot;. Try searching with broader keywords.
+                <div className="p-12 text-center border border-warm-200 dark:border-gray-800 bg-warm-50/40 dark:bg-gray-900/40 rounded-xl space-y-2">
+                  <p className="font-serif text-xl text-ink dark:text-gray-100 font-normal">No results found</p>
+                  <p className="text-xs text-warm-400 dark:text-gray-400 font-sans">
+                    We could not find any records matching &quot;{deferredQuery}&quot;. Try searching with broader keywords or checking our quick discovery categories below.
                   </p>
+                </div>
+              )}
+
+              {/* Special Interest Groups */}
+              {searchResults.sigs.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-2">
+                    <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal">Special Interest Groups (SIGs)</h3>
+                    <span className="bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full text-xs font-bold font-mono">
+                      {searchResults.sigs.length}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {searchResults.sigs.map((sig: any) => (
+                      <Link
+                        key={sig.id || sig.slug}
+                        href={`/sigs/${sig.slug}`}
+                        className="p-5 border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl hover:border-ieee-blue/40 dark:hover:border-sky-500/40 transition-all block group shadow-xs"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-serif text-lg text-ink dark:text-gray-100 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors font-normal">
+                            {sig.name}
+                          </h4>
+                          <span className="text-xs font-mono text-ieee-blue dark:text-sky-400">Hub →</span>
+                        </div>
+                        <p className="text-xs text-warm-500 dark:text-gray-400 line-clamp-2">
+                          {sig.description}
+                        </p>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Opportunities */}
+              {searchResults.opportunities.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-2">
+                    <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal">Opportunities & Grants</h3>
+                    <span className="bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-full text-xs font-bold font-mono">
+                      {searchResults.opportunities.length}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {searchResults.opportunities.map((opp: any) => (
+                      <div
+                        key={opp.id || opp.slug}
+                        className="p-5 border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl hover:border-ieee-blue/40 dark:hover:border-sky-500/40 transition-all space-y-3 shadow-xs"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Badge variant="ieee">{opp.category}</Badge>
+                          {opp.organisation && (
+                            <span className="text-xs font-mono text-warm-400 dark:text-gray-400">
+                              {opp.organisation}
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="font-serif text-lg text-ink dark:text-gray-100 font-normal">
+                          {opp.title}
+                        </h4>
+                        <p className="text-xs text-warm-500 dark:text-gray-400 line-clamp-2">
+                          {opp.description}
+                        </p>
+                        {opp.link && (
+                          <a
+                            href={opp.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block text-xs font-mono text-ieee-blue dark:text-sky-400 font-bold hover:underline"
+                          >
+                            Apply Link ↗
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
               {/* Projects & Hardware Builds */}
               {searchResults.projects.length > 0 && (
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
-                    <h3 className="font-serif text-2xl text-ink font-normal">Technical Projects</h3>
-                    <span className="bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px] text-xs font-bold font-mono">
+                  <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-2">
+                    <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal">Technical Projects</h3>
+                    <span className="bg-ieee-subtle dark:bg-sky-950 text-ieee-blue dark:text-sky-400 px-2 py-0.5 rounded-full text-xs font-bold font-mono">
                       {searchResults.projects.length}
                     </span>
                   </div>
@@ -272,9 +463,9 @@ export const SearchClient: React.FC<SearchClientProps> = ({
               {/* Initiatives */}
               {searchResults.initiatives.length > 0 && (
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
-                    <h3 className="font-serif text-2xl text-ink font-normal">Strategic Initiatives</h3>
-                    <span className="bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px] text-xs font-bold font-mono">
+                  <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-2">
+                    <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal">Strategic Initiatives</h3>
+                    <span className="bg-ieee-subtle dark:bg-sky-950 text-ieee-blue dark:text-sky-400 px-2 py-0.5 rounded-full text-xs font-bold font-mono">
                       {searchResults.initiatives.length}
                     </span>
                   </div>
@@ -296,55 +487,54 @@ export const SearchClient: React.FC<SearchClientProps> = ({
               {/* Events Results */}
               {searchResults.events.length > 0 && (
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
-                    <h3 className="font-serif text-2xl text-ink font-normal">Events & Workshops</h3>
-                    <span className="bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px] text-xs font-bold font-mono">
+                  <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-2">
+                    <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal">Events & Workshops</h3>
+                    <span className="bg-ieee-subtle dark:bg-sky-950 text-ieee-blue dark:text-sky-400 px-2 py-0.5 rounded-full text-xs font-bold font-mono">
                       {searchResults.events.length}
                     </span>
                   </div>
-                  <div className="border border-warm-200 bg-white rounded-[2px] divide-y divide-warm-200">
-                    {searchResults.events.map((event: any) => (
+                  <div className="space-y-4">
+                    {searchResults.events.map((evt: any) => (
                       <EventPreview
-                        key={event.id}
-                        title={event.title}
-                        slug={event.slug}
-                        date={event.date}
-                        venue={event.venue}
-                        unit={event.unit}
-                        category={event.category}
+                        key={evt.id || evt.slug}
+                        slug={evt.slug}
+                        title={evt.title}
+                        date={evt.date}
+                        venue={evt.venue}
+                        category={evt.category}
+                        unit={evt.unit}
+                        status={evt.status}
                       />
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* People Results */}
-              {searchResults.people.length > 0 && (
+              {/* Publications & Articles */}
+              {searchResults.stories.length > 0 && (
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
-                    <h3 className="font-serif text-2xl text-ink font-normal">People & Leadership</h3>
-                    <span className="bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px] text-xs font-bold font-mono">
-                      {searchResults.people.length}
+                  <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-2">
+                    <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal">Publications & Digest</h3>
+                    <span className="bg-ieee-subtle dark:bg-sky-950 text-ieee-blue dark:text-sky-400 px-2 py-0.5 rounded-full text-xs font-bold font-mono">
+                      {searchResults.stories.length}
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {searchResults.people.map((p: any) => (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {searchResults.stories.map((story: any) => (
                       <Link
-                        key={p.id}
-                        href="/people"
-                        className="p-4 border border-warm-200 bg-white rounded-[2px] hover:border-ieee-blue/40 transition-colors block group"
+                        key={story.id || story.slug}
+                        href={`/publications/${story.slug}`}
+                        className="p-5 border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl hover:border-ieee-blue/40 dark:hover:border-sky-500/40 transition-all block group shadow-xs"
                       >
-                        <h4 className="font-serif text-lg text-ink group-hover:text-ieee-blue transition-colors font-normal">
-                          {p.name}
+                        <span className="font-mono text-[10px] text-ieee-blue dark:text-sky-400 font-bold uppercase tracking-wider block mb-1">
+                          {story.type || 'Tech Digest'}
+                        </span>
+                        <h4 className="font-serif text-lg text-ink dark:text-gray-100 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors font-normal">
+                          {story.title}
                         </h4>
-                        <p className="font-mono text-[11px] text-ieee-blue uppercase tracking-wider mt-0.5">
-                          {p.role}
+                        <p className="text-xs text-warm-500 dark:text-gray-400 line-clamp-2 mt-1">
+                          {story.excerpt}
                         </p>
-                        {p.department && (
-                          <p className="text-xs text-warm-400 font-sans mt-1">
-                            {p.department}
-                          </p>
-                        )}
                       </Link>
                     ))}
                   </div>
@@ -354,120 +544,83 @@ export const SearchClient: React.FC<SearchClientProps> = ({
               {/* Achievements Results */}
               {searchResults.achievements.length > 0 && (
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
-                    <h3 className="font-serif text-2xl text-ink font-normal">Achievements</h3>
-                    <span className="bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px] text-xs font-bold font-mono">
+                  <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-2">
+                    <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal">Achievements & Honors</h3>
+                    <span className="bg-ieee-subtle dark:bg-sky-950 text-ieee-blue dark:text-sky-400 px-2 py-0.5 rounded-full text-xs font-bold font-mono">
                       {searchResults.achievements.length}
                     </span>
                   </div>
-                  <div className="border-t border-warm-200 bg-white rounded-[2px]">
-                    {searchResults.achievements.map((item: any) => (
+                  <div className="divide-y divide-warm-200 dark:divide-gray-800 border-t border-b border-warm-200 dark:border-gray-800">
+                    {searchResults.achievements.map((ach: any) => (
                       <AchievementRow
-                        key={item.id}
-                        id={item.id}
-                        year={item.year}
-                        title={item.title}
-                        conferredBy={item.conferredBy}
-                        unitOrTeam={item.unitOrTeam}
-                        category={item.category}
+                        key={ach.id}
+                        id={ach.id}
+                        title={ach.title}
+                        year={ach.year}
+                        conferredBy={ach.conferredBy}
+                        unitOrTeam={ach.unitOrTeam}
+                        category={ach.category}
                       />
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Chapters Results */}
+              {/* People & Leadership */}
+              {searchResults.people.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-2">
+                    <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal">People & Officers</h3>
+                    <span className="bg-ieee-subtle dark:bg-sky-950 text-ieee-blue dark:text-sky-400 px-2 py-0.5 rounded-full text-xs font-bold font-mono">
+                      {searchResults.people.length}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {searchResults.people.map((person: any) => (
+                      <div
+                        key={person.id}
+                        className="p-4 border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl flex items-center gap-3 shadow-xs"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-ieee-subtle dark:bg-sky-950 flex items-center justify-center font-mono text-sm font-bold text-ieee-blue dark:text-sky-400 shrink-0">
+                          {person.name?.[0] || 'I'}
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="font-sans font-semibold text-sm text-ink dark:text-gray-100 truncate">
+                            {person.name}
+                          </h4>
+                          <p className="text-xs text-warm-400 dark:text-gray-400 truncate">
+                            {person.role}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Chapters & Units */}
               {searchResults.chapters.length > 0 && (
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
-                    <h3 className="font-serif text-2xl text-ink font-normal">Communities & Chapters</h3>
-                    <span className="bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px] text-xs font-bold font-mono">
+                  <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-2">
+                    <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal">Chapters & Societies</h3>
+                    <span className="bg-ieee-subtle dark:bg-sky-950 text-ieee-blue dark:text-sky-400 px-2 py-0.5 rounded-full text-xs font-bold font-mono">
                       {searchResults.chapters.length}
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {searchResults.chapters.map((ch: any) => (
                       <Link
                         key={ch.id || ch.slug}
                         href={`/chapters/${ch.slug}`}
-                        className="group p-5 border border-warm-200 bg-white rounded-[2px] hover:border-ieee-blue/40 transition-all block"
+                        className="p-5 border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl hover:border-ieee-blue/40 dark:hover:border-sky-500/40 transition-all block group shadow-xs"
                       >
-                        <span className="font-mono text-[11px] font-semibold tracking-wider text-ieee-blue uppercase block mb-1">
-                          {ch.type}
-                        </span>
-                        <h4 className="font-serif text-xl text-ink group-hover:text-ieee-blue transition-colors font-normal">
+                        <h4 className="font-serif text-lg text-ink dark:text-gray-100 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors font-normal">
                           {ch.name}
                         </h4>
-                        <p className="text-xs text-warm-400 line-clamp-2 mt-1 font-sans">
-                          {ch.description || ch.tagline}
+                        <p className="text-xs text-warm-400 dark:text-gray-400 line-clamp-2 mt-1">
+                          {ch.tagline || ch.description}
                         </p>
                       </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Stories Results */}
-              {searchResults.stories.length > 0 && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
-                    <h3 className="font-serif text-2xl text-ink font-normal">Stories & Reports</h3>
-                    <span className="bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px] text-xs font-bold font-mono">
-                      {searchResults.stories.length}
-                    </span>
-                  </div>
-                  <div className="divide-y divide-warm-200 border border-warm-200 rounded-[2px] bg-white">
-                    {searchResults.stories.map((story: any) => (
-                      <Link
-                        key={story.id || story.slug}
-                        href={`/publications/${story.slug}`}
-                        className="p-5 hover:bg-warm-50/50 transition-colors block group"
-                      >
-                        <span className="font-mono text-[11px] text-warm-400 block mb-1">
-                          {story.date || story.publishedDate} · {story.type || story.category}
-                        </span>
-                        <h4 className="font-serif text-lg text-ink group-hover:text-ieee-blue transition-colors font-normal">
-                          {story.title}
-                        </h4>
-                        {story.excerpt && (
-                          <p className="text-xs text-warm-400 font-sans mt-1 line-clamp-2">
-                            {story.excerpt}
-                          </p>
-                        )}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Resources Results */}
-              {searchResults.resources.length > 0 && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
-                    <h3 className="font-serif text-2xl text-ink font-normal">Resources & Documents</h3>
-                    <span className="bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px] text-xs font-bold font-mono">
-                      {searchResults.resources.length}
-                    </span>
-                  </div>
-                  <div className="divide-y divide-warm-200 border border-warm-200 rounded-[2px] bg-white">
-                    {searchResults.resources.map((r: any) => (
-                      <div key={r.id} className="p-5 flex items-center justify-between gap-4">
-                        <div>
-                          <span className="font-mono text-[11px] text-ieee-blue uppercase block mb-0.5">
-                            {r.type}
-                          </span>
-                          <h4 className="font-serif text-lg text-ink font-normal">{r.title}</h4>
-                          {r.description && (
-                            <p className="text-xs text-warm-400 font-sans mt-0.5">{r.description}</p>
-                          )}
-                        </div>
-                        <Link
-                          href="/resources"
-                          className="font-mono text-xs text-ieee-blue hover:underline font-semibold shrink-0"
-                        >
-                          View Resource →
-                        </Link>
-                      </div>
                     ))}
                   </div>
                 </div>
@@ -476,23 +629,25 @@ export const SearchClient: React.FC<SearchClientProps> = ({
               {/* Static Pages */}
               {searchResults.pages.length > 0 && (
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 border-b border-warm-200 pb-2">
-                    <h3 className="font-serif text-2xl text-ink font-normal">Site Sections</h3>
-                    <span className="bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px] text-xs font-bold font-mono">
+                  <div className="flex items-center gap-3 border-b border-warm-200 dark:border-gray-800 pb-2">
+                    <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal">Platform Sections</h3>
+                    <span className="bg-ieee-subtle dark:bg-sky-950 text-ieee-blue dark:text-sky-400 px-2 py-0.5 rounded-full text-xs font-bold font-mono">
                       {searchResults.pages.length}
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {searchResults.pages.map((p: any) => (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {searchResults.pages.map((p) => (
                       <Link
                         key={p.url}
                         href={p.url}
-                        className="group p-5 border border-warm-200 bg-white rounded-[2px] hover:border-ieee-blue/40 transition-all block"
+                        className="p-4 border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl hover:border-ieee-blue/40 dark:hover:border-sky-500/40 transition-all block group shadow-xs"
                       >
-                        <h4 className="font-serif text-lg text-ink group-hover:text-ieee-blue transition-colors font-normal">
+                        <h4 className="font-serif text-base text-ink dark:text-gray-100 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors font-normal">
                           {p.title}
                         </h4>
-                        <p className="text-xs text-warm-400 font-sans mt-1">{p.description}</p>
+                        <p className="text-xs text-warm-400 dark:text-gray-400 font-sans mt-0.5">
+                          {p.description}
+                        </p>
                       </Link>
                     ))}
                   </div>
@@ -500,9 +655,8 @@ export const SearchClient: React.FC<SearchClientProps> = ({
               )}
             </div>
           ) : (
-            /* Default Search Discovery Grid when input is empty */
-            <div className="space-y-8 pt-4">
-              <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-widest block">
+            <div className="space-y-6 pt-6">
+              <span className="font-mono text-xs font-semibold text-ieee-blue dark:text-sky-400 uppercase tracking-widest block">
                 Quick Category Discovery
               </span>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -521,12 +675,12 @@ export const SearchClient: React.FC<SearchClientProps> = ({
                   <Link
                     key={idx}
                     href={cat.href}
-                    className="p-5 border border-warm-200 bg-white rounded-[2px] hover:border-ieee-blue/40 hover:-translate-y-0.5 transition-all block group"
+                    className="p-5 border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl hover:border-ieee-blue/40 dark:hover:border-sky-500/40 hover:-translate-y-0.5 transition-all block group shadow-xs"
                   >
-                    <h4 className="font-serif text-base text-ink group-hover:text-ieee-blue transition-colors font-normal">
+                    <h4 className="font-serif text-base text-ink dark:text-gray-100 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors font-normal">
                       {cat.title}
                     </h4>
-                    <span className="font-mono text-[11px] text-warm-400 block mt-1">
+                    <span className="font-mono text-[11px] text-warm-400 dark:text-gray-400 block mt-1">
                       {cat.count}
                     </span>
                   </Link>

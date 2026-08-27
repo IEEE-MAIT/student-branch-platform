@@ -2,10 +2,11 @@ import React from 'react';
 
 /**
  * @file src/components/seo/JsonLd.tsx
- * @description EducationalOrganization Schema.org JSON-LD component for IEEE MAIT Student Branch.
+ * @description EducationalOrganization & WebSite Schema.org JSON-LD component for IEEE MAIT Student Branch.
  * 
  * Injects structured metadata into the HTML head to provide search engines with rich context
- * regarding the institutional hierarchy, parent college, chartered chapters, and social profiles.
+ * regarding the institutional hierarchy, parent college, chartered chapters, Special Interest Groups,
+ * search actions, and social profiles.
  * 
  * @author IEEE MAIT Webmaster
  * @license MIT
@@ -21,59 +22,83 @@ export const JsonLd: React.FC<JsonLdProps> = ({ siteUrl }) => {
 
   const schema = {
     '@context': 'https://schema.org',
-    '@type': 'EducationalOrganization',
-    name: 'IEEE MAIT Student Branch',
-    alternateName: [
-      'IEEE Student Branch MAIT',
-      'IEEE Maharaja Agrasen Institute of Technology Student Branch',
-      'IEEE MAIT SB',
-    ],
-    url: baseUrl,
-    logo: `${baseUrl}/ieee_mait_sb_light_mode_logo.png`,
-    image: `${baseUrl}/ieee_mait_sb_light_mode_logo.png`,
-    description:
-      'Official digital platform, identity, and institutional record of IEEE MAIT Student Branch at Maharaja Agrasen Institute of Technology, Delhi. Established in 2005 under IEEE Delhi Section, Region 10.',
-    foundingDate: '2005',
-    email: 'mait.ieee.sb@gmail.com',
-    parentOrganization: {
-      '@type': 'CollegeOrUniversity',
-      name: 'Maharaja Agrasen Institute of Technology',
-      alternateName: 'MAIT Delhi',
-      url: 'https://mait.ac.in',
-    },
-    memberOf: {
-      '@type': 'Organization',
-      name: 'IEEE Delhi Section',
-      alternateName: 'IEEE Region 10 (Asia-Pacific)',
-      url: 'https://ieeedelhi.org',
-    },
-    department: [
+    '@graph': [
       {
-        '@type': 'Organization',
-        name: 'IEEE EDS Chapter MAIT',
-        alternateName: 'Electron Devices Society Student Branch Chapter',
-        description: 'Advancing Solid-State Devices, Microelectronics, and Semiconductor Engineering.',
-        url: `${baseUrl}/chapters/eds`,
+        '@type': 'WebSite',
+        '@id': `${baseUrl}/#website`,
+        url: baseUrl,
+        name: 'IEEE MAIT Student Branch',
+        description: 'Official digital platform of IEEE MAIT Student Branch at Maharaja Agrasen Institute of Technology, Delhi.',
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: `${baseUrl}/search?q={search_term_string}`,
+          'query-input': 'required name=search_term_string',
+        },
       },
       {
-        '@type': 'Organization',
-        name: 'IEEE WIE Affinity Group MAIT',
-        alternateName: 'Women in Engineering Student Branch Affinity Group',
-        description: 'Empowering Women in Engineering, Science, and Technology.',
-        url: `${baseUrl}/chapters/wie`,
+        '@type': 'EducationalOrganization',
+        '@id': `${baseUrl}/#organization`,
+        name: 'IEEE MAIT Student Branch',
+        alternateName: [
+          'IEEE Student Branch MAIT',
+          'IEEE Maharaja Agrasen Institute of Technology Student Branch',
+          'IEEE MAIT SB',
+        ],
+        url: baseUrl,
+        logo: `${baseUrl}/ieee_mait_sb_light_mode_logo.png`,
+        image: `${baseUrl}/ieee_mait_sb_light_mode_logo.png`,
+        description:
+          'Official digital platform, identity, and institutional record of IEEE MAIT Student Branch at Maharaja Agrasen Institute of Technology, Delhi. Established in 2005 under IEEE Delhi Section, Region 10.',
+        foundingDate: '2005',
+        email: 'mait.ieee.sb@gmail.com',
+        parentOrganization: {
+          '@type': 'CollegeOrUniversity',
+          name: 'Maharaja Agrasen Institute of Technology',
+          alternateName: 'MAIT Delhi',
+          url: 'https://mait.ac.in',
+        },
+        memberOf: {
+          '@type': 'Organization',
+          name: 'IEEE Delhi Section',
+          alternateName: 'IEEE Region 10 (Asia-Pacific)',
+          url: 'https://ieeedelhi.org',
+        },
+        department: [
+          {
+            '@type': 'Organization',
+            name: 'IEEE EDS Chapter MAIT',
+            alternateName: 'Electron Devices Society Student Branch Chapter',
+            description: 'Advancing Solid-State Devices, Microelectronics, and Semiconductor Engineering.',
+            url: `${baseUrl}/chapters/eds`,
+          },
+          {
+            '@type': 'Organization',
+            name: 'IEEE WIE Affinity Group MAIT',
+            alternateName: 'Women in Engineering Student Branch Affinity Group',
+            description: 'Empowering Women in Engineering, Science, and Technology.',
+            url: `${baseUrl}/chapters/wie`,
+          },
+          {
+            '@type': 'Organization',
+            name: 'IEEE MAIT Special Interest Groups',
+            alternateName: 'SIGs Hub',
+            description: 'Technical learning circles in DSA, Full-Stack Web Development, AI/ML, and Hardware/IoT.',
+            url: `${baseUrl}/sigs`,
+          },
+        ],
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'PSP Area, Plot No-1, Sector-22, Rohini',
+          addressLocality: 'Delhi',
+          postalCode: '110086',
+          addressCountry: 'IN',
+        },
+        sameAs: [
+          'https://github.com/IEEE-MAIT',
+          'https://linkedin.com/company/ieee-mait',
+          'https://instagram.com/ieee_mait',
+        ],
       },
-    ],
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: 'PSP Area, Plot No-1, Sector-22, Rohini',
-      addressLocality: 'Delhi',
-      postalCode: '110086',
-      addressCountry: 'IN',
-    },
-    sameAs: [
-      'https://github.com/IEEE-MAIT',
-      'https://linkedin.com/company/ieee-mait',
-      'https://instagram.com/ieee_mait',
     ],
   };
 
