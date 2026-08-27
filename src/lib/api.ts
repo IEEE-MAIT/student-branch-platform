@@ -290,7 +290,8 @@ export const getDynamicPeople = cache(async () => {
 });
 
 export const getDynamicPeopleByAcademicYear = cache(async (year: string) => {
-  if (typeof window !== 'undefined') return PEOPLE_DATA;
+  const isCurrentYear = year === '2025-26' || year === '2025–26';
+  if (typeof window !== 'undefined') return isCurrentYear ? PEOPLE_DATA : [];
   try {
     const normalizedYear = year.replace('–', '-');
     const all = await prisma.person.findMany({
@@ -318,7 +319,7 @@ export const getDynamicPeopleByAcademicYear = cache(async (year: string) => {
   } catch (e) {
     console.warn('Failed to fetch people by year from DB', e);
   }
-  return PEOPLE_DATA;
+  return isCurrentYear ? PEOPLE_DATA : [];
 });
 
 export const getDynamicSiteSettings = cache(async () => {

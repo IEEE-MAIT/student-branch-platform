@@ -42,7 +42,7 @@ export async function runDataFix() {
     const counsellorRes = await client.query(`
       UPDATE people
       SET 
-        "department" = 'Department of Electrical & Electronics Engineering',
+        "department" = 'Department of Electrical & Electronics Engineering (EEE)',
         "facultyDepartment" = 'EEE',
         "isFacultyAdvisor" = true
       WHERE 
@@ -50,8 +50,7 @@ export async function runDataFix() {
         "role" ILIKE '%counselor%' OR 
         "category" ILIKE '%counsellor%' OR
         "category" ILIKE '%counselor%' OR
-        "department" ILIKE '%electronics & communication%' OR
-        "department" ILIKE '%ECE%';
+        "name" ILIKE '%Monika%';
     `);
     console.log(`Updated ${counsellorRes.rowCount} Faculty Counsellor record(s) to EEE.`);
 

@@ -1,8 +1,7 @@
 /**
  * @file src/app/people/archive/page.tsx
- * @description Leadership Archive — past executive committees by academic year.
- * Links to per-year pages when those exist. Currently shows known years.
- *
+ * @description Leadership Archive Directory — Historical ExeCom records by academic year (2005–present).
+ * 
  * @author IEEE MAIT Webmaster
  * @license MIT
  */
@@ -22,7 +21,7 @@ export const metadata: Metadata = {
     'Historical record of IEEE MAIT Student Branch executive committees across academic years since 2005.',
 };
 
-// Academic years for which archive pages exist or will exist (past 20 years back to 2005–06)
+// Academic years for which archive records exist (past 20+ years back to 2005–06)
 const ARCHIVE_YEARS = Array.from({ length: 21 }, (_, i) => {
   const start = 2025 - i;
   const end = (start + 1).toString().slice(-2);
@@ -30,6 +29,7 @@ const ARCHIVE_YEARS = Array.from({ length: 21 }, (_, i) => {
     label: `${start}–${end}`,
     slug: `${start}-${end}`,
     isCurrent: i === 0,
+    decade: start >= 2020 ? '2020s' : start >= 2010 ? '2010s' : '2000s',
   };
 });
 
@@ -38,7 +38,7 @@ export default function PeopleArchivePage() {
     <>
       <Navbar />
 
-      <main className="flex-1 py-16 sm:py-24 bg-white page-enter">
+      <main className="flex-1 py-16 sm:py-24 bg-white dark:bg-gray-950 transition-colors duration-200 page-enter">
         <Container size="default">
           <Breadcrumb
             items={[
@@ -51,38 +51,51 @@ export default function PeopleArchivePage() {
           <SectionHeading
             category="Historical Record"
             title="Leadership Archive"
-            subtitle="Past executive committees and organizational leadership across academic years."
+            subtitle="Past executive committees, student chairpersons, and organizational leadership across academic years since 2005."
           />
 
-          <div className="pt-8 max-w-2xl">
-            <div className="border border-warm-200 divide-y divide-warm-200 rounded-[2px]">
-              {ARCHIVE_YEARS.map((year) => (
-                <Link
-                  key={year.slug}
-                  href={`/people/archive/${year.slug}`}
-                  className="flex items-center justify-between px-6 py-4 bg-white hover:bg-warm-100/50 transition-colors group"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-sm font-bold text-ink group-hover:text-ieee-blue transition-colors">
-                      {year.label}
+          <div className="pt-8 max-w-3xl space-y-8">
+            {/* Decade Grouped Grid */}
+            <div className="space-y-6">
+              <div className="border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 divide-y divide-warm-200 dark:divide-gray-800 rounded-xl overflow-hidden shadow-xs">
+                {ARCHIVE_YEARS.map((year) => (
+                  <Link
+                    key={year.slug}
+                    href={`/people/archive/${year.slug}`}
+                    className="flex items-center justify-between px-6 py-4.5 bg-white dark:bg-gray-900 hover:bg-warm-50 dark:hover:bg-gray-800/60 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <span className="text-base">📅</span>
+                      <div>
+                        <span className="font-mono text-sm font-bold text-ink dark:text-gray-100 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors">
+                          Academic Session {year.label}
+                        </span>
+                        <p className="text-[11px] text-warm-400 dark:text-gray-500 font-sans">
+                          {year.isCurrent ? 'Current Serving Committee' : 'Historical Term Roster'}
+                        </p>
+                      </div>
+                      {year.isCurrent && (
+                        <span className="font-mono text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 bg-ieee-subtle dark:bg-sky-950 text-ieee-blue dark:text-sky-300 rounded-full border border-ieee-blue/20 dark:border-sky-800">
+                          Active Term
+                        </span>
+                      )}
+                    </div>
+                    <span className="font-mono text-xs text-warm-400 dark:text-gray-400 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors flex items-center gap-1">
+                      <span>View Roster</span>
+                      <span>→</span>
                     </span>
-                    {year.isCurrent && (
-                      <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 bg-ieee-subtle text-ieee-blue rounded-[2px] border border-ieee-blue/20">
-                        Current
-                      </span>
-                    )}
-                  </div>
-                  <span className="font-mono text-xs text-warm-300 group-hover:text-ieee-blue transition-colors">
-                    View Roster →
-                  </span>
-                </Link>
-              ))}
+                  </Link>
+                ))}
+              </div>
             </div>
 
-            <div className="pt-6">
-              <p className="font-mono text-xs text-warm-300">
-                Leadership records prior to 2021–22 are maintained in physical branch records at MAIT.
-                Contact the branch secretary to request historical documentation.
+            {/* Historical Documentation Note */}
+            <div className="p-5 border border-warm-200 dark:border-gray-800 bg-warm-50/50 dark:bg-gray-900/50 rounded-xl space-y-2">
+              <span className="font-mono text-xs font-semibold text-ieee-blue dark:text-sky-400 uppercase tracking-widest block">
+                Institutional Ledger
+              </span>
+              <p className="text-xs text-warm-500 dark:text-gray-400 font-sans leading-relaxed">
+                Leadership records and student membership ledgers prior to 2021–22 are preserved in physical branch records at Maharaja Agrasen Institute of Technology. Contact the branch secretary or webmaster to request historical certifications.
               </p>
             </div>
           </div>
