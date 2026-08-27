@@ -3,6 +3,7 @@
  * @description Dynamic Data Fetching Engine for IEEE MAIT Student Branch platform.
  * 
  * Uses Prisma ORM during SSR for edge-compatible data fetching without HTTP latency.
+ * Employs React cache() to memoize and deduplicate database queries per-request.
  * Ensures soft-deleted records (where deletedAt != null) are strictly excluded from public views.
  * Wraps DB calls with safe exception handling to ensure serverless pages degrade gracefully.
  * 
@@ -10,6 +11,7 @@
  * @license MIT
  */
 
+import { cache } from 'react';
 import {
   EVENTS_DATA,
   CHAPTERS_DATA,
@@ -28,7 +30,7 @@ function getBaseUrl(): string {
   return `http://localhost:${process.env.PORT || 3000}`;
 }
 
-export async function getDynamicEventBySlug(slug: string) {
+export const getDynamicEventBySlug = cache(async (slug: string) => {
   if (typeof window !== 'undefined') return EVENTS_DATA.find((e) => e.slug === slug) || null;
   try {
     const dbEvent = await prisma.event.findFirst({
@@ -48,9 +50,9 @@ export async function getDynamicEventBySlug(slug: string) {
     console.warn(`Failed to fetch event ${slug} from DB`, e);
   }
   return EVENTS_DATA.find((e) => e.slug === slug) || null;
-}
+});
 
-export async function getDynamicEvents(): Promise<any[]> {
+export const getDynamicEvents = cache(async (): Promise<any[]> => {
   if (typeof window === 'undefined') {
     try {
       const dbEvents = await prisma.event.findMany({
@@ -78,9 +80,9 @@ export async function getDynamicEvents(): Promise<any[]> {
     }
   } catch (err) {}
   return EVENTS_DATA;
-}
+});
 
-export async function getDynamicAchievements(): Promise<any[]> {
+export const getDynamicAchievements = cache(async (): Promise<any[]> => {
   if (typeof window === 'undefined') {
     try {
       const dbAchievements = await prisma.achievement.findMany({
@@ -108,9 +110,9 @@ export async function getDynamicAchievements(): Promise<any[]> {
     }
   } catch (err) {}
   return ACHIEVEMENTS_DATA;
-}
+});
 
-export async function getDynamicAchievementById(id: string) {
+export const getDynamicAchievementById = cache(async (id: string) => {
   if (typeof window !== 'undefined') {
     return ACHIEVEMENTS_DATA.find((a) => a.id === id) || null;
   }
@@ -129,9 +131,9 @@ export async function getDynamicAchievementById(id: string) {
     console.warn(`Failed to fetch achievement ${id} from DB`, e);
   }
   return ACHIEVEMENTS_DATA.find((a) => a.id === id) || null;
-}
+});
 
-export async function getDynamicChapterBySlug(slug: string) {
+export const getDynamicChapterBySlug = cache(async (slug: string) => {
   if (typeof window !== 'undefined') return CHAPTERS_DATA[slug] || null;
   try {
     const dbChapter = await prisma.chapter.findFirst({
@@ -151,9 +153,9 @@ export async function getDynamicChapterBySlug(slug: string) {
     console.warn(`Failed to fetch chapter ${slug} from DB`, e);
   }
   return CHAPTERS_DATA[slug] || null;
-}
+});
 
-export async function getDynamicChapterMemberships(chapterId: string): Promise<any[]> {
+export const getDynamicChapterMemberships = cache(async (chapterId: string): Promise<any[]> => {
   if (typeof window !== 'undefined') return [];
   try {
     return await prisma.organizationMembership.findMany({
@@ -169,9 +171,9 @@ export async function getDynamicChapterMemberships(chapterId: string): Promise<a
     console.warn(`Failed to fetch memberships for chapter ${chapterId}`, e);
     return [];
   }
-}
+});
 
-export async function getDynamicStoryBySlug(slug: string) {
+export const getDynamicStoryBySlug = cache(async (slug: string) => {
   if (typeof window !== 'undefined') return STORIES_DATA[slug] || null;
   try {
     const dbStory = await prisma.story.findFirst({
@@ -183,9 +185,9 @@ export async function getDynamicStoryBySlug(slug: string) {
     console.warn(`Failed to fetch story ${slug} from DB`, e);
   }
   return STORIES_DATA[slug] || null;
-}
+});
 
-export async function getDynamicGalleryAlbumBySlug(slug: string) {
+export const getDynamicGalleryAlbumBySlug = cache(async (slug: string) => {
   if (typeof window !== 'undefined') return GALLERY_ALBUMS_DATA[slug] || null;
   try {
     const dbGallery = await prisma.gallery.findFirst({
@@ -197,9 +199,9 @@ export async function getDynamicGalleryAlbumBySlug(slug: string) {
     console.warn(`Failed to fetch gallery ${slug} from DB`, e);
   }
   return GALLERY_ALBUMS_DATA[slug] || null;
-}
+});
 
-export async function getDynamicStories() {
+export const getDynamicStories = cache(async () => {
   if (typeof window !== 'undefined') return Object.values(STORIES_DATA);
   try {
     const dbStories = await prisma.story.findMany({
@@ -212,9 +214,9 @@ export async function getDynamicStories() {
     console.warn('Failed to fetch stories from DB', e);
   }
   return Object.values(STORIES_DATA);
-}
+});
 
-export async function getDynamicGalleries() {
+export const getDynamicGalleries = cache(async () => {
   if (typeof window !== 'undefined') return Object.values(GALLERY_ALBUMS_DATA);
   try {
     const dbGalleries = await prisma.gallery.findMany({
@@ -227,9 +229,9 @@ export async function getDynamicGalleries() {
     console.warn('Failed to fetch galleries from DB', e);
   }
   return Object.values(GALLERY_ALBUMS_DATA);
-}
+});
 
-export async function getDynamicChapters() {
+export const getDynamicChapters = cache(async () => {
   if (typeof window !== 'undefined') return Object.values(CHAPTERS_DATA);
   try {
     const dbChapters = await prisma.chapter.findMany({
@@ -255,9 +257,9 @@ export async function getDynamicChapters() {
     console.warn('Failed to fetch chapters from DB', e);
   }
   return Object.values(CHAPTERS_DATA);
-}
+});
 
-export async function getDynamicPeople() {
+export const getDynamicPeople = cache(async () => {
   if (typeof window !== 'undefined') return PEOPLE_DATA;
   try {
     const activeYear = await prisma.academicYear.findFirst({ where: { isCurrent: true } });
@@ -285,9 +287,9 @@ export async function getDynamicPeople() {
     console.warn('Failed to fetch people from DB', e);
   }
   return PEOPLE_DATA;
-}
+});
 
-export async function getDynamicPeopleByAcademicYear(year: string) {
+export const getDynamicPeopleByAcademicYear = cache(async (year: string) => {
   if (typeof window !== 'undefined') return PEOPLE_DATA;
   try {
     const normalizedYear = year.replace('–', '-');
@@ -317,9 +319,9 @@ export async function getDynamicPeopleByAcademicYear(year: string) {
     console.warn('Failed to fetch people by year from DB', e);
   }
   return PEOPLE_DATA;
-}
+});
 
-export async function getDynamicSiteSettings() {
+export const getDynamicSiteSettings = cache(async () => {
   const defaultSettings = {
     announcementMessage: 'Membership Drive 2025–26 is officially open!',
     announcementLinkText: 'Register Now →',
@@ -344,9 +346,9 @@ export async function getDynamicSiteSettings() {
     if (res.ok) return await res.json();
   } catch (err) {}
   return defaultSettings;
-}
+});
 
-export async function getDynamicMilestones() {
+export const getDynamicMilestones = cache(async () => {
   if (typeof window !== 'undefined') return [];
   try {
     return await prisma.milestone.findMany({
@@ -357,9 +359,9 @@ export async function getDynamicMilestones() {
     console.warn('Failed to fetch milestones from DB', e);
     return [];
   }
-}
+});
 
-export async function getDynamicResources() {
+export const getDynamicResources = cache(async () => {
   if (typeof window !== 'undefined') return [];
   try {
     return await prisma.resource.findMany({
@@ -370,9 +372,9 @@ export async function getDynamicResources() {
     console.warn('Failed to fetch resources from DB', e);
     return [];
   }
-}
+});
 
-export async function getDynamicProjects(chapterIdOrSlug?: string) {
+export const getDynamicProjects = cache(async (chapterIdOrSlug?: string) => {
   if (typeof window !== 'undefined') {
     if (!chapterIdOrSlug) return PROJECTS_DATA;
     return PROJECTS_DATA.filter(
@@ -400,9 +402,9 @@ export async function getDynamicProjects(chapterIdOrSlug?: string) {
   return PROJECTS_DATA.filter(
     (p) => p.chapterId === chapterIdOrSlug || p.chapterSlug === chapterIdOrSlug
   );
-}
+});
 
-export async function getDynamicProjectBySlug(slug: string) {
+export const getDynamicProjectBySlug = cache(async (slug: string) => {
   if (typeof window !== 'undefined') return PROJECTS_DATA.find((p) => p.slug === slug) || null;
   try {
     const dbProject = await prisma.project.findFirst({
@@ -414,9 +416,9 @@ export async function getDynamicProjectBySlug(slug: string) {
     console.warn(`Failed to fetch project ${slug} from DB`, e);
   }
   return PROJECTS_DATA.find((p) => p.slug === slug) || null;
-}
+});
 
-export async function getDynamicInitiatives(chapterIdOrSlug?: string) {
+export const getDynamicInitiatives = cache(async (chapterIdOrSlug?: string) => {
   if (typeof window !== 'undefined') {
     if (!chapterIdOrSlug) return INITIATIVES_DATA;
     return INITIATIVES_DATA.filter(
@@ -443,4 +445,4 @@ export async function getDynamicInitiatives(chapterIdOrSlug?: string) {
   return INITIATIVES_DATA.filter(
     (i) => i.chapterId === chapterIdOrSlug || i.chapterSlug === chapterIdOrSlug
   );
-}
+});

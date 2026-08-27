@@ -1,4 +1,7 @@
 import React from 'react';
+import { Metadata } from 'next';
+import Link from '@/components/ui/AppLink';
+import Image from 'next/image';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/layout/Container';
@@ -6,64 +9,73 @@ import { Button } from '@/components/ui/Button';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { StatMetric } from '@/components/content/StatMetric';
 import { EventPreview } from '@/components/content/EventPreview';
-import { AchievementRow } from '@/components/content/AchievementRow';
 import { ChapterPanel } from '@/components/content/ChapterPanel';
+import { AchievementRow } from '@/components/content/AchievementRow';
 import { PersonCard } from '@/components/content/PersonCard';
 import { BRANCH_STATS } from '@/lib/data';
-import {
-  getDynamicEvents,
-  getDynamicAchievements,
-  getDynamicChapters,
-  getDynamicPeople,
-  getDynamicGalleries,
+import { 
+  getDynamicEvents, 
+  getDynamicChapters, 
+  getDynamicAchievements, 
+  getDynamicPeople, 
+  getDynamicGalleries 
 } from '@/lib/api';
-import Link from '@/components/ui/AppLink';
-import Image from 'next/image';
 
-export const revalidate = 60; // ISR: revalidate every 60 seconds
+export const metadata: Metadata = {
+  title: 'IEEE MAIT Student Branch · Advancing Technology for Humanity',
+  description:
+    'Official digital platform of IEEE Student Branch at Maharaja Agrasen Institute of Technology (MAIT), Delhi. Explore our chartered chapters (EDS, WIE), workshops, research, hackathons, and leadership.',
+};
 
+/**
+ * IEEE MAIT Student Branch — Institutional Homepage
+ * Server Component with Dynamic Prisma Database Integration & Fallback Hydration.
+ */
 export default async function HomePage() {
-  // Fetch dynamic records with resilient fallback layers
-  const [allEvents, allAchievements, rawChapters, allPeople, allGalleries] = await Promise.all([
+  // Fetch real-time data from database with automatic static fallbacks
+  const [
+    events,
+    chaptersList,
+    achievementsList,
+    peopleList,
+    galleries
+  ] = await Promise.all([
     getDynamicEvents(),
-    getDynamicAchievements(),
     getDynamicChapters(),
+    getDynamicAchievements(),
     getDynamicPeople(),
-    getDynamicGalleries(),
+    getDynamicGalleries()
   ]);
 
-  // 1. Filter upcoming events for the spotlight and upcoming list
-  const upcomingEvents = allEvents.filter(
-    (e: any) => e.status === 'upcoming' || e.status === 'Upcoming'
-  );
-  const featuredEvent = upcomingEvents.length > 0 ? upcomingEvents[0] : allEvents[0];
-  const remainingUpcoming = upcomingEvents.length > 0 ? upcomingEvents.slice(1, 4) : allEvents.slice(1, 4);
+  // Flatten gallery photos for documentary showcase
+  const galleryPhotos = (galleries as any[])
+    .flatMap((g: any) =>
+      (g.photos || []).map((p: any) => ({
+        url: p.url || p.imageUrl,
+        caption: p.caption,
+        albumTitle: g.title,
+        albumSlug: g.slug,
+      }))
+    )
+    .filter((p: any) => Boolean(p.url))
+    .slice(0, 4);
 
-  // 2. Featured achievements (top 4 latest)
-  const featuredAchievements = allAchievements.slice(0, 4);
+  // Featured Event: Next upcoming event or most recent
+  const featuredEvent = events.length > 0 ? events[0] : null;
+  const remainingUpcoming = events.length > 1 ? events.slice(1, 4) : [];
 
-  // 3. Chapters list (ensure 3 core units: SB, EDS, WIE)
-  const chaptersList = rawChapters.slice(0, 3);
+  // Top Leadership for Spotlight: Counselors & Core ExeCom
+  const topLeadership = (peopleList as any[])
+    .filter((p: any) => 
+      p.category === 'Counsellor / Mentor' || 
+      p.category === 'Senior Executive Committee' ||
+      p.hierarchy === 'mentor' ||
+      p.hierarchy === 1
+    )
+    .slice(0, 4);
 
-  // 4. Leadership spotlight (top 4-6 key officers)
-  const topLeadership = allPeople.slice(0, 4);
-
-  // 5. Gallery highlights (extract 4 representative photos)
-  const galleryPhotos: Array<{ caption: string; url?: string | null; albumSlug: string; albumTitle: string }> = [];
-  for (const album of allGalleries) {
-    if (album.photos && Array.isArray(album.photos)) {
-      for (const photo of album.photos) {
-        if (galleryPhotos.length < 4) {
-          galleryPhotos.push({
-            caption: photo.caption || album.title,
-            url: photo.url,
-            albumSlug: album.slug,
-            albumTitle: album.title,
-          });
-        }
-      }
-    }
-  }
+  // Featured Achievements
+  const featuredAchievements = achievementsList.slice(0, 5);
 
   // Fallback photo items if no photos found
   const fallbackMoments = [
@@ -313,29 +325,29 @@ export default async function HomePage() {
         )}
 
         {/* 7. REAL MOMENTS — Documentary Photography Band */}
-        <section className="py-16 sm:py-24 bg-gray-950 dark:bg-black text-white border-b border-gray-800">
+        <section className="py-16 sm:py-24 bg-warm-100/40 dark:bg-gray-950 border-b border-warm-200 dark:border-gray-800 transition-colors duration-200">
           <Container size="default">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
               <div>
-                <span className="font-mono text-xs font-semibold text-sky-400 uppercase tracking-widest block mb-2">
+                <span className="font-mono text-xs font-semibold text-ieee-blue dark:text-sky-400 uppercase tracking-widest block mb-2">
                   Documentary Record
                 </span>
-                <h2 className="font-serif text-3xl sm:text-4xl text-white font-normal leading-tight">
+                <h2 className="font-serif text-3xl sm:text-4xl text-ink dark:text-white font-normal leading-tight">
                   Real Moments, Real Work
                 </h2>
               </div>
-              <Link href="/gallery" className="text-xs font-mono text-sky-400 hover:text-sky-300 hover:underline font-semibold shrink-0">
+              <Link href="/gallery" className="text-xs font-mono text-ieee-blue dark:text-sky-400 hover:text-ieee-dark dark:hover:text-sky-300 hover:underline font-semibold shrink-0">
                 View Full Photo Gallery →
               </Link>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {galleryPhotos.length > 0 ? (
-                galleryPhotos.map((photo, idx) => (
+                galleryPhotos.map((photo: any, idx: number) => (
                   <Link
                     key={idx}
                     href={photo.albumSlug ? `/gallery/${photo.albumSlug}` : `/gallery`}
-                    className="group relative aspect-4/3 bg-gray-900 border border-gray-800 overflow-hidden rounded-[2px] flex flex-col justify-end p-4 hover:border-sky-400/50 transition-all duration-300"
+                    className="group relative aspect-4/3 bg-warm-200/60 dark:bg-gray-900 border border-warm-200 dark:border-gray-800 overflow-hidden rounded-lg flex flex-col justify-end p-4 hover:border-ieee-blue/40 dark:hover:border-sky-400/50 shadow-xs transition-all duration-300"
                   >
                     {photo.url ? (
                       <Image
@@ -343,15 +355,15 @@ export default async function HomePage() {
                         alt={photo.caption || photo.albumTitle || 'Documentary Photo'}
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 25vw"
-                        className="object-cover transition-transform duration-500 group-hover:scale-105 opacity-75 group-hover:opacity-95"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105 opacity-90 group-hover:opacity-100"
                       />
                     ) : null}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
                     <div className="relative z-10">
-                      <span className="font-mono text-[10px] text-sky-400 uppercase tracking-wider block mb-1">
+                      <span className="font-mono text-[10px] text-sky-300 uppercase tracking-wider block mb-1">
                         {photo.albumTitle}
                       </span>
-                      <p className="font-sans text-xs text-gray-200 line-clamp-2 leading-snug">
+                      <p className="font-sans text-xs text-white line-clamp-2 leading-snug">
                         {photo.caption}
                       </p>
                     </div>
@@ -362,14 +374,16 @@ export default async function HomePage() {
                   <Link
                     key={idx}
                     href={item.href}
-                    className="group relative aspect-4/3 bg-gray-900 border border-gray-800 rounded-[2px] flex flex-col justify-end p-4 hover:border-sky-400/50 transition-all duration-300 overflow-hidden"
+                    className="group relative aspect-4/3 bg-white dark:bg-gray-900 border border-warm-200 dark:border-gray-800 rounded-lg flex flex-col justify-between p-4 hover:border-ieee-blue/40 dark:hover:border-sky-400/50 shadow-xs hover:shadow-md transition-all duration-300 overflow-hidden"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                    <div className="relative z-10">
-                      <span className="font-mono text-[10px] text-sky-400 uppercase tracking-wider block mb-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] text-ieee-blue dark:text-sky-400 uppercase tracking-wider font-semibold">
                         {item.subtitle}
                       </span>
-                      <h4 className="font-serif text-sm text-white group-hover:text-sky-300 transition-colors leading-snug">
+                      <span className="text-xs text-warm-400 dark:text-gray-500 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors">↗</span>
+                    </div>
+                    <div>
+                      <h4 className="font-serif text-sm text-ink dark:text-white group-hover:text-ieee-blue dark:group-hover:text-sky-300 transition-colors leading-snug">
                         {item.title}
                       </h4>
                     </div>
@@ -378,7 +392,7 @@ export default async function HomePage() {
               )}
             </div>
             <div className="mt-6 text-center">
-              <span className="font-mono text-[11px] text-gray-400">
+              <span className="font-mono text-[11px] text-warm-400 dark:text-gray-400">
                 Official documentary archive curated by the IEEE MAIT Creative & Media Team
               </span>
             </div>
@@ -386,23 +400,23 @@ export default async function HomePage() {
         </section>
 
         {/* 8. HIGH-CONVERSION JOIN CALLOUT */}
-        <section className="py-20 sm:py-28 bg-ieee-blue text-white">
+        <section className="py-20 sm:py-28 bg-white dark:bg-gray-950 border-b border-warm-200 dark:border-gray-800 transition-colors duration-200">
           <Container size="narrow">
             <div className="text-center space-y-6">
-              <span className="font-mono text-xs font-semibold text-white/70 uppercase tracking-widest block">
+              <span className="font-mono text-xs font-semibold text-ieee-blue dark:text-sky-400 uppercase tracking-widest block">
                 Become a Member
               </span>
-              <h2 className="font-serif text-3xl sm:text-5xl text-white font-normal leading-tight">
+              <h2 className="font-serif text-3xl sm:text-5xl text-ink dark:text-white font-normal leading-tight">
                 Join IEEE MAIT Student Branch
               </h2>
-              <p className="text-base sm:text-lg text-white/90 font-sans leading-relaxed max-w-xl mx-auto">
+              <p className="text-base sm:text-lg text-warm-500 dark:text-gray-300 font-sans leading-relaxed max-w-xl mx-auto">
                 Connect with {BRANCH_STATS.activeMembers} engineers, access IEEE&apos;s global network of 460,000+ technologists, and build hands-on skills in hardware, AI, and leadership.
               </p>
               <div className="flex flex-wrap justify-center gap-4 pt-2">
-                <Button href="/join" variant="primary" size="lg" className="!bg-white !text-ieee-blue hover:!bg-warm-100 font-semibold shadow-md">
+                <Button href="/join" variant="primary" size="lg" className="shadow-md">
                   Start Your Membership →
                 </Button>
-                <Button href="/contact" variant="secondary" size="lg" className="!border-white/50 !text-white hover:!bg-white/10">
+                <Button href="/contact" variant="secondary" size="lg">
                   Ask a Question
                 </Button>
               </div>

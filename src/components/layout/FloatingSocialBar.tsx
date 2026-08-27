@@ -144,7 +144,7 @@ export const FloatingSocialBar: React.FC = () => {
               className="animate-tooltip absolute left-full ml-3 px-3 py-2 bg-gray-950 dark:bg-gray-900 text-white rounded-lg shadow-xl border border-gray-800 whitespace-nowrap z-50 pointer-events-none flex flex-col gap-0.5"
             >
               <div className="flex items-center gap-1.5">
-                <span className={`text-[9px] font-bold uppercase font-mono px-1.5 py-0.2 rounded ${item.badgeColor}`}>
+                <span className={`text-[9px] font-bold uppercase font-mono px-1.5 py-0.5 rounded ${item.badgeColor}`}>
                   {item.badgeLabel}
                 </span>
                 <span className="font-semibold text-xs leading-tight text-white">{item.name}</span>
@@ -188,7 +188,7 @@ export const FloatingSocialBar: React.FC = () => {
               className="animate-tooltip absolute left-full ml-3 px-3 py-2 bg-gray-950 dark:bg-gray-900 text-white rounded-lg shadow-xl border border-gray-800 whitespace-nowrap z-50 pointer-events-none flex flex-col gap-0.5"
             >
               <div className="flex items-center gap-1.5">
-                <span className={`text-[9px] font-bold uppercase font-mono px-1.5 py-0.2 rounded ${item.badgeColor}`}>
+                <span className={`text-[9px] font-bold uppercase font-mono px-1.5 py-0.5 rounded ${item.badgeColor}`}>
                   {item.badgeLabel}
                 </span>
                 <span className="font-semibold text-xs leading-tight text-white">{item.name}</span>

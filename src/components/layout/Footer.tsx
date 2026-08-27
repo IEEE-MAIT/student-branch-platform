@@ -40,7 +40,10 @@ export const Footer: React.FC = () => {
               />
             </Link>
             <div className="accent-rule bg-ieee-blue my-2" aria-hidden="true" />
-            <p className="text-xs text-gray-400 leading-relaxed font-sans">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/5 border border-white/10 font-mono text-[11px] text-sky-400">
+              <span>📍 Delhi, India · Est. since 2005</span>
+            </div>
+            <p className="text-xs text-gray-400 leading-relaxed font-sans mt-2">
               IEEE Student Branch at Maharaja Agrasen Institute of Technology. Advancing technological innovation, research excellence, and empowering student engineers since 2005.
             </p>
             <div className="space-y-1.5 pt-1 text-xs text-gray-400">
@@ -256,8 +259,8 @@ export const Footer: React.FC = () => {
             <p className="font-medium text-gray-300">
               IEEE MAIT Student Branch · Maharaja Agrasen Institute of Technology
             </p>
-            <p className="text-gray-500 mt-0.5 font-mono text-[11px]">
-              Affiliated with IEEE Delhi Section · Region 10 (Asia-Pacific) · Established 2005
+            <p className="text-gray-400 mt-0.5 font-mono text-[11px]">
+              Delhi, India · Established since 2005 · Affiliated with IEEE Delhi Section · Region 10
             </p>
           </div>
           <div className="text-center md:text-right space-y-0.5 font-sans">
