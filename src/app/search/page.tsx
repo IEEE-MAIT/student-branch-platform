@@ -12,6 +12,8 @@ import {
   getDynamicResources,
   getDynamicProjects,
   getDynamicInitiatives,
+  getDynamicSIGs,
+  getDynamicOpportunities,
 } from '@/lib/api';
 
 /**
@@ -19,7 +21,7 @@ import {
  * Fetches all searchable content from the database and passes it to the client for instant deferred filtering.
  */
 export default async function SearchPage() {
-  const [events, achievements, chapters, stories, people, galleries, resources, projects, initiatives] = await Promise.all([
+  const [events, achievements, chapters, stories, people, galleries, resources, projects, initiatives, sigs, opportunities] = await Promise.all([
     getDynamicEvents(),
     getDynamicAchievements(),
     getDynamicChapters(),
@@ -29,6 +31,8 @@ export default async function SearchPage() {
     getDynamicResources(),
     getDynamicProjects(),
     getDynamicInitiatives(),
+    getDynamicSIGs(),
+    getDynamicOpportunities(),
   ]);
 
   return (
@@ -44,6 +48,8 @@ export default async function SearchPage() {
         resources={resources}
         projects={projects}
         initiatives={initiatives}
+        sigs={sigs}
+        opportunities={opportunities}
       />
       <Footer />
     </>

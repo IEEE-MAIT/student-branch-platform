@@ -36,12 +36,51 @@ export const Navbar: React.FC = () => {
   const router = useRouter();
   const navRef = useRef<HTMLElement>(null);
 
+  const aboutTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const communitiesTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleAboutEnter = () => {
+    if (aboutTimeoutRef.current) clearTimeout(aboutTimeoutRef.current);
+    if (communitiesTimeoutRef.current) clearTimeout(communitiesTimeoutRef.current);
+    setCommunitiesDropdownOpen(false);
+    setAboutDropdownOpen(true);
+  };
+
+  const handleAboutLeave = () => {
+    if (aboutTimeoutRef.current) clearTimeout(aboutTimeoutRef.current);
+    aboutTimeoutRef.current = setTimeout(() => {
+      setAboutDropdownOpen(false);
+    }, 200);
+  };
+
+  const handleCommunitiesEnter = () => {
+    if (communitiesTimeoutRef.current) clearTimeout(communitiesTimeoutRef.current);
+    if (aboutTimeoutRef.current) clearTimeout(aboutTimeoutRef.current);
+    setAboutDropdownOpen(false);
+    setCommunitiesDropdownOpen(true);
+  };
+
+  const handleCommunitiesLeave = () => {
+    if (communitiesTimeoutRef.current) clearTimeout(communitiesTimeoutRef.current);
+    communitiesTimeoutRef.current = setTimeout(() => {
+      setCommunitiesDropdownOpen(false);
+    }, 200);
+  };
+
   // Close menus on route change
   useEffect(() => {
     setMobileMenuOpen(false);
     setAboutDropdownOpen(false);
     setCommunitiesDropdownOpen(false);
   }, [pathname]);
+
+  // Clean timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (aboutTimeoutRef.current) clearTimeout(aboutTimeoutRef.current);
+      if (communitiesTimeoutRef.current) clearTimeout(communitiesTimeoutRef.current);
+    };
+  }, []);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -125,12 +164,12 @@ export const Navbar: React.FC = () => {
             {/* 1. About Dropdown */}
             <div
               className="relative"
-              onMouseEnter={() => setAboutDropdownOpen(true)}
-              onMouseLeave={() => setAboutDropdownOpen(false)}
+              onMouseEnter={handleAboutEnter}
+              onMouseLeave={handleAboutLeave}
             >
               <button
                 type="button"
-                onClick={() => setAboutDropdownOpen(!aboutDropdownOpen)}
+                onClick={() => setAboutDropdownOpen((prev) => !prev)}
                 className={`${navPillClasses('/about')} flex items-center gap-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ieee-blue`}
                 aria-expanded={aboutDropdownOpen}
                 aria-haspopup="true"
@@ -148,43 +187,49 @@ export const Navbar: React.FC = () => {
               </button>
 
               {aboutDropdownOpen && (
-                <div 
-                  className="absolute top-full left-0 mt-2 w-64 bg-white/95 dark:bg-gray-900/95 backdrop-blur-2xl border border-warm-200/80 dark:border-gray-800/80 shadow-2xl p-1.5 rounded-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-150"
-                  role="menu"
-                  aria-label="About IEEE MAIT Submenu"
-                >
-                  <Link 
-                    href="/about" 
-                    role="menuitem"
-                    className="block px-3 py-2 rounded-xl text-xs hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ieee-blue dark:hover:text-sky-400 transition-colors text-ink dark:text-gray-200"
+                <div className="absolute top-full left-0 pt-2 w-64 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                  <div 
+                    className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-2xl border border-warm-200/80 dark:border-gray-800/80 shadow-2xl p-1.5 rounded-2xl"
+                    role="menu"
+                    aria-label="About IEEE MAIT Submenu"
                   >
-                    <div className="font-semibold">About IEEE MAIT</div>
-                    <div className="text-[11px] text-warm-400 dark:text-gray-400 font-normal">Mission, governance & branch charter</div>
-                  </Link>
-                  <Link 
-                    href="/about/ieee" 
-                    role="menuitem"
-                    className="block px-3 py-2 rounded-xl text-xs hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ieee-blue dark:hover:text-sky-400 transition-colors text-ink dark:text-gray-200"
-                  >
-                    <div className="font-semibold">Global IEEE & Delhi Section</div>
-                    <div className="text-[11px] text-warm-400 dark:text-gray-400 font-normal">Region 10 & international network</div>
-                  </Link>
-                  <Link 
-                    href="/about/history" 
-                    role="menuitem"
-                    className="block px-3 py-2 rounded-xl text-xs hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ieee-blue dark:hover:text-sky-400 transition-colors text-ink dark:text-gray-200"
-                  >
-                    <div className="font-semibold">20-Year Milestones</div>
-                    <div className="text-[11px] text-warm-400 dark:text-gray-400 font-normal">Institutional timeline since 2005</div>
-                  </Link>
-                  <Link 
-                    href="/about/impact" 
-                    role="menuitem"
-                    className="block px-3 py-2 rounded-xl text-xs hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ieee-blue dark:hover:text-sky-400 transition-colors text-ink dark:text-gray-200"
-                  >
-                    <div className="font-semibold">Branch Impact</div>
-                    <div className="text-[11px] text-warm-400 dark:text-gray-400 font-normal">Community reach & engineering outcomes</div>
-                  </Link>
+                    <Link 
+                      href="/about" 
+                      role="menuitem"
+                      onClick={() => setAboutDropdownOpen(false)}
+                      className="block px-3 py-2 rounded-xl text-xs hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ieee-blue dark:hover:text-sky-400 transition-colors text-ink dark:text-gray-200"
+                    >
+                      <div className="font-semibold">About IEEE MAIT</div>
+                      <div className="text-[11px] text-warm-400 dark:text-gray-400 font-normal">Mission, governance & branch charter</div>
+                    </Link>
+                    <Link 
+                      href="/about/ieee" 
+                      role="menuitem"
+                      onClick={() => setAboutDropdownOpen(false)}
+                      className="block px-3 py-2 rounded-xl text-xs hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ieee-blue dark:hover:text-sky-400 transition-colors text-ink dark:text-gray-200"
+                    >
+                      <div className="font-semibold">Global IEEE & Delhi Section</div>
+                      <div className="text-[11px] text-warm-400 dark:text-gray-400 font-normal">Region 10 & international network</div>
+                    </Link>
+                    <Link 
+                      href="/about/history" 
+                      role="menuitem"
+                      onClick={() => setAboutDropdownOpen(false)}
+                      className="block px-3 py-2 rounded-xl text-xs hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ieee-blue dark:hover:text-sky-400 transition-colors text-ink dark:text-gray-200"
+                    >
+                      <div className="font-semibold">20-Year Milestones</div>
+                      <div className="text-[11px] text-warm-400 dark:text-gray-400 font-normal">Institutional timeline since 2005</div>
+                    </Link>
+                    <Link 
+                      href="/about/impact" 
+                      role="menuitem"
+                      onClick={() => setAboutDropdownOpen(false)}
+                      className="block px-3 py-2 rounded-xl text-xs hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ieee-blue dark:hover:text-sky-400 transition-colors text-ink dark:text-gray-200"
+                    >
+                      <div className="font-semibold">Branch Impact</div>
+                      <div className="text-[11px] text-warm-400 dark:text-gray-400 font-normal">Community reach & engineering outcomes</div>
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>
@@ -192,12 +237,12 @@ export const Navbar: React.FC = () => {
             {/* 2. Communities & SIGs Dropdown */}
             <div
               className="relative"
-              onMouseEnter={() => setCommunitiesDropdownOpen(true)}
-              onMouseLeave={() => setCommunitiesDropdownOpen(false)}
+              onMouseEnter={handleCommunitiesEnter}
+              onMouseLeave={handleCommunitiesLeave}
             >
               <button
                 type="button"
-                onClick={() => setCommunitiesDropdownOpen(!communitiesDropdownOpen)}
+                onClick={() => setCommunitiesDropdownOpen((prev) => !prev)}
                 className={`${navPillClasses('/chapters')} flex items-center gap-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ieee-blue`}
                 aria-expanded={communitiesDropdownOpen}
                 aria-haspopup="true"
@@ -215,52 +260,83 @@ export const Navbar: React.FC = () => {
               </button>
 
               {communitiesDropdownOpen && (
-                <div 
-                  className="absolute top-full left-0 mt-2 w-72 bg-white/95 dark:bg-gray-900/95 backdrop-blur-2xl border border-warm-200/80 dark:border-gray-800/80 shadow-2xl p-1.5 rounded-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-150"
-                  role="menu"
-                  aria-label="Communities & Chapters Submenu"
-                >
-                  <Link 
-                    href="/chapters" 
-                    role="menuitem"
-                    className="block px-3 py-2 rounded-xl text-xs hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ieee-blue dark:hover:text-sky-400 transition-colors text-ink dark:text-gray-200"
+                <div className="absolute top-full left-0 pt-2 w-72 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                  <div 
+                    className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-2xl border border-warm-200/80 dark:border-gray-800/80 shadow-2xl p-1.5 rounded-2xl"
+                    role="menu"
+                    aria-label="Communities & Chapters Submenu"
                   >
-                    <div className="font-semibold">All Units & SIGs Overview</div>
-                    <div className="text-[11px] text-warm-400 dark:text-gray-400 font-normal">Student Branch, Chapters, Affinity Groups & SIGs</div>
-                  </Link>
-                  <Link 
-                    href="/chapters/sb" 
-                    role="menuitem"
-                    className="block px-3 py-2 rounded-xl text-xs hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ieee-blue dark:hover:text-sky-400 transition-colors text-ink dark:text-gray-200"
-                  >
-                    <div className="font-semibold flex items-center justify-between">
-                      <span>IEEE MAIT SB (Parent)</span>
-                      <span className="font-mono text-[10px] bg-ieee-subtle dark:bg-sky-950 text-ieee-blue dark:text-sky-400 px-2 py-0.5 rounded-full">Core</span>
-                    </div>
-                    <div className="text-[11px] text-warm-400 dark:text-gray-400 font-normal">Flagship operations, IEEE Day & symposiums</div>
-                  </Link>
-                  <Link 
-                    href="/chapters/eds" 
-                    role="menuitem"
-                    className="block px-3 py-2 rounded-xl text-xs hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ieee-blue dark:hover:text-sky-400 transition-colors text-ink dark:text-gray-200"
-                  >
-                    <div className="font-semibold flex items-center justify-between">
-                      <span>IEEE EDS Chapter</span>
-                      <span className="font-mono text-[10px] bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded-full">Hardware</span>
-                    </div>
-                    <div className="text-[11px] text-warm-400 dark:text-gray-400 font-normal">Semiconductors, KiCad PCB & microelectronics</div>
-                  </Link>
-                  <Link 
-                    href="/chapters/wie" 
-                    role="menuitem"
-                    className="block px-3 py-2 rounded-xl text-xs hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ieee-blue dark:hover:text-sky-400 transition-colors text-ink dark:text-gray-200"
-                  >
-                    <div className="font-semibold flex items-center justify-between">
-                      <span>IEEE WIE Affinity Group</span>
-                      <span className="font-mono text-[10px] bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full">Mentorship</span>
-                    </div>
-                    <div className="text-[11px] text-warm-400 dark:text-gray-400 font-normal">Women in engineering leadership circle</div>
-                  </Link>
+                    <Link 
+                      href="/chapters" 
+                      role="menuitem"
+                      onClick={() => setCommunitiesDropdownOpen(false)}
+                      className="block px-3 py-2 rounded-xl text-xs hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ieee-blue dark:hover:text-sky-400 transition-colors text-ink dark:text-gray-200"
+                    >
+                      <div className="font-semibold">All Units & SIGs Overview</div>
+                      <div className="text-[11px] text-warm-400 dark:text-gray-400 font-normal">Student Branch, Chapters, Affinity Groups & SIGs</div>
+                    </Link>
+                    <Link 
+                      href="/chapters/sb" 
+                      role="menuitem"
+                      onClick={() => setCommunitiesDropdownOpen(false)}
+                      className="block px-3 py-2 rounded-xl text-xs hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ieee-blue dark:hover:text-sky-400 transition-colors text-ink dark:text-gray-200"
+                    >
+                      <div className="font-semibold flex items-center justify-between">
+                        <span>IEEE MAIT SB (Parent)</span>
+                        <span className="font-mono text-[10px] bg-ieee-subtle dark:bg-sky-950 text-ieee-blue dark:text-sky-400 px-2 py-0.5 rounded-full">Core</span>
+                      </div>
+                      <div className="text-[11px] text-warm-400 dark:text-gray-400 font-normal">Flagship operations, IEEE Day & symposiums</div>
+                    </Link>
+                    <Link 
+                      href="/chapters/eds" 
+                      role="menuitem"
+                      onClick={() => setCommunitiesDropdownOpen(false)}
+                      className="block px-3 py-2 rounded-xl text-xs hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ieee-blue dark:hover:text-sky-400 transition-colors text-ink dark:text-gray-200"
+                    >
+                      <div className="font-semibold flex items-center justify-between">
+                        <span>IEEE EDS Chapter</span>
+                        <span className="font-mono text-[10px] bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded-full">Hardware</span>
+                      </div>
+                      <div className="text-[11px] text-warm-400 dark:text-gray-400 font-normal">Semiconductors, KiCad PCB & microelectronics</div>
+                    </Link>
+                    <Link 
+                      href="/chapters/wie" 
+                      role="menuitem"
+                      onClick={() => setCommunitiesDropdownOpen(false)}
+                      className="block px-3 py-2 rounded-xl text-xs hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ieee-blue dark:hover:text-sky-400 transition-colors text-ink dark:text-gray-200"
+                    >
+                      <div className="font-semibold flex items-center justify-between">
+                        <span>IEEE WIE Affinity Group</span>
+                        <span className="font-mono text-[10px] bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full">Mentorship</span>
+                      </div>
+                      <div className="text-[11px] text-warm-400 dark:text-gray-400 font-normal">Women in engineering leadership circle</div>
+                    </Link>
+                    <div className="border-t border-warm-200/60 dark:border-gray-800 my-1"></div>
+                    <Link 
+                      href="/gallery" 
+                      role="menuitem"
+                      onClick={() => setCommunitiesDropdownOpen(false)}
+                      className="block px-3 py-2 rounded-xl text-xs hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ieee-blue dark:hover:text-sky-400 transition-colors text-ink dark:text-gray-200"
+                    >
+                      <div className="font-semibold flex items-center justify-between">
+                        <span>Photo Gallery & Archives</span>
+                        <span className="font-mono text-[10px] bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full">Media</span>
+                      </div>
+                      <div className="text-[11px] text-warm-400 dark:text-gray-400 font-normal">Documentary photography & event photo albums</div>
+                    </Link>
+                    <Link 
+                      href="/projects" 
+                      role="menuitem"
+                      onClick={() => setCommunitiesDropdownOpen(false)}
+                      className="block px-3 py-2 rounded-xl text-xs hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ieee-blue dark:hover:text-sky-400 transition-colors text-ink dark:text-gray-200"
+                    >
+                      <div className="font-semibold flex items-center justify-between">
+                        <span>Technical Projects Hub</span>
+                        <span className="font-mono text-[10px] bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full">Builds</span>
+                      </div>
+                      <div className="text-[11px] text-warm-400 dark:text-gray-400 font-normal">Robotics, Edge AI & Open Source systems</div>
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>
@@ -278,8 +354,8 @@ export const Navbar: React.FC = () => {
               Publications
             </Link>
 
-            <Link href="/gallery" className={navPillClasses('/gallery')}>
-              Gallery
+            <Link href="/sigs" className={navPillClasses('/sigs')}>
+              SIGs
             </Link>
 
             <Link href="/people" className={navPillClasses('/people')}>
@@ -475,6 +551,22 @@ export const Navbar: React.FC = () => {
                   <span>IEEE WIE Affinity Group</span>
                   <span className="font-mono text-[10px] bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded-full">Mentorship</span>
                 </Link>
+                <Link
+                  href="/gallery"
+                  className="block py-2.5 px-2 hover:text-ieee-blue dark:hover:text-sky-400 border-t border-warm-100 dark:border-gray-800 min-h-[44px] flex items-center justify-between"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span>Photo Gallery & Archives</span>
+                  <span className="font-mono text-[10px] bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded-full">Media</span>
+                </Link>
+                <Link
+                  href="/projects"
+                  className="block py-2.5 px-2 hover:text-ieee-blue dark:hover:text-sky-400 border-t border-warm-100 dark:border-gray-800 min-h-[44px] flex items-center justify-between"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span>Technical Projects Hub</span>
+                  <span className="font-mono text-[10px] bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded-full">Builds</span>
+                </Link>
               </div>
             )}
           </div>
@@ -502,11 +594,11 @@ export const Navbar: React.FC = () => {
             Publications & Digest
           </Link>
           <Link
-            href="/gallery"
+            href="/sigs"
             className="block px-4 py-3 text-base font-medium hover:text-ieee-blue dark:hover:text-sky-400 min-h-[48px] flex items-center rounded-xl hover:bg-warm-50 dark:hover:bg-gray-900"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Photo Gallery
+            Special Interest Groups (SIGs)
           </Link>
           <Link
             href="/people"

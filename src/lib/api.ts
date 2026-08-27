@@ -21,6 +21,8 @@ import {
   PEOPLE_DATA,
   PROJECTS_DATA,
   INITIATIVES_DATA,
+  SIGS_DATA,
+  OPPORTUNITIES_DATA,
 } from './data';
 import { prisma } from './db';
 
@@ -449,4 +451,79 @@ export const getDynamicInitiatives = cache(async (chapterIdOrSlug?: string) => {
   return INITIATIVES_DATA.filter(
     (i) => i.chapterId === chapterIdOrSlug || i.chapterSlug === chapterIdOrSlug
   );
+});
+
+export const getDynamicSIGs = cache(async () => {
+  if (typeof window !== 'undefined') return SIGS_DATA;
+  try {
+    const dbSIGs = await prisma.sIG.findMany({
+      where: { deletedAt: null },
+      orderBy: { createdAt: 'asc' },
+      include: {
+        lead: true,
+        projects: { where: { deletedAt: null } },
+        events: { where: { deletedAt: null } },
+        _count: {
+          select: { projects: true, events: true, memberships: true },
+        },
+      },
+    });
+    if (dbSIGs && dbSIGs.length > 0) return dbSIGs;
+  } catch (e) {
+    console.warn('Failed to fetch SIGs from DB', e);
+  }
+  return SIGS_DATA;
+});
+
+export const getDynamicSIGBySlug = cache(async (slug: string) => {
+  if (typeof window !== 'undefined') return SIGS_DATA.find((s) => s.slug === slug) || null;
+  try {
+    const dbSIG = await prisma.sIG.findFirst({
+      where: { slug, deletedAt: null },
+      include: {
+        lead: true,
+        projects: { where: { deletedAt: null } },
+        events: { where: { deletedAt: null } },
+        memberships: {
+          where: { isCurrent: true },
+          include: { person: true },
+        },
+      },
+    });
+    if (dbSIG) return dbSIG;
+  } catch (e) {
+    console.warn(`Failed to fetch SIG ${slug} from DB`, e);
+  }
+  return SIGS_DATA.find((s) => s.slug === slug) || null;
+});
+
+export const getDynamicOpportunities = cache(async () => {
+  if (typeof window !== 'undefined') return OPPORTUNITIES_DATA;
+  try {
+    const dbOpps = await prisma.opportunity.findMany({
+      where: { deletedAt: null },
+      orderBy: [
+        { featured: 'desc' },
+        { deadlineDate: 'asc' },
+        { createdAt: 'desc' },
+      ],
+    });
+    if (dbOpps && dbOpps.length > 0) return dbOpps;
+  } catch (e) {
+    console.warn('Failed to fetch opportunities from DB', e);
+  }
+  return OPPORTUNITIES_DATA;
+});
+
+export const getDynamicOpportunityBySlug = cache(async (slug: string) => {
+  if (typeof window !== 'undefined') return OPPORTUNITIES_DATA.find((o) => o.slug === slug) || null;
+  try {
+    const dbOpp = await prisma.opportunity.findFirst({
+      where: { slug, deletedAt: null },
+    });
+    if (dbOpp) return dbOpp;
+  } catch (e) {
+    console.warn(`Failed to fetch opportunity ${slug} from DB`, e);
+  }
+  return OPPORTUNITIES_DATA.find((o) => o.slug === slug) || null;
 });

@@ -18,6 +18,9 @@ export const STATIC_PAGES = [
   { title: 'Achievements Ledger', description: 'Explore awards and recognitions earned by our branch', url: '/achievements' },
   { title: 'Communities & Chapters', description: 'Discover our specialized technical societies and affinity groups', url: '/chapters' },
   { title: 'Publications & Digest', description: 'Read technical articles, Tech Tuesday digests, and insights from our community', url: '/publications' },
+  { title: 'Special Interest Groups (SIGs)', description: 'Explore technical wings in DSA, Web Dev, AI/ML, and Hardware', url: '/sigs' },
+  { title: 'Technical Projects', description: 'Explore student-engineered robotics, Edge AI, and RISC-V builds', url: '/projects' },
+  { title: 'Opportunities & Grants', description: 'Browse funded IEEE scholarships, research fellowships, and volunteer calls', url: '/opportunities' },
   { title: 'Photo Gallery', description: 'View visual archives from our past events and initiatives', url: '/gallery' },
   { title: 'People & Leadership', description: 'Meet the executive committee, branch counselors, and active members', url: '/people' },
   { title: 'Leadership Archive', description: 'Historical leadership rosters organized by academic year', url: '/people/archive' },
@@ -34,6 +37,8 @@ interface SearchClientProps {
   resources: any[];
   projects?: any[];
   initiatives?: any[];
+  sigs?: any[];
+  opportunities?: any[];
 }
 
 export const SearchClient: React.FC<SearchClientProps> = ({
@@ -46,6 +51,8 @@ export const SearchClient: React.FC<SearchClientProps> = ({
   resources: initialResources,
   projects: initialProjects = [],
   initiatives: initialInitiatives = [],
+  sigs: initialSIGs = [],
+  opportunities: initialOpportunities = [],
 }) => {
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
@@ -501,7 +508,9 @@ export const SearchClient: React.FC<SearchClientProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {[
                   { title: 'Events Archive', href: '/events', count: `${initialEvents.length} Recorded` },
-                  { title: 'Technical Projects', href: '/chapters/eds', count: `${initialProjects.length} Hardware Builds` },
+                  { title: 'Technical Projects', href: '/projects', count: `${initialProjects.length} Hardware Builds` },
+                  { title: 'Special Interest Groups', href: '/sigs', count: `${initialSIGs.length} Active Wings` },
+                  { title: 'Opportunities & Grants', href: '/opportunities', count: `${initialOpportunities.length} Grants & Calls` },
                   { title: 'Achievements Ledger', href: '/achievements', count: `${initialAchievements.length} Honors` },
                   { title: 'Leadership Rosters', href: '/people', count: `${initialPeople.length} Officers` },
                   { title: 'Communities & Chapters', href: '/chapters', count: `${initialChapters.length} Units` },

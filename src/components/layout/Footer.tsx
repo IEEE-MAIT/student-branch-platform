@@ -154,12 +154,16 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li className="pt-2 border-t border-gray-800">
-                <span className="text-[11px] font-mono text-gray-500 uppercase tracking-wider block mb-1">
-                  Special Interest Groups:
-                </span>
-                <span className="text-xs text-gray-400">
-                  DSA · Web & Dev · AI/ML · Hardware/IoT
-                </span>
+                <Link href="/sigs" className="hover:text-white transition-colors flex items-center justify-between group">
+                  <span>Special Interest Groups (SIGs)</span>
+                  <span className="text-[10px] font-mono bg-amber-900/40 px-1.5 py-0.5 rounded text-amber-300">Pods</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/projects" className="hover:text-white transition-colors flex items-center justify-between group">
+                  <span>Technical Projects Hub</span>
+                  <span className="text-[10px] font-mono bg-emerald-900/40 px-1.5 py-0.5 rounded text-emerald-300">Builds</span>
+                </Link>
               </li>
             </ul>
           </div>
@@ -215,6 +219,11 @@ export const Footer: React.FC = () => {
               <li>
                 <Link href="/about/history" className="hover:text-white transition-colors">
                   20-Year Milestones (Est. 2005)
+                </Link>
+              </li>
+              <li>
+                <Link href="/opportunities" className="hover:text-white transition-colors">
+                  Opportunities, Grants & Fellowships
                 </Link>
               </li>
               <li>
