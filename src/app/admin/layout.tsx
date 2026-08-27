@@ -18,14 +18,17 @@ import { Badge } from '@/components/ui/Badge';
 
 const ADMIN_NAV = [
   { label: 'Overview', href: '/admin' },
-  { label: 'Events', href: '/admin/events' },
-  { label: 'Achievements', href: '/admin/achievements' },
-  { label: 'People', href: '/admin/people' },
+  { label: 'Events & Workshops', href: '/admin/events' },
+  { label: 'Technical Projects', href: '/admin/projects' },
+  { label: 'Special Interest Groups', href: '/admin/sigs' },
+  { label: 'Opportunities & Grants', href: '/admin/opportunities' },
+  { label: 'Achievements Ledger', href: '/admin/achievements' },
+  { label: 'People & Roster', href: '/admin/people' },
   { label: 'Publications & Articles', href: '/admin/stories' },
-  { label: 'Galleries', href: '/admin/galleries' },
-  { label: 'Resources', href: '/admin/resources' },
-  { label: 'Media Library', href: '/admin/assets' },
-  { label: 'Milestones', href: '/admin/milestones' },
+  { label: 'Photo Galleries', href: '/admin/galleries' },
+  { label: 'Resources & Documents', href: '/admin/resources' },
+  { label: 'Media Library & Assets', href: '/admin/assets' },
+  { label: 'Milestones Timeline', href: '/admin/milestones' },
   { label: 'Site Settings', href: '/admin/settings' },
   { label: 'Audit Logs', href: '/admin/audit-logs' },
 ];
@@ -86,7 +89,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (
       <>
         <Navbar />
-        <main className="flex-1 py-24 text-center font-mono text-sm text-warm-400">
+        <main className="flex-1 py-24 text-center font-mono text-xs text-warm-400 dark:text-gray-400 bg-white dark:bg-gray-950 min-h-screen">
           Validating IEEE MAIT Admin Session...
         </main>
         <Footer />
@@ -99,28 +102,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (
       <>
         <Navbar />
-        <main className="flex-1 py-16 sm:py-24 bg-white">
+        <main className="flex-1 py-16 sm:py-24 bg-white dark:bg-gray-950 min-h-screen">
           <Container size="narrow">
-            <div className="max-w-md mx-auto border border-warm-200 p-8 rounded-[2px] shadow-sm">
+            <div className="max-w-md mx-auto border border-warm-200 dark:border-gray-800 p-8 rounded-xl bg-white dark:bg-gray-900 shadow-xs">
               <div className="flex items-center justify-between mb-4">
                 <Badge variant="ieee">IEEE MAIT CMS</Badge>
-                <span className="font-mono text-xs text-warm-300">Protected Portal</span>
+                <span className="font-mono text-xs text-warm-400 dark:text-gray-400">Protected Portal</span>
               </div>
 
-              <h1 className="font-serif text-2xl text-ink font-normal mb-2">Officer Authentication</h1>
-              <p className="font-sans text-xs text-warm-400 mb-6">
+              <h1 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal mb-2">Officer Authentication</h1>
+              <p className="font-sans text-xs text-warm-400 dark:text-gray-400 mb-6">
                 Enter your executive credentials to access the CMS portal.
               </p>
 
               {loginError && (
-                <div className="p-3 bg-red-50 text-red-700 text-xs font-mono mb-4 border border-red-200">
+                <div className="p-3 bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 text-xs font-mono mb-4 border border-red-200 dark:border-red-800 rounded-lg">
                   {loginError}
                 </div>
               )}
 
               <form onSubmit={handleLogin} className="space-y-4 font-sans text-xs">
                 <div>
-                  <label className="block font-mono text-xs uppercase tracking-wider text-warm-400 mb-1">
+                  <label className="block font-mono text-xs uppercase tracking-wider text-warm-500 dark:text-gray-400 mb-1">
                     Email Address
                   </label>
                   <input
@@ -128,13 +131,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="mait.ieee.sb@gmail.com"
-                    className="w-full px-3 py-2 border border-warm-200 rounded-[2px] focus:outline-none focus:border-ieee-blue"
+                    className="w-full px-3.5 py-2.5 bg-warm-50 dark:bg-gray-800 border border-warm-200 dark:border-gray-700 rounded-lg text-ink dark:text-gray-100 focus:outline-hidden focus:border-ieee-blue dark:focus:border-sky-500"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block font-mono text-xs uppercase tracking-wider text-warm-400 mb-1">
+                  <label className="block font-mono text-xs uppercase tracking-wider text-warm-500 dark:text-gray-400 mb-1">
                     Password
                   </label>
                   <input
@@ -142,14 +145,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full px-3 py-2 border border-warm-200 rounded-[2px] focus:outline-none focus:border-ieee-blue"
+                    className="w-full px-3.5 py-2.5 bg-warm-50 dark:bg-gray-800 border border-warm-200 dark:border-gray-700 rounded-lg text-ink dark:text-gray-100 focus:outline-hidden focus:border-ieee-blue dark:focus:border-sky-500"
                     required
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full py-3 bg-ieee-blue text-white font-mono text-xs font-bold uppercase tracking-wider rounded-[2px] hover:bg-ieee-blue/90 transition-colors"
+                  className="w-full py-3 bg-ieee-blue hover:bg-ieee-dark dark:bg-sky-600 dark:hover:bg-sky-700 text-white font-mono text-xs font-bold uppercase tracking-wider rounded-lg transition-colors shadow-xs cursor-pointer"
                 >
                   Authenticate Session →
                 </button>
@@ -167,29 +170,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <>
       <Navbar />
 
-      <main className="flex-1 py-12 sm:py-16 bg-white">
+      <main className="flex-1 py-12 sm:py-16 bg-white dark:bg-gray-950 min-h-screen">
         <Container size="default">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-warm-200 pb-6 mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-warm-200 dark:border-gray-800 pb-6 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Badge variant="ieee">IEEE MAIT Command Center</Badge>
-                <span className="font-mono text-xs text-ieee-blue font-semibold">
-                  Role: {session.officer?.role || 'Super Admin'}
+                <span className="font-mono text-xs text-ieee-blue dark:text-sky-400 font-semibold">
+                  Role: {session.officer?.role || 'Executive Admin'}
                 </span>
               </div>
-              <h1 className="font-serif text-3xl text-ink font-normal">
+              <h1 className="font-serif text-3xl text-ink dark:text-gray-100 font-normal">
                 Administrative CMS Portal
               </h1>
             </div>
 
             <div className="flex items-center gap-4">
-              <span className="font-mono text-xs text-warm-400">
+              <span className="font-mono text-xs text-warm-400 dark:text-gray-400">
                 {session.officer?.email}
               </span>
               <button
                 onClick={handleLogout}
-                className="font-mono text-xs text-red-600 hover:underline font-semibold"
+                className="font-mono text-xs text-red-600 dark:text-red-400 hover:underline font-semibold cursor-pointer"
               >
                 Sign Out
               </button>
@@ -200,8 +203,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             {/* Sidebar Nav */}
             <aside className="md:col-span-3">
-              <nav className="space-y-1 border border-warm-200 rounded-[2px] p-2 bg-warm-100/30">
-                <div className="px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-widest text-warm-300">
+              <nav className="space-y-1 border border-warm-200 dark:border-gray-800 rounded-xl p-2 bg-warm-50/50 dark:bg-gray-900/50">
+                <div className="px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-widest text-warm-400 dark:text-gray-400">
                   CMS Navigation
                 </div>
                 {ADMIN_NAV.map((item: any) => {
@@ -210,10 +213,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`block px-3 py-2 text-xs font-mono rounded-[2px] transition-colors ${
+                      className={`block px-3 py-2 text-xs font-mono rounded-lg transition-colors ${
                         isActive
-                          ? 'bg-ieee-blue text-white font-bold'
-                          : 'text-warm-400 hover:bg-warm-100 hover:text-ink'
+                          ? 'bg-ieee-blue text-white font-bold dark:bg-sky-600'
+                          : 'text-warm-600 dark:text-gray-300 hover:bg-warm-100 dark:hover:bg-gray-800 hover:text-ink dark:hover:text-white'
                       }`}
                     >
                       {item.label}
