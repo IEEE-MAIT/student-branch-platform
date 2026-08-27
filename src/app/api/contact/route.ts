@@ -1,17 +1,6 @@
-/**
- * @file src/app/api/contact/route.ts
- * @description Contact form submission API route.
- * Validates input, logs the inquiry to audit_logs, and returns a JSON response.
- * 
- * To add real email delivery, integrate with Resend or Nodemailer and
- * forward messages to mait.ieee.sb@gmail.com.
- *
- * @author IEEE MAIT Webmaster
- * @license MIT
- */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { sanitizePlainText } from '@/lib/security';
 
 export async function POST(req: NextRequest) {
   try {
@@ -35,27 +24,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const safeName = sanitizePlainText(name, 100);
+    const safeEmail = sanitizePlainText(email, 150).toLowerCase();
+    const safeSubject = sanitizePlainText(subject || 'General Inquiry', 200);
+    const safeMessage = sanitizePlainText(message, 3000);
+
     // Save the inquiry to the dedicated Inquiry table
     await prisma.inquiry.create({
       data: {
-        name,
-        email,
-        subject: subject || 'General Inquiry',
-        message,
+        name: safeName,
+        email: safeEmail,
+        subject: safeSubject,
+        message: safeMessage,
         createdAt: new Date().toISOString(),
         status: 'Unread',
       },
     });
-
-    // TODO: Integrate with an email delivery service (e.g. Resend):
-    // import { Resend } from 'resend';
-    // const resend = new Resend(process.env.RESEND_API_KEY);
-    // await resend.emails.send({
-    //   from: 'noreply@yourdomain.com',
-    //   to: 'mait.ieee.sb@gmail.com',
-    //   subject: `[IEEE MAIT Contact] ${subject}`,
-    //   text: `From: ${name} <${email}>\n\n${message}`,
-    // });
 
     return NextResponse.json(
       { success: true, message: 'Your inquiry has been received. We will respond shortly.' },

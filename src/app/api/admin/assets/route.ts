@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { guardApiRoute } from '@/lib/auth';
+import { recordAuditLog } from '@/lib/auditLog';
 
 function getCloudinaryCredentials() {
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
@@ -19,6 +21,11 @@ function getBasicAuthToken(apiKey: string, apiSecret: string) {
 
 export async function GET(request: Request) {
   try {
+    const authCheck = await guardApiRoute(request, 'Galleries', 'view');
+    if (!authCheck.isAuthorized) {
+      return authCheck.errorResponse;
+    }
+
     const { cloudName, apiKey, apiSecret } = getCloudinaryCredentials();
     const url = new URL(request.url);
     const maxResults = url.searchParams.get('max_results') || '50';
@@ -50,6 +57,12 @@ export async function GET(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const authCheck = await guardApiRoute(request, 'Galleries', 'delete');
+    if (!authCheck.isAuthorized) {
+      return authCheck.errorResponse;
+    }
+    const user = authCheck.user;
+
     const { cloudName, apiKey, apiSecret } = getCloudinaryCredentials();
     const body: any = await request.json();
     const publicId = body.public_id;
@@ -61,7 +74,6 @@ export async function DELETE(request: Request) {
     // Cloudinary Admin API for deleting a single resource
     const apiUrl = `https://api.cloudinary.com/v1_1/${cloudName}/resources/image/upload`;
     
-    // We pass the public_ids as an array
     const formData = new URLSearchParams();
     formData.append('public_ids[]', publicId);
 
@@ -78,6 +90,16 @@ export async function DELETE(request: Request) {
       const errorText = await response.text();
       return NextResponse.json({ error: 'Failed to delete asset', details: errorText }, { status: response.status });
     }
+
+    await recordAuditLog({
+      performedBy: user.name || user.email,
+      userEmail: user.email,
+      actionType: 'DELETE',
+      entityType: 'ASSET',
+      entityId: publicId,
+      entityTitle: publicId,
+      changeSummary: `Deleted media asset from Cloudinary: ${publicId}`,
+    });
 
     const data = await response.json();
     return NextResponse.json({ success: true, data });

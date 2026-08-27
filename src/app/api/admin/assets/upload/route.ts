@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { guardApiRoute } from '@/lib/auth';
+import { recordAuditLog } from '@/lib/auditLog';
 
 function getCloudinaryCredentials() {
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
@@ -13,11 +15,9 @@ function getCloudinaryCredentials() {
 }
 
 async function generateSignature(params: Record<string, string>, apiSecret: string) {
-  // Sort parameters alphabetically
   const sortedKeys = Object.keys(params).sort();
   const signatureString = sortedKeys.map(key => `${key}=${params[key]}`).join('&') + apiSecret;
   
-  // Generate SHA-1 hash using Web Crypto API (Edge compatible)
   const encoder = new TextEncoder();
   const data = encoder.encode(signatureString);
   const hashBuffer = await crypto.subtle.digest('SHA-1', data);
@@ -29,6 +29,12 @@ async function generateSignature(params: Record<string, string>, apiSecret: stri
 
 export async function POST(request: Request) {
   try {
+    const authCheck = await guardApiRoute(request, 'Galleries', 'create');
+    if (!authCheck.isAuthorized) {
+      return authCheck.errorResponse;
+    }
+    const user = authCheck.user;
+
     const { cloudName, apiKey, apiSecret } = getCloudinaryCredentials();
     const formData = await request.formData();
     const file = formData.get('file');
@@ -62,7 +68,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to upload to Cloudinary', details: errorText }, { status: response.status });
     }
 
-    const data = await response.json();
+    const data: any = await response.json();
+
+    await recordAuditLog({
+      performedBy: user.name || user.email,
+      userEmail: user.email,
+      actionType: 'CREATE',
+      entityType: 'ASSET',
+      entityId: data.public_id || data.secure_url,
+      entityTitle: data.original_filename || 'Uploaded File',
+      changeSummary: `Uploaded media asset to Cloudinary: ${data.secure_url || data.public_id}`,
+    });
+
     return NextResponse.json({ success: true, data });
   } catch (error: any) {
     console.error('Cloudinary POST upload error:', error);

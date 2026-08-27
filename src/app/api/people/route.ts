@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db'; // cache bust for prisma hierarchy int
+import { prisma } from '@/lib/db';
 
 export async function GET(req: Request) {
   try {
@@ -7,8 +7,9 @@ export async function GET(req: Request) {
     const year = searchParams.get('year') || searchParams.get('academicYear');
 
     const people = await prisma.person.findMany({
+      where: { deletedAt: null },
       orderBy: { hierarchy: 'asc' },
-      include: { memberships: { include: { academicYear: true } } }
+      include: { memberships: { include: { academicYear: true } } },
     });
 
     if (!year) {

@@ -1,11 +1,18 @@
 import { NextResponse } from 'next/server';
-import { sanitizeText } from '@/lib/security';
-import { recordAuditLog } from '@/lib/auditLog';
 import { prisma } from '@/lib/db';
 
 export async function GET() {
   try {
-    const achievements = await prisma.achievement.findMany({ orderBy: { year: 'desc' } });
+    const achievements = await prisma.achievement.findMany({
+      where: { deletedAt: null },
+      orderBy: { year: 'desc' },
+      include: {
+        people: { include: { person: true } },
+        tags: true,
+        chapter: true,
+        event: true,
+      },
+    });
     return NextResponse.json(achievements, {
       headers: {
         'Cache-Control': 'public, max-age=60, s-maxage=120, stale-while-revalidate=300',
@@ -16,5 +23,3 @@ export async function GET() {
     return NextResponse.json({ error: 'Database error' }, { status: 500 });
   }
 }
-
-

@@ -3,6 +3,7 @@
  * @description Dynamic Data Fetching Engine for IEEE MAIT Student Branch platform.
  * 
  * Uses Prisma ORM during SSR for edge-compatible data fetching without HTTP latency.
+ * Ensures soft-deleted records (where deletedAt != null) are strictly excluded from public views.
  * Wraps DB calls with safe exception handling to ensure serverless pages degrade gracefully.
  * 
  * @author IEEE MAIT Webmaster
@@ -30,13 +31,14 @@ function getBaseUrl(): string {
 export async function getDynamicEventBySlug(slug: string) {
   if (typeof window !== 'undefined') return EVENTS_DATA.find((e) => e.slug === slug) || null;
   try {
-    const dbEvent = await prisma.event.findUnique({
-      where: { slug },
+    const dbEvent = await prisma.event.findFirst({
+      where: { slug, deletedAt: null },
       include: {
         story: true,
-        gallery: { include: { photos: true } },
+        gallery: { include: { photos: { where: { deletedAt: null } } } },
         chapter: true,
-        achievements: true,
+        achievements: { where: { deletedAt: null } },
+        resources: { where: { deletedAt: null, isPublic: true } },
       },
     });
     if (dbEvent) {
@@ -52,11 +54,13 @@ export async function getDynamicEvents(): Promise<any[]> {
   if (typeof window === 'undefined') {
     try {
       const dbEvents = await prisma.event.findMany({
+        where: { deletedAt: null },
         orderBy: { date: 'desc' },
         include: {
           story: true,
-          gallery: { include: { photos: true } },
+          gallery: { include: { photos: { where: { deletedAt: null } } } },
           chapter: true,
+          resources: { where: { deletedAt: null, isPublic: true } },
         },
       });
       if (dbEvents && dbEvents.length > 0) return dbEvents;
@@ -80,9 +84,11 @@ export async function getDynamicAchievements(): Promise<any[]> {
   if (typeof window === 'undefined') {
     try {
       const dbAchievements = await prisma.achievement.findMany({
+        where: { deletedAt: null },
         orderBy: { year: 'desc' },
         include: {
           people: { include: { person: true } },
+          tags: true,
           chapter: true,
           event: true,
         },
@@ -109,10 +115,11 @@ export async function getDynamicAchievementById(id: string) {
     return ACHIEVEMENTS_DATA.find((a) => a.id === id) || null;
   }
   try {
-    const dbAchievement = await prisma.achievement.findUnique({
-      where: { id },
+    const dbAchievement = await prisma.achievement.findFirst({
+      where: { id, deletedAt: null },
       include: {
         people: { include: { person: true } },
+        tags: true,
         chapter: true,
         event: true,
       },
@@ -127,16 +134,16 @@ export async function getDynamicAchievementById(id: string) {
 export async function getDynamicChapterBySlug(slug: string) {
   if (typeof window !== 'undefined') return CHAPTERS_DATA[slug] || null;
   try {
-    const dbChapter = await prisma.chapter.findUnique({
-      where: { slug },
+    const dbChapter = await prisma.chapter.findFirst({
+      where: { slug, deletedAt: null },
       include: {
         leader: true,
-        events: { orderBy: { date: 'desc' } },
-        achievements: { orderBy: { year: 'desc' } },
-        stories: { orderBy: { date: 'desc' } },
-        galleries: { orderBy: { date: 'desc' } },
-        projects: { orderBy: { year: 'desc' } },
-        initiatives: true,
+        events: { where: { deletedAt: null }, orderBy: { date: 'desc' } },
+        achievements: { where: { deletedAt: null }, orderBy: { year: 'desc' } },
+        stories: { where: { deletedAt: null }, orderBy: { date: 'desc' } },
+        galleries: { where: { deletedAt: null }, orderBy: { date: 'desc' } },
+        projects: { where: { deletedAt: null }, orderBy: { year: 'desc' } },
+        initiatives: { where: { deletedAt: null } },
       },
     });
     if (dbChapter) return dbChapter;
@@ -167,7 +174,10 @@ export async function getDynamicChapterMemberships(chapterId: string): Promise<a
 export async function getDynamicStoryBySlug(slug: string) {
   if (typeof window !== 'undefined') return STORIES_DATA[slug] || null;
   try {
-    const dbStory = await prisma.story.findUnique({ where: { slug } });
+    const dbStory = await prisma.story.findFirst({
+      where: { slug, deletedAt: null },
+      include: { chapter: true, authorPerson: true },
+    });
     if (dbStory) return dbStory;
   } catch (e) {
     console.warn(`Failed to fetch story ${slug} from DB`, e);
@@ -178,9 +188,9 @@ export async function getDynamicStoryBySlug(slug: string) {
 export async function getDynamicGalleryAlbumBySlug(slug: string) {
   if (typeof window !== 'undefined') return GALLERY_ALBUMS_DATA[slug] || null;
   try {
-    const dbGallery = await prisma.gallery.findUnique({ 
-      where: { slug },
-      include: { photos: true } 
+    const dbGallery = await prisma.gallery.findFirst({
+      where: { slug, deletedAt: null },
+      include: { photos: { where: { deletedAt: null } } },
     });
     if (dbGallery) return dbGallery;
   } catch (e) {
@@ -192,7 +202,11 @@ export async function getDynamicGalleryAlbumBySlug(slug: string) {
 export async function getDynamicStories() {
   if (typeof window !== 'undefined') return Object.values(STORIES_DATA);
   try {
-    const dbStories = await prisma.story.findMany({ orderBy: { date: 'desc' } });
+    const dbStories = await prisma.story.findMany({
+      where: { deletedAt: null },
+      orderBy: { date: 'desc' },
+      include: { chapter: true },
+    });
     if (dbStories.length > 0) return dbStories;
   } catch (e) {
     console.warn('Failed to fetch stories from DB', e);
@@ -204,8 +218,9 @@ export async function getDynamicGalleries() {
   if (typeof window !== 'undefined') return Object.values(GALLERY_ALBUMS_DATA);
   try {
     const dbGalleries = await prisma.gallery.findMany({
+      where: { deletedAt: null },
       orderBy: { date: 'desc' },
-      include: { photos: true },
+      include: { photos: { where: { deletedAt: null } } },
     });
     if (dbGalleries.length > 0) return dbGalleries;
   } catch (e) {
@@ -218,14 +233,14 @@ export async function getDynamicChapters() {
   if (typeof window !== 'undefined') return Object.values(CHAPTERS_DATA);
   try {
     const dbChapters = await prisma.chapter.findMany({
+      where: { deletedAt: null },
       include: {
         leader: true,
-        projects: { orderBy: { year: 'desc' } },
-        initiatives: true,
+        projects: { where: { deletedAt: null }, orderBy: { year: 'desc' } },
+        initiatives: { where: { deletedAt: null } },
       },
     });
     if (dbChapters.length > 0) {
-      // Sort so 'sb' comes first, then 'eds', then 'wie', then others
       const order = ['sb', 'eds', 'wie'];
       return dbChapters.sort((a: any, b: any) => {
         const idxA = order.indexOf(a.slug);
@@ -247,8 +262,9 @@ export async function getDynamicPeople() {
   try {
     const activeYear = await prisma.academicYear.findFirst({ where: { isCurrent: true } });
     const all = await prisma.person.findMany({
+      where: { deletedAt: null },
       orderBy: { hierarchy: 'asc' },
-      include: { memberships: { include: { academicYear: true } } }
+      include: { memberships: { include: { academicYear: true } } },
     });
     const currentLabel = activeYear?.label || '2025-26';
     const normalizedCurrent = currentLabel.replace('–', '-');
@@ -276,8 +292,9 @@ export async function getDynamicPeopleByAcademicYear(year: string) {
   try {
     const normalizedYear = year.replace('–', '-');
     const all = await prisma.person.findMany({
+      where: { deletedAt: null },
       orderBy: { hierarchy: 'asc' },
-      include: { memberships: { include: { academicYear: true } } }
+      include: { memberships: { include: { academicYear: true } } },
     });
     const filtered = all.filter((p: any) => {
       if (p.academicYear) {
@@ -308,6 +325,8 @@ export async function getDynamicSiteSettings() {
     announcementLinkText: 'Register Now →',
     announcementLinkHref: '/join',
     announcementActive: true,
+    donateUrl: 'https://www.ieee.org/membership/join/index.html',
+    recycleBinRetentionDays: 30,
   };
 
   if (typeof window === 'undefined') {
@@ -330,7 +349,10 @@ export async function getDynamicSiteSettings() {
 export async function getDynamicMilestones() {
   if (typeof window !== 'undefined') return [];
   try {
-    return await prisma.milestone.findMany({ orderBy: { sortOrder: 'desc' } });
+    return await prisma.milestone.findMany({
+      where: { deletedAt: null },
+      orderBy: { sortOrder: 'desc' },
+    });
   } catch (e) {
     console.warn('Failed to fetch milestones from DB', e);
     return [];
@@ -341,7 +363,7 @@ export async function getDynamicResources() {
   if (typeof window !== 'undefined') return [];
   try {
     return await prisma.resource.findMany({
-      where: { status: 'published' },
+      where: { status: 'published', deletedAt: null },
       orderBy: { publishedDate: 'desc' },
     });
   } catch (e) {
@@ -358,7 +380,7 @@ export async function getDynamicProjects(chapterIdOrSlug?: string) {
     );
   }
   try {
-    const whereClause: any = {};
+    const whereClause: any = { deletedAt: null };
     if (chapterIdOrSlug) {
       whereClause.OR = [
         { chapterId: chapterIdOrSlug },
@@ -368,7 +390,7 @@ export async function getDynamicProjects(chapterIdOrSlug?: string) {
     const dbProjects = await prisma.project.findMany({
       where: whereClause,
       orderBy: { year: 'desc' },
-      include: { chapter: true },
+      include: { chapter: true, sig: true },
     });
     if (dbProjects && dbProjects.length > 0) return dbProjects;
   } catch (e) {
@@ -383,9 +405,9 @@ export async function getDynamicProjects(chapterIdOrSlug?: string) {
 export async function getDynamicProjectBySlug(slug: string) {
   if (typeof window !== 'undefined') return PROJECTS_DATA.find((p) => p.slug === slug) || null;
   try {
-    const dbProject = await prisma.project.findUnique({
-      where: { slug },
-      include: { chapter: true },
+    const dbProject = await prisma.project.findFirst({
+      where: { slug, deletedAt: null },
+      include: { chapter: true, sig: true },
     });
     if (dbProject) return dbProject;
   } catch (e) {
@@ -402,7 +424,7 @@ export async function getDynamicInitiatives(chapterIdOrSlug?: string) {
     );
   }
   try {
-    const whereClause: any = {};
+    const whereClause: any = { deletedAt: null };
     if (chapterIdOrSlug) {
       whereClause.OR = [
         { chapterId: chapterIdOrSlug },
