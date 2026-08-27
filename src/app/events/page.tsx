@@ -26,7 +26,7 @@ export default async function EventsPage() {
     <>
       <Navbar />
 
-      <main className="flex-1 py-16 sm:py-24 bg-white page-enter">
+      <main className="flex-1 py-16 sm:py-24 bg-white dark:bg-gray-950 transition-colors duration-200 page-enter">
         <Container size="default">
           <Breadcrumb
             items={[
