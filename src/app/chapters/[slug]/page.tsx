@@ -289,16 +289,16 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
               {/* ---------------------------------------------------- */}
               {chapterProjects.length > 0 && (
                 <section className="space-y-6">
-                  <div className="flex items-center justify-between border-b border-warm-200 pb-3">
+                  <div className="flex items-center justify-between border-b border-warm-200 dark:border-gray-800 pb-3">
                     <div>
-                      <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-widest block">
+                      <span className="font-mono text-xs font-semibold text-ieee-blue dark:text-sky-400 uppercase tracking-widest block">
                         Student Builds
                       </span>
-                      <h2 className="font-serif text-2xl sm:text-3xl text-ink font-normal mt-0.5">
+                      <h2 className="font-serif text-2xl sm:text-3xl text-ink dark:text-gray-100 font-normal mt-0.5">
                         {isEDS ? 'Hardware & VLSI Project Showcase' : 'Active Technical Projects'}
                       </h2>
                     </div>
-                    <span className="font-mono text-xs text-warm-400">
+                    <span className="font-mono text-xs text-warm-400 dark:text-gray-400">
                       {chapterProjects.length} Projects
                     </span>
                   </div>
@@ -328,16 +328,16 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
               {/* ---------------------------------------------------- */}
               {chapterInitiatives.length > 0 && (
                 <section className="space-y-6">
-                  <div className="flex items-center justify-between border-b border-warm-200 pb-3">
+                  <div className="flex items-center justify-between border-b border-warm-200 dark:border-gray-800 pb-3">
                     <div>
-                      <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-widest block">
+                      <span className="font-mono text-xs font-semibold text-ieee-blue dark:text-sky-400 uppercase tracking-widest block">
                         Programs & Impact
                       </span>
-                      <h2 className="font-serif text-2xl sm:text-3xl text-ink font-normal mt-0.5">
+                      <h2 className="font-serif text-2xl sm:text-3xl text-ink dark:text-gray-100 font-normal mt-0.5">
                         {isWIE ? 'Mentorship Circles & Outreach Drives' : 'Strategic Chapter Initiatives'}
                       </h2>
                     </div>
-                    <span className="font-mono text-xs text-warm-400">
+                    <span className="font-mono text-xs text-warm-400 dark:text-gray-400">
                       {chapterInitiatives.length} Initiatives
                     </span>
                   </div>
@@ -364,16 +364,16 @@ export default async function ChapterDetailPage({ params }: ChapterPageProps) {
               {/* Chapter Team Section */}
               {chapterTeam.length > 0 && (
                 <section className="space-y-6">
-                  <div className="flex items-center justify-between border-b border-warm-200 pb-3">
+                  <div className="flex items-center justify-between border-b border-warm-200 dark:border-gray-800 pb-3">
                     <div>
-                      <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-widest block">
+                      <span className="font-mono text-xs font-semibold text-ieee-blue dark:text-sky-400 uppercase tracking-widest block">
                         Leadership
                       </span>
-                      <h2 className="font-serif text-2xl sm:text-3xl text-ink font-normal mt-0.5">
+                      <h2 className="font-serif text-2xl sm:text-3xl text-ink dark:text-gray-100 font-normal mt-0.5">
                         Executive Committee & Leadership
                       </h2>
                     </div>
-                    <span className="font-mono text-xs text-warm-400">
+                    <span className="font-mono text-xs text-warm-400 dark:text-gray-400">
                       {chapterTeam.length} Officers
                     </span>
                   </div>

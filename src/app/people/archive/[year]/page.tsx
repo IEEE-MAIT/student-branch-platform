@@ -51,6 +51,12 @@ const KNOWN_ARCHIVE_YEARS = Array.from({ length: 21 }, (_, i) => {
 
 export const revalidate = 60; // ISR Cache for 60 seconds
 
+export async function generateStaticParams() {
+  return KNOWN_ARCHIVE_YEARS.map((y) => ({
+    year: y.slug,
+  }));
+}
+
 export async function generateMetadata({
   params,
 }: LeadershipArchiveYearPageProps) {
