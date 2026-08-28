@@ -23,6 +23,8 @@ import {
   INITIATIVES_DATA,
   SIGS_DATA,
   OPPORTUNITIES_DATA,
+  BANNERS_DATA,
+  SOCIAL_LINKS_DATA,
 } from './data';
 import { prisma } from './db';
 
@@ -527,3 +529,40 @@ export const getDynamicOpportunityBySlug = cache(async (slug: string) => {
   }
   return OPPORTUNITIES_DATA.find((o) => o.slug === slug) || null;
 });
+
+export const getDynamicBanners = cache(async () => {
+  if (typeof window !== 'undefined') return BANNERS_DATA;
+  try {
+    const dbBanners = await prisma.banner.findMany({
+      where: { deletedAt: null, isActive: true },
+      orderBy: { sortOrder: 'asc' },
+    });
+    if (dbBanners && dbBanners.length > 0) return dbBanners;
+  } catch (e) {
+    console.warn('Failed to fetch banners from DB', e);
+  }
+  return BANNERS_DATA;
+});
+
+export const getDynamicSocialLinks = cache(async (entity?: string) => {
+  if (typeof window !== 'undefined') {
+    if (!entity) return SOCIAL_LINKS_DATA;
+    return SOCIAL_LINKS_DATA.filter((s) => s.entity.toLowerCase() === entity.toLowerCase());
+  }
+  try {
+    const whereClause: any = { deletedAt: null, isActive: true };
+    if (entity) {
+      whereClause.entity = { equals: entity, mode: 'insensitive' };
+    }
+    const dbSocials = await prisma.socialLink.findMany({
+      where: whereClause,
+      orderBy: { sortOrder: 'asc' },
+    });
+    if (dbSocials && dbSocials.length > 0) return dbSocials;
+  } catch (e) {
+    console.warn('Failed to fetch social links from DB', e);
+  }
+  if (!entity) return SOCIAL_LINKS_DATA;
+  return SOCIAL_LINKS_DATA.filter((s) => s.entity.toLowerCase() === entity.toLowerCase());
+});
+

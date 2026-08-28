@@ -102,13 +102,14 @@ export function GalleryAlbumViewer({ album }: { album: Album }) {
         </div>
       </Container>
 
-      {/* Lightbox Modal */}
+      {/* Fullscreen Lightbox Modal */}
       <Lightbox
         photos={photosList}
         currentIndex={photoIndex}
         isOpen={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
         onNavigate={(newIdx) => setPhotoIndex(newIdx)}
+        albumTitle={album.title}
       />
     </>
   );

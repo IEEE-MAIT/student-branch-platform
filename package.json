@@ -13,6 +13,7 @@
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "prisma:generate": "prisma generate --no-engine",
     "db:migrate": "tsx scripts/migrate.ts",
+    "db:seed": "tsx scripts/seed.ts",
     "db:fix-data": "tsx scripts/fix-data.ts",
     "db:seed-rbac": "tsx scripts/seed-rbac.ts",
     "db:purge-recycle-bin": "tsx scripts/purge-recycle-bin.ts",

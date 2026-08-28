@@ -52,7 +52,7 @@ export default async function HistoryPage() {
     <>
       <Navbar />
 
-      <main className="flex-1 py-16 sm:py-24 bg-white page-enter">
+      <main className="flex-1 py-16 sm:py-24 bg-white dark:bg-gray-950 transition-colors duration-200 page-enter">
         <Container size="default">
           <Breadcrumb
             items={[
@@ -72,33 +72,33 @@ export default async function HistoryPage() {
             {/* Category legend */}
             <div className="flex flex-wrap gap-3 mb-10">
               {[
-                { label: 'Establishment', color: 'bg-ieee-blue' },
-                { label: 'Award / Recognition', color: 'bg-mait-warm' },
-                { label: 'Chapter Charter', color: 'bg-warm-400' },
+                { label: 'Establishment', color: 'bg-ieee-blue dark:bg-sky-400' },
+                { label: 'Award / Recognition', color: 'bg-mait-warm dark:bg-amber-400' },
+                { label: 'Chapter Charter', color: 'bg-warm-400 dark:bg-gray-500' },
               ].map((cat) => (
-                <div key={cat.label} className="flex items-center gap-1.5 font-mono text-xs text-warm-400">
+                <div key={cat.label} className="flex items-center gap-1.5 font-mono text-xs text-warm-400 dark:text-gray-400">
                   <span className={`inline-block w-2 h-2 rounded-full ${cat.color}`} />
                   {cat.label}
                 </div>
               ))}
             </div>
 
-            <div className="relative border-l-2 border-warm-200 pl-8 space-y-12 ml-4 sm:ml-8">
+            <div className="relative border-l-2 border-warm-200 dark:border-gray-800 pl-8 space-y-12 ml-4 sm:ml-8">
               {milestones.map((milestone, idx) => (
                 <div key={idx} className="relative group">
                   {/* Timeline dot */}
-                  <div className="absolute -left-[41px] top-2 w-4 h-4 rounded-full bg-white border-2 border-ieee-blue group-hover:bg-ieee-blue transition-colors duration-200" />
+                  <div className="absolute -left-[41px] top-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950 border-2 border-ieee-blue dark:border-sky-400 group-hover:bg-ieee-blue dark:group-hover:bg-sky-400 transition-colors duration-200" />
 
-                  <span className="font-mono text-sm font-bold text-ieee-blue bg-ieee-subtle px-2.5 py-1 rounded-[2px] inline-block mb-2">
+                  <span className="font-mono text-sm font-bold text-ieee-blue dark:text-sky-300 bg-ieee-subtle dark:bg-sky-950/80 px-2.5 py-1 rounded-md inline-block mb-2">
                     {milestone.year}
                   </span>
 
-                  <h3 className="font-serif text-2xl text-ink font-normal leading-snug">
+                  <h3 className="font-serif text-2xl text-ink dark:text-gray-100 font-normal leading-snug">
                     {milestone.title}
                   </h3>
 
                   {milestone.description && (
-                    <p className="text-sm text-warm-400 font-sans mt-1.5 leading-relaxed">
+                    <p className="text-sm text-warm-400 dark:text-gray-300 font-sans mt-1.5 leading-relaxed">
                       {milestone.description}
                     </p>
                   )}
@@ -107,8 +107,8 @@ export default async function HistoryPage() {
             </div>
 
             {/* Source note */}
-            <div className="mt-16 pt-6 border-t border-warm-200">
-              <p className="font-mono text-xs text-warm-300">
+            <div className="mt-16 pt-6 border-t border-warm-200 dark:border-gray-800">
+              <p className="font-mono text-xs text-warm-300 dark:text-gray-500">
                 {dbMilestones.length > 0
                   ? `${milestones.length} milestones loaded from database.`
                   : 'Milestones loaded from static record. Upload new milestones via the Admin panel.'}

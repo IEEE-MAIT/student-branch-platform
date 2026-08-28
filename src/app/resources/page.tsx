@@ -187,7 +187,7 @@ export default async function ResourcesPage() {
     <>
       <Navbar />
 
-      <main className="flex-1 py-16 sm:py-24 bg-white page-enter">
+      <main className="flex-1 py-16 sm:py-24 bg-white dark:bg-gray-950 transition-colors duration-200 page-enter">
         <Container size="default">
           <Breadcrumb
             items={[
@@ -203,25 +203,25 @@ export default async function ResourcesPage() {
           />
 
           {/* Quick Navigation Jump Bar */}
-          <div className="flex flex-wrap items-center gap-2 pb-8 mb-12 border-b border-warm-200">
-            <span className="font-mono text-xs font-semibold text-warm-400 uppercase tracking-wider mr-2">
+          <div className="flex flex-wrap items-center gap-2 pb-8 mb-12 border-b border-warm-200 dark:border-gray-800">
+            <span className="font-mono text-xs font-semibold text-warm-400 dark:text-gray-400 uppercase tracking-wider mr-2">
               Browse Sections:
             </span>
             <a
               href="#reports"
-              className="px-3 py-1.5 font-mono text-xs bg-warm-100/80 hover:bg-ieee-subtle hover:text-ieee-blue border border-warm-200 rounded-[2px] transition-colors"
+              className="px-3 py-1.5 font-mono text-xs bg-warm-100/80 dark:bg-gray-900 hover:bg-ieee-subtle dark:hover:bg-sky-950 hover:text-ieee-blue dark:hover:text-sky-400 text-ink dark:text-gray-200 border border-warm-200 dark:border-gray-800 rounded-lg transition-colors"
             >
               01 · Newsletters & Reports
             </a>
             <a
               href="#technical-kits"
-              className="px-3 py-1.5 font-mono text-xs bg-warm-100/80 hover:bg-ieee-subtle hover:text-ieee-blue border border-warm-200 rounded-[2px] transition-colors"
+              className="px-3 py-1.5 font-mono text-xs bg-warm-100/80 dark:bg-gray-900 hover:bg-ieee-subtle dark:hover:bg-sky-950 hover:text-ieee-blue dark:hover:text-sky-400 text-ink dark:text-gray-200 border border-warm-200 dark:border-gray-800 rounded-lg transition-colors"
             >
               02 · Technical Kits & Slide Decks
             </a>
             <a
               href="#brand-toolkit"
-              className="px-3 py-1.5 font-mono text-xs bg-warm-100/80 hover:bg-ieee-subtle hover:text-ieee-blue border border-warm-200 rounded-[2px] transition-colors"
+              className="px-3 py-1.5 font-mono text-xs bg-warm-100/80 dark:bg-gray-900 hover:bg-ieee-subtle dark:hover:bg-sky-950 hover:text-ieee-blue dark:hover:text-sky-400 text-ink dark:text-gray-200 border border-warm-200 dark:border-gray-800 rounded-lg transition-colors"
             >
               03 · Brand Identity Toolkit
             </a>
@@ -232,14 +232,14 @@ export default async function ResourcesPage() {
             {/* SECTION 1: NEWSLETTERS & ANNUAL REPORTS */}
             {/* ---------------------------------------------------- */}
             <section id="reports" className="space-y-8">
-              <div className="border-b border-warm-200 pb-3">
-                <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-widest block">
+              <div className="border-b border-warm-200 dark:border-gray-800 pb-3">
+                <span className="font-mono text-xs font-semibold text-ieee-blue dark:text-sky-400 uppercase tracking-widest block">
                   Publications
                 </span>
-                <h2 className="font-serif text-2xl sm:text-3xl text-ink font-normal mt-0.5">
+                <h2 className="font-serif text-2xl sm:text-3xl text-ink dark:text-gray-100 font-normal mt-0.5">
                   Newsletters & Annual Activity Reports
                 </h2>
-                <p className="text-sm text-warm-400 font-sans mt-1">
+                <p className="text-sm text-warm-400 dark:text-gray-400 font-sans mt-1">
                   Official publications documenting branch activities, financial audits, and technical milestones.
                 </p>
               </div>
@@ -247,26 +247,26 @@ export default async function ResourcesPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Newsletters Column */}
                 <div className="space-y-4">
-                  <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-ieee-blue">
+                  <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-ieee-blue dark:text-sky-400">
                     Branch Newsletters
                   </h3>
-                  <div className="border border-warm-200 bg-white rounded-[2px] divide-y divide-warm-200">
+                  <div className="border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl divide-y divide-warm-200 dark:divide-gray-800 overflow-hidden shadow-xs">
                     {newsletters.map((r: any) => (
-                      <div key={r.id} className="p-5 hover:bg-warm-50/50 transition-colors flex flex-col justify-between space-y-3">
+                      <div key={r.id} className="p-5 hover:bg-warm-50/50 dark:hover:bg-gray-800/50 transition-colors flex flex-col justify-between space-y-3">
                         <div>
                           <div className="flex items-center justify-between gap-2">
-                            <span className="font-mono text-[11px] text-warm-400">{r.publishedDate}</span>
-                            <span className="font-mono text-[10px] bg-ieee-subtle text-ieee-blue px-2 py-0.5 rounded-[2px]">
+                            <span className="font-mono text-[11px] text-warm-400 dark:text-gray-400">{r.publishedDate}</span>
+                            <span className="font-mono text-[10px] bg-ieee-subtle dark:bg-sky-950 text-ieee-blue dark:text-sky-400 px-2 py-0.5 rounded-md font-semibold border border-ieee-blue/20 dark:border-sky-800/40">
                               PDF Publication
                             </span>
                           </div>
-                          <h4 className="font-serif text-lg text-ink font-normal mt-1">{r.title}</h4>
-                          <p className="text-xs text-warm-400 font-sans mt-1">{r.description}</p>
+                          <h4 className="font-serif text-lg text-ink dark:text-gray-100 font-normal mt-1">{r.title}</h4>
+                          <p className="text-xs text-warm-500 dark:text-gray-400 font-sans mt-1">{r.description}</p>
                         </div>
                         <div className="pt-1">
                           <a
                             href={r.fileUrl || '#'}
-                            className="inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-ieee-blue hover:underline"
+                            className="inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-ieee-blue dark:text-sky-400 hover:underline"
                           >
                             <span>Download Issue (PDF) ↓</span>
                           </a>
@@ -278,26 +278,26 @@ export default async function ResourcesPage() {
 
                 {/* Annual Activity Reports Column */}
                 <div className="space-y-4">
-                  <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-ieee-blue">
+                  <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-ieee-blue dark:text-sky-400">
                     Annual Activity Reports
                   </h3>
-                  <div className="border border-warm-200 bg-white rounded-[2px] divide-y divide-warm-200">
+                  <div className="border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl divide-y divide-warm-200 dark:divide-gray-800 overflow-hidden shadow-xs">
                     {annualReports.map((r: any) => (
-                      <div key={r.id} className="p-5 hover:bg-warm-50/50 transition-colors flex flex-col justify-between space-y-3">
+                      <div key={r.id} className="p-5 hover:bg-warm-50/50 dark:hover:bg-gray-800/50 transition-colors flex flex-col justify-between space-y-3">
                         <div>
                           <div className="flex items-center justify-between gap-2">
-                            <span className="font-mono text-[11px] text-warm-400">{r.publishedDate}</span>
-                            <span className="font-mono text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-[2px]">
+                            <span className="font-mono text-[11px] text-warm-400 dark:text-gray-400">{r.publishedDate}</span>
+                            <span className="font-mono text-[10px] bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-md font-semibold">
                               Institutional Record
                             </span>
                           </div>
-                          <h4 className="font-serif text-lg text-ink font-normal mt-1">{r.title}</h4>
-                          <p className="text-xs text-warm-400 font-sans mt-1">{r.description}</p>
+                          <h4 className="font-serif text-lg text-ink dark:text-gray-100 font-normal mt-1">{r.title}</h4>
+                          <p className="text-xs text-warm-500 dark:text-gray-400 font-sans mt-1">{r.description}</p>
                         </div>
                         <div className="pt-1">
                           <a
                             href={r.fileUrl || '#'}
-                            className="inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-ieee-blue hover:underline"
+                            className="inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-ieee-blue dark:text-sky-400 hover:underline"
                           >
                             <span>Download Report (PDF) ↓</span>
                           </a>
@@ -311,20 +311,20 @@ export default async function ResourcesPage() {
               {/* Branch Governing Documents */}
               {documents.length > 0 && (
                 <div className="space-y-4 pt-4">
-                  <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-ieee-blue">
+                  <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-ieee-blue dark:text-sky-400">
                     Governing Documents & Member Guides
                   </h3>
-                  <div className="border border-warm-200 bg-white rounded-[2px] divide-y divide-warm-200">
+                  <div className="border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl divide-y divide-warm-200 dark:divide-gray-800 overflow-hidden shadow-xs">
                     {documents.map((r: any) => (
-                      <div key={r.id} className="p-5 hover:bg-warm-50/50 transition-colors flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
+                      <div key={r.id} className="p-5 hover:bg-warm-50/50 dark:hover:bg-gray-800/50 transition-colors flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
                         <div>
-                          <span className="font-mono text-[11px] text-warm-400 block mb-0.5">{r.publishedDate}</span>
-                          <h4 className="font-serif text-base text-ink font-normal">{r.title}</h4>
-                          <p className="text-xs text-warm-400 font-sans mt-0.5">{r.description}</p>
+                          <span className="font-mono text-[11px] text-warm-400 dark:text-gray-400 block mb-0.5">{r.publishedDate}</span>
+                          <h4 className="font-serif text-base text-ink dark:text-gray-100 font-normal">{r.title}</h4>
+                          <p className="text-xs text-warm-500 dark:text-gray-400 font-sans mt-0.5">{r.description}</p>
                         </div>
                         <a
                           href={r.fileUrl || '#'}
-                          className="font-mono text-xs font-semibold text-ieee-blue hover:underline shrink-0"
+                          className="font-mono text-xs font-semibold text-ieee-blue dark:text-sky-400 hover:underline shrink-0"
                         >
                           Download Document ↓
                         </a>
@@ -338,15 +338,15 @@ export default async function ResourcesPage() {
             {/* ---------------------------------------------------- */}
             {/* SECTION 2: TECHNICAL KITS & SLIDE DECKS */}
             {/* ---------------------------------------------------- */}
-            <section id="technical-kits" className="border-t border-warm-200 pt-16 space-y-8">
-              <div className="border-b border-warm-200 pb-3">
-                <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-widest block">
+            <section id="technical-kits" className="border-t border-warm-200 dark:border-gray-800 pt-16 space-y-8">
+              <div className="border-b border-warm-200 dark:border-gray-800 pb-3">
+                <span className="font-mono text-xs font-semibold text-ieee-blue dark:text-sky-400 uppercase tracking-widest block">
                   Engineering Library
                 </span>
-                <h2 className="font-serif text-2xl sm:text-3xl text-ink font-normal mt-0.5">
+                <h2 className="font-serif text-2xl sm:text-3xl text-ink dark:text-gray-100 font-normal mt-0.5">
                   Workshop Slide Decks & Starter Kits
                 </h2>
-                <p className="text-sm text-warm-400 font-sans mt-1">
+                <p className="text-sm text-warm-400 dark:text-gray-400 font-sans mt-1">
                   Verified hardware project templates, firmware frameworks, and machine learning tutorial notebooks curated by MAIT technical leads.
                 </p>
               </div>
@@ -355,34 +355,34 @@ export default async function ResourcesPage() {
                 {TECHNICAL_KITS.map((kit, idx) => (
                   <div
                     key={idx}
-                    className="border border-warm-200 bg-white rounded-[2px] p-6 flex flex-col justify-between space-y-4 hover:border-ieee-blue/40 transition-all group"
+                    className="border border-warm-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl p-6 flex flex-col justify-between space-y-4 hover:border-ieee-blue/40 dark:hover:border-sky-500/40 transition-all group shadow-xs"
                   >
                     <div className="space-y-2.5">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-mono text-xs font-semibold text-ieee-blue bg-ieee-subtle px-2 py-0.5 rounded-[2px]">
+                        <span className="font-mono text-xs font-semibold text-ieee-blue dark:text-sky-400 bg-ieee-subtle dark:bg-sky-950 px-2 py-0.5 rounded-md border border-ieee-blue/20 dark:border-sky-800/40">
                           {kit.category}
                         </span>
-                        <span className="font-mono text-[10px] text-warm-400">
+                        <span className="font-mono text-[10px] text-warm-400 dark:text-gray-400">
                           {kit.author}
                         </span>
                       </div>
-                      <h3 className="font-serif text-xl text-ink font-normal group-hover:text-ieee-blue transition-colors">
+                      <h3 className="font-serif text-xl text-ink dark:text-gray-100 font-normal group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors">
                         {kit.title}
                       </h3>
-                      <p className="text-xs text-warm-400 font-sans leading-relaxed">
+                      <p className="text-xs text-warm-500 dark:text-gray-400 font-sans leading-relaxed">
                         {kit.description}
                       </p>
                     </div>
 
-                    <div className="pt-3 border-t border-warm-100 flex items-center justify-between">
-                      <span className="font-mono text-[11px] text-warm-400 bg-warm-100/70 px-2 py-0.5 rounded-[2px]">
+                    <div className="pt-3 border-t border-warm-100 dark:border-gray-800 flex items-center justify-between">
+                      <span className="font-mono text-[11px] text-warm-500 dark:text-gray-400 bg-warm-100 dark:bg-gray-800 px-2 py-0.5 rounded-md">
                         {kit.tag}
                       </span>
                       <a
                         href={kit.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-mono text-xs font-semibold text-ieee-blue hover:underline inline-flex items-center gap-1"
+                        className="font-mono text-xs font-semibold text-ieee-blue dark:text-sky-400 hover:underline inline-flex items-center gap-1"
                       >
                         <span>Access Repository</span>
                         <FiExternalLink className="w-3 h-3" />
@@ -396,15 +396,15 @@ export default async function ResourcesPage() {
             {/* ---------------------------------------------------- */}
             {/* SECTION 3: BRAND ASSETS & IDENTITY TOOLKIT */}
             {/* ---------------------------------------------------- */}
-            <section id="brand-toolkit" className="border-t border-warm-200 pt-16 space-y-8">
-              <div className="border-b border-warm-200 pb-3">
-                <span className="font-mono text-xs font-semibold text-ieee-blue uppercase tracking-widest block">
+            <section id="brand-toolkit" className="border-t border-warm-200 dark:border-gray-800 pt-16 space-y-8">
+              <div className="border-b border-warm-200 dark:border-gray-800 pb-3">
+                <span className="font-mono text-xs font-semibold text-ieee-blue dark:text-sky-400 uppercase tracking-widest block">
                   Media & Creative
                 </span>
-                <h2 className="font-serif text-2xl sm:text-3xl text-ink font-normal mt-0.5">
+                <h2 className="font-serif text-2xl sm:text-3xl text-ink dark:text-gray-100 font-normal mt-0.5">
                   Brand Identity Toolkit & Vectors
                 </h2>
-                <p className="text-sm text-warm-400 font-sans mt-1">
+                <p className="text-sm text-warm-400 dark:text-gray-400 font-sans mt-1">
                   Official high-resolution logos, emblem guidelines, and presentation templates for IEEE MAIT student organizers.
                 </p>
               </div>
@@ -413,25 +413,25 @@ export default async function ResourcesPage() {
                 {BRAND_ASSETS.map((asset, idx) => (
                   <div
                     key={idx}
-                    className="border border-warm-200 bg-warm-50/50 rounded-[2px] p-6 flex flex-col justify-between space-y-4 hover:bg-white hover:shadow-xs transition-all"
+                    className="border border-warm-200 dark:border-gray-800 bg-warm-50/50 dark:bg-gray-900/60 rounded-xl p-6 flex flex-col justify-between space-y-4 hover:bg-white dark:hover:bg-gray-900 hover:shadow-xs transition-all"
                   >
                     <div className="space-y-2">
-                      <span className="font-mono text-[10px] uppercase font-bold text-ieee-blue bg-white border border-warm-200 px-2 py-0.5 rounded-[2px] inline-block">
+                      <span className="font-mono text-[10px] uppercase font-bold text-ieee-blue dark:text-sky-400 bg-white dark:bg-gray-800 border border-warm-200 dark:border-gray-700 px-2 py-0.5 rounded-md inline-block">
                         {asset.format}
                       </span>
-                      <h4 className="font-serif text-lg text-ink font-normal leading-snug">
+                      <h4 className="font-serif text-lg text-ink dark:text-gray-100 font-normal leading-snug">
                         {asset.title}
                       </h4>
-                      <p className="text-xs text-warm-400 font-sans leading-relaxed">
+                      <p className="text-xs text-warm-500 dark:text-gray-400 font-sans leading-relaxed">
                         {asset.description}
                       </p>
                     </div>
 
-                    <div className="pt-2 border-t border-warm-200">
+                    <div className="pt-2 border-t border-warm-200 dark:border-gray-800">
                       <a
                         href={asset.url}
                         download
-                        className="font-mono text-xs font-semibold text-ieee-blue hover:underline"
+                        className="font-mono text-xs font-semibold text-ieee-blue dark:text-sky-400 hover:underline"
                       >
                         Download Asset ↓
                       </a>

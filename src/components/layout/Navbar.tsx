@@ -18,11 +18,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from '@/components/ui/AppLink';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Container } from './Container';
 import { FiChevronDown, FiSearch, FiMenu, FiX, FiArrowRight } from 'react-icons/fi';
 
 export const Navbar: React.FC = () => {
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [communitiesDropdownOpen, setCommunitiesDropdownOpen] = useState(false);
@@ -66,7 +67,7 @@ export const Navbar: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  // Keyboard navigation: Escape key closes menus
+  // Keyboard navigation: Escape key closes menus, Cmd+K / Ctrl+K opens search
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -74,10 +75,14 @@ export const Navbar: React.FC = () => {
         setCommunitiesDropdownOpen(false);
         setMobileMenuOpen(false);
       }
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        router.push('/search');
+      }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [router]);
 
   // Debounced mouse enter/leave handlers
   const handleAboutEnter = () => {

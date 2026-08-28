@@ -2,21 +2,33 @@
 
 /**
  * @file src/components/gallery/Lightbox.tsx
- * @description Fullscreen modal Lightbox viewer for photo albums with react-icons and keyboard navigation.
+ * @description Modern, aesthetic & professional Fullscreen Lightbox for Photo Galleries.
  * 
- * DESIGN & ACCESSIBILITY SPECIFICATIONS:
- * - Full-screen backdrop overlay (`bg-black/95 backdrop-blur-md`).
- * - Keyboard shortcuts (Escape key to close, Left/Right arrow keys to cycle images).
- * - ARIA accessibility compliance (`role="dialog"`, `aria-label`, focus trap ready).
- * - Monospaced image index counter (`Photo X of Y`) and caption overlay.
+ * Features:
+ * - True React Portal mounting directly to document.body (z-[9999]).
+ * - Complete immersive fullscreen backdrop (bg-black/95 backdrop-blur-2xl) covering all page elements.
+ * - Prevents background body scrolling when open.
+ * - Floating glassmorphic top control bar with photo counter, title, download, and close triggers.
+ * - Tactile floating left/right navigation controls.
+ * - Floating bottom caption bar with refined typography.
+ * - Full keyboard navigation (Escape, ArrowLeft, ArrowRight).
+ * - Click-outside backdrop dismissal.
  * 
- * @author IEEE MAIT Webmaster & Open Source Contributors
+ * @author IEEE MAIT Webmaster
  * @license MIT
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
-import { FiChevronLeft, FiChevronRight, FiX } from 'react-icons/fi';
+import {
+  FiChevronLeft,
+  FiChevronRight,
+  FiX,
+  FiDownload,
+  FiMaximize,
+  FiMinimize,
+} from 'react-icons/fi';
 
 export interface LightboxPhoto {
   id: string;
@@ -35,6 +47,8 @@ interface LightboxProps {
   onClose: () => void;
   /** Callback fired when user navigates to a new image index */
   onNavigate: (newIndex: number) => void;
+  /** Optional album title for context */
+  albumTitle?: string;
 }
 
 export const Lightbox: React.FC<LightboxProps> = ({
@@ -43,9 +57,18 @@ export const Lightbox: React.FC<LightboxProps> = ({
   isOpen,
   onClose,
   onNavigate,
+  albumTitle,
 }) => {
+  const [mounted, setMounted] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const currentPhoto = photos[currentIndex];
 
+  // Navigation callbacks
   const handleNext = useCallback(() => {
     if (currentIndex < photos.length - 1) {
       onNavigate(currentIndex + 1);
@@ -62,6 +85,18 @@ export const Lightbox: React.FC<LightboxProps> = ({
     }
   }, [currentIndex, photos.length, onNavigate]);
 
+  // Lock body scroll while open
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow || 'unset';
+      };
+    }
+  }, [isOpen]);
+
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
@@ -74,84 +109,170 @@ export const Lightbox: React.FC<LightboxProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose, handleNext, handlePrev]);
 
-  if (!isOpen || !currentPhoto) return null;
+  const toggleBrowserFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+        setIsFullscreen(false);
+      }
+    }
+  };
 
-  return (
+  if (!mounted || !isOpen || !currentPhoto) return null;
+
+  const content = (
     <div
-      className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col justify-between p-4 sm:p-6"
+      className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-2xl flex flex-col justify-between select-none animate-fadeIn"
       role="dialog"
-      aria-label="Photo Lightbox Viewer"
+      aria-label="Fullscreen Photo Lightbox"
       aria-modal="true"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
-      {/* Header bar: Counter & Close Button */}
-      <div className="flex items-center justify-between text-white border-b border-white/10 pb-4">
-        <span className="font-mono text-xs uppercase tracking-widest text-warm-300">
-          Photo {currentIndex + 1} of {photos.length}
-        </span>
-        <button
-          onClick={onClose}
-          className="text-warm-300 hover:text-white p-2 text-xs font-mono focus:outline-hidden hover:bg-white/10 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
-          aria-label="Close Lightbox"
-        >
-          <FiX className="w-4 h-4" />
-          <span>Close (Esc)</span>
-        </button>
-      </div>
+      {/* ---------------------------------------------------- */}
+      {/* TOP FLOATING GLASS HEADER */}
+      {/* ---------------------------------------------------- */}
+      <header className="relative z-30 flex items-center justify-between px-4 sm:px-8 py-4 bg-gradient-to-b from-black/80 via-black/40 to-transparent">
+        {/* Left: Album Context & Index Counter */}
+        <div className="flex items-center gap-3">
+          <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 font-mono text-xs font-semibold text-white tracking-widest uppercase shadow-xs">
+            {currentIndex + 1} / {photos.length}
+          </span>
+          {albumTitle && (
+            <span className="hidden sm:inline font-serif text-sm text-gray-300 font-normal truncate max-w-md">
+              {albumTitle}
+            </span>
+          )}
+        </div>
 
-      {/* Main Image Frame & Navigation Controls */}
-      <div className="relative flex-1 flex items-center justify-center my-4 overflow-hidden">
-        {/* Previous Image Button */}
+        {/* Right: Actions (Fullscreen, Download, Close) */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={toggleBrowserFullscreen}
+            className="p-2.5 rounded-full text-gray-300 hover:text-white bg-white/5 hover:bg-white/15 backdrop-blur-md border border-white/10 transition-all cursor-pointer shadow-xs"
+            aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+            title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+          >
+            {isFullscreen ? (
+              <FiMinimize className="w-4 h-4" />
+            ) : (
+              <FiMaximize className="w-4 h-4" />
+            )}
+          </button>
+
+          {currentPhoto.url && (
+            <a
+              href={currentPhoto.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              download
+              className="p-2.5 rounded-full text-gray-300 hover:text-white bg-white/5 hover:bg-white/15 backdrop-blur-md border border-white/10 transition-all cursor-pointer shadow-xs"
+              aria-label="Download High-Resolution Photo"
+              title="Download High-Resolution Photo"
+            >
+              <FiDownload className="w-4 h-4" />
+            </a>
+          )}
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-white bg-white/15 hover:bg-white/25 hover:scale-102 active:scale-98 backdrop-blur-md border border-white/20 text-xs font-mono font-semibold transition-all cursor-pointer shadow-xs ml-1"
+            aria-label="Close Lightbox"
+          >
+            <FiX className="w-4 h-4" />
+            <span>Close</span>
+            <kbd className="hidden sm:inline text-[10px] opacity-60 ml-0.5 bg-black/30 px-1 py-0.5 rounded font-mono">
+              ESC
+            </kbd>
+          </button>
+        </div>
+      </header>
+
+      {/* ---------------------------------------------------- */}
+      {/* MAIN VIEWPORT FRAME & NAVIGATION BUTTONS */}
+      {/* ---------------------------------------------------- */}
+      <main
+        className="relative flex-1 flex items-center justify-center w-full h-full px-2 sm:px-12 py-2 overflow-hidden"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
+      >
+        {/* Previous Button */}
         <button
-          onClick={handlePrev}
-          className="absolute left-2 sm:left-6 z-20 p-3 text-white bg-black/60 hover:bg-ieee-blue/80 border border-white/20 rounded-full transition-colors cursor-pointer"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            handlePrev();
+          }}
+          className="absolute left-3 sm:left-6 z-30 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 hover:bg-white/25 hover:scale-105 active:scale-95 text-white backdrop-blur-xl border border-white/20 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-2xl group"
           aria-label="Previous Photo"
         >
-          <FiChevronLeft className="w-6 h-6" />
+          <FiChevronLeft className="w-6 h-6 sm:w-7 sm:h-7 transition-transform group-hover:-translate-x-0.5" />
         </button>
 
-        {/* Display Frame */}
-        <div className="max-w-5xl max-h-[75vh] w-full h-full flex flex-col items-center justify-center p-2 relative">
+        {/* Central High-Res Photo Container */}
+        <div
+          className="relative max-w-6xl max-h-[78vh] w-full h-full flex items-center justify-center p-2"
+          onClick={(e) => e.stopPropagation()}
+        >
           {currentPhoto.url ? (
-            <div className="relative w-full h-full max-h-[70vh] rounded-[2px] overflow-hidden">
+            <div className="relative w-full h-full max-h-[76vh] flex items-center justify-center">
               <Image
                 src={currentPhoto.url}
-                alt={currentPhoto.caption}
+                alt={currentPhoto.caption || 'Gallery documentary photo'}
                 fill
-                sizes="(max-width: 1280px) 100vw, 1200px"
-                className="object-contain"
+                sizes="100vw"
+                className="object-contain drop-shadow-2xl transition-all duration-300"
                 priority
               />
             </div>
           ) : (
-            <div className="relative w-full max-h-[70vh] flex items-center justify-center bg-warm-200/10 border border-white/10 p-8 rounded-[2px]">
-              <div className="text-center space-y-3">
-                <span className="font-mono text-xs text-ieee-light uppercase tracking-wider block">
-                  IEEE MAIT Visual Archive
-                </span>
-                <h4 className="font-serif text-2xl text-white font-normal">
-                  {currentPhoto.caption}
-                </h4>
-              </div>
+            <div className="relative w-full max-w-2xl bg-white/5 border border-white/10 p-10 rounded-2xl text-center space-y-4 backdrop-blur-md shadow-2xl">
+              <span className="font-mono text-xs uppercase tracking-widest text-sky-400 font-semibold block">
+                IEEE MAIT Documentary Archive
+              </span>
+              <h3 className="font-serif text-2xl sm:text-3xl text-white font-normal leading-snug">
+                {currentPhoto.caption}
+              </h3>
             </div>
           )}
         </div>
 
-        {/* Next Image Button */}
+        {/* Next Button */}
         <button
-          onClick={handleNext}
-          className="absolute right-2 sm:right-6 z-20 p-3 text-white bg-black/60 hover:bg-ieee-blue/80 border border-white/20 rounded-full transition-colors cursor-pointer"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleNext();
+          }}
+          className="absolute right-3 sm:right-6 z-30 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 hover:bg-white/25 hover:scale-105 active:scale-95 text-white backdrop-blur-xl border border-white/20 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-2xl group"
           aria-label="Next Photo"
         >
-          <FiChevronRight className="w-6 h-6" />
+          <FiChevronRight className="w-6 h-6 sm:w-7 sm:h-7 transition-transform group-hover:translate-x-0.5" />
         </button>
-      </div>
+      </main>
 
-      {/* Caption & Footer Bar */}
-      <div className="text-center border-t border-white/10 pt-4">
-        <p className="text-sm font-sans text-warm-200 max-w-2xl mx-auto">
-          {currentPhoto.caption}
-        </p>
-      </div>
+      {/* ---------------------------------------------------- */}
+      {/* BOTTOM FLOATING CAPTION PILL */}
+      {/* ---------------------------------------------------- */}
+      <footer className="relative z-30 flex items-center justify-center px-4 py-5 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+        <div className="max-w-2xl w-full px-5 py-3 rounded-2xl bg-black/60 hover:bg-black/80 backdrop-blur-xl border border-white/15 text-center shadow-xl transition-all">
+          <p className="font-serif text-base sm:text-lg text-white font-normal leading-relaxed">
+            {currentPhoto.caption}
+          </p>
+          <span className="font-mono text-[11px] text-gray-400 uppercase tracking-wider block mt-1">
+            IEEE MAIT Visual Archive · Maharaja Agrasen Institute of Technology
+          </span>
+        </div>
+      </footer>
     </div>
   );
+
+  return createPortal(content, document.body);
 };
