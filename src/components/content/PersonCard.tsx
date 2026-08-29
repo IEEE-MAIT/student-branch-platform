@@ -67,6 +67,30 @@ function formatExternalUrl(url?: string | null): string | undefined {
   return clean;
 }
 
+function formatShortRole(role: string): string {
+  if (!role || typeof role !== 'string') return '';
+  return role
+    .replace(/WIE Affinity Group Chairperson/gi, 'WIE AG Chair')
+    .replace(/WIE Affinity Group Chair/gi, 'WIE AG Chair')
+    .replace(/WIE Affinity Group/gi, 'WIE AG')
+    .replace(/WIE Vice-Chairperson/gi, 'WIE AG Vice-Chair')
+    .replace(/WIE General Secretary/gi, 'WIE AG Gen Sec')
+    .replace(/WIE Joint Secretary/gi, 'WIE AG Joint Sec')
+    .replace(/WIE Technical Lead/gi, 'WIE AG Tech Lead')
+    .replace(/EDS Chapter Chairperson/gi, 'EDS Chair')
+    .replace(/EDS Chapter Chair/gi, 'EDS Chair')
+    .replace(/EDS Chapter/gi, 'EDS')
+    .replace(/EDS Vice-Chairperson/gi, 'EDS Vice-Chair')
+    .replace(/EDS General Secretary/gi, 'EDS Gen Sec')
+    .replace(/EDS Joint Secretary/gi, 'EDS Joint Sec')
+    .replace(/EDS Technical Lead/gi, 'EDS Tech Lead')
+    .replace(/Vice-Chairperson/gi, 'Vice-Chair')
+    .replace(/General Secretary/gi, 'Gen Sec')
+    .replace(/Joint Secretary/gi, 'Joint Sec')
+    .replace(/Technical Lead/gi, 'Tech Lead')
+    .trim();
+}
+
 export const PersonCard: React.FC<PersonCardProps> = memo(({
   name,
   role,
@@ -86,6 +110,7 @@ export const PersonCard: React.FC<PersonCardProps> = memo(({
   const rawPhoto = imageUrl || imageSrc;
   const photo = rawPhoto && !rawPhoto.startsWith('/images/people/') ? rawPhoto : undefined;
   const scale = size || hierarchy;
+  const shortRole = formatShortRole(role);
   const isCounselor =
     (scale === 'mentor' || scale === 'hero') &&
     (category === 'Counsellor' ||
@@ -120,7 +145,10 @@ export const PersonCard: React.FC<PersonCardProps> = memo(({
         </div>
         <div className="flex flex-col min-w-0">
           <span className="font-medium text-sm text-ink dark:text-gray-100 truncate">{name}</span>
-          <span className="text-[11px] text-warm-500 dark:text-gray-400 font-medium truncate">{role}</span>
+          <span className="text-[11px] text-warm-500 dark:text-gray-400 font-medium truncate">
+            <span className="sm:hidden">{shortRole}</span>
+            <span className="hidden sm:inline">{role}</span>
+          </span>
           {department && <span className="text-[10px] text-warm-400 dark:text-gray-500 truncate">{department}</span>}
         </div>
       </div>
@@ -153,7 +181,10 @@ export const PersonCard: React.FC<PersonCardProps> = memo(({
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-warm-100 dark:bg-gray-800 text-ink dark:text-gray-200 border border-warm-200 dark:border-gray-700 font-mono text-[10px] font-semibold uppercase tracking-wider">
                 <FiCheckCircle className="w-3 h-3 text-ieee-blue dark:text-sky-400" />
-                <span>{role}</span>
+                <span>
+                  <span className="sm:hidden">{shortRole}</span>
+                  <span className="hidden sm:inline">{role}</span>
+                </span>
               </span>
               <span className="font-mono text-[10px] text-warm-400 dark:text-gray-400">
                 IEEE Delhi Section · Region 10
@@ -214,8 +245,12 @@ export const PersonCard: React.FC<PersonCardProps> = memo(({
       <div className="space-y-2 sm:space-y-3">
         {/* Role Badge + Academic Term */}
         <div className="flex items-center justify-between gap-1 flex-wrap">
-          <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full font-mono text-[9px] sm:text-[10px] font-medium tracking-wider text-warm-700 dark:text-gray-300 bg-warm-100/90 dark:bg-gray-800 border border-warm-200/80 dark:border-gray-700/80 max-w-full truncate">
-            {role}
+          <span 
+            className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full font-mono text-[9px] sm:text-[10px] font-medium tracking-wider text-warm-700 dark:text-gray-300 bg-warm-100/90 dark:bg-gray-800 border border-warm-200/80 dark:border-gray-700/80 max-w-full"
+            title={role}
+          >
+            <span className="sm:hidden">{shortRole}</span>
+            <span className="hidden sm:inline">{role}</span>
           </span>
           {academicYear && (
             <span className="font-mono text-[9px] sm:text-[10px] text-warm-400 dark:text-gray-400 hidden xs:inline">
@@ -256,9 +291,9 @@ export const PersonCard: React.FC<PersonCardProps> = memo(({
             </p>
           )}
 
-          {/* Quote / Bio */}
+          {/* Quote / Bio (Full quote on all screen sizes) */}
           {bio && (
-            <p className="text-[10px] sm:text-xs text-warm-500 dark:text-gray-400 italic font-sans leading-relaxed line-clamp-1 sm:line-clamp-2 pt-0.5 sm:pt-1">
+            <p className="text-[10px] sm:text-xs text-warm-500 dark:text-gray-400 italic font-sans leading-relaxed pt-0.5 sm:pt-1">
               &ldquo;{bio}&rdquo;
             </p>
           )}
