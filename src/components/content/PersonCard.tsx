@@ -210,15 +210,15 @@ export const PersonCard: React.FC<PersonCardProps> = memo(({
 
   // 3. Standard Unified Member Card: Clean, modern, 1:1 squarish frame across all student members
   return (
-    <div className="bg-white dark:bg-gray-900 border border-warm-200/90 dark:border-gray-800 rounded-xl p-4 flex flex-col justify-between space-y-3.5 shadow-2xs hover:shadow-md hover:border-warm-300 dark:hover:border-gray-700 hover:-translate-y-1 transition-all duration-300 ease-out group h-full w-full">
-      <div className="space-y-3">
+    <div className="bg-white dark:bg-gray-900 border border-warm-200/90 dark:border-gray-800 rounded-xl p-2.5 sm:p-4 flex flex-col justify-between space-y-2 sm:space-y-3.5 shadow-2xs hover:shadow-md hover:border-warm-300 dark:hover:border-gray-700 hover:-translate-y-1 transition-all duration-300 ease-out group h-full w-full">
+      <div className="space-y-2 sm:space-y-3">
         {/* Role Badge + Academic Term */}
-        <div className="flex items-center justify-between gap-1.5 flex-wrap">
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-mono text-[10px] font-medium tracking-wider text-warm-700 dark:text-gray-300 bg-warm-100/90 dark:bg-gray-800 border border-warm-200/80 dark:border-gray-700/80">
+        <div className="flex items-center justify-between gap-1 flex-wrap">
+          <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full font-mono text-[9px] sm:text-[10px] font-medium tracking-wider text-warm-700 dark:text-gray-300 bg-warm-100/90 dark:bg-gray-800 border border-warm-200/80 dark:border-gray-700/80 max-w-full truncate">
             {role}
           </span>
           {academicYear && (
-            <span className="font-mono text-[10px] text-warm-400 dark:text-gray-400">
+            <span className="font-mono text-[9px] sm:text-[10px] text-warm-400 dark:text-gray-400 hidden xs:inline">
               {academicYear}
             </span>
           )}
@@ -231,14 +231,14 @@ export const PersonCard: React.FC<PersonCardProps> = memo(({
               src={photo}
               alt={name}
               fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 280px"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 280px"
               className="object-cover object-top transition-transform duration-500 group-hover:scale-104"
               loading="eager"
               priority={priority}
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-warm-100 dark:bg-gray-800 text-center p-4 select-none">
-              <span className="font-serif text-3xl text-warm-400 dark:text-gray-500 font-normal">
+            <div className="w-full h-full flex flex-col items-center justify-center bg-warm-100 dark:bg-gray-800 text-center p-2 sm:p-4 select-none">
+              <span className="font-serif text-xl sm:text-3xl text-warm-400 dark:text-gray-500 font-normal">
                 {name.split(' ').map((n) => n[0]).slice(0, 2).join('')}
               </span>
             </div>
@@ -247,18 +247,18 @@ export const PersonCard: React.FC<PersonCardProps> = memo(({
 
         {/* Identity & Department */}
         <div className="space-y-0.5">
-          <h3 className="font-serif text-lg text-ink dark:text-gray-100 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors font-normal leading-snug">
+          <h3 className="font-serif text-sm sm:text-lg text-ink dark:text-gray-100 group-hover:text-ieee-blue dark:group-hover:text-sky-400 transition-colors font-normal leading-snug line-clamp-1">
             {name}
           </h3>
           {department && (
-            <p className="text-[11px] text-warm-500 dark:text-gray-400 font-sans font-medium line-clamp-1">
+            <p className="text-[10px] sm:text-[11px] text-warm-500 dark:text-gray-400 font-sans font-medium line-clamp-1">
               {department}
             </p>
           )}
 
           {/* Quote / Bio */}
           {bio && (
-            <p className="text-xs text-warm-500 dark:text-gray-400 italic font-sans leading-relaxed line-clamp-2 pt-1">
+            <p className="text-[10px] sm:text-xs text-warm-500 dark:text-gray-400 italic font-sans leading-relaxed line-clamp-1 sm:line-clamp-2 pt-0.5 sm:pt-1">
               &ldquo;{bio}&rdquo;
             </p>
           )}
@@ -267,21 +267,21 @@ export const PersonCard: React.FC<PersonCardProps> = memo(({
 
       {/* Social & Contact Actions Bar */}
       {(formattedLinkedIn || formattedGithub || email) && (
-        <div className="pt-2.5 border-t border-warm-100 dark:border-gray-800/80 flex items-center justify-between text-xs font-mono mt-auto">
-          <span className="text-[9px] text-warm-400 dark:text-gray-400 uppercase tracking-widest font-medium">
+        <div className="pt-2 sm:pt-2.5 border-t border-warm-100 dark:border-gray-800/80 flex items-center justify-between text-xs font-mono mt-auto">
+          <span className="text-[8px] sm:text-[9px] text-warm-400 dark:text-gray-400 uppercase tracking-widest font-medium">
             Connect
           </span>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1 sm:gap-1.5">
             {formattedLinkedIn && (
               <a
                 href={formattedLinkedIn}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-6.5 h-6.5 rounded-md bg-warm-100/80 dark:bg-gray-800 hover:bg-ieee-blue hover:text-white flex items-center justify-center text-warm-500 dark:text-gray-400 transition-all duration-200 p-1.5"
+                className="w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 rounded-md bg-warm-100/80 dark:bg-gray-800 hover:bg-ieee-blue hover:text-white flex items-center justify-center text-warm-500 dark:text-gray-400 transition-all duration-200 p-1"
                 aria-label={`${name}'s LinkedIn Profile`}
                 title="LinkedIn"
               >
-                <FaLinkedinIn className="w-3 h-3" />
+                <FaLinkedinIn className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               </a>
             )}
             {formattedGithub && (
@@ -289,21 +289,21 @@ export const PersonCard: React.FC<PersonCardProps> = memo(({
                 href={formattedGithub}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-6.5 h-6.5 rounded-md bg-warm-100/80 dark:bg-gray-800 hover:bg-black hover:text-white flex items-center justify-center text-warm-500 dark:text-gray-400 transition-all duration-200 p-1.5"
+                className="w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 rounded-md bg-warm-100/80 dark:bg-gray-800 hover:bg-black hover:text-white flex items-center justify-center text-warm-500 dark:text-gray-400 transition-all duration-200 p-1"
                 aria-label={`${name}'s GitHub Profile`}
                 title="GitHub"
               >
-                <FaGithub className="w-3 h-3" />
+                <FaGithub className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               </a>
             )}
             {email && (
               <a
                 href={`mailto:${email.replace(/^mailto:/i, '')}`}
-                className="w-6.5 h-6.5 rounded-md bg-warm-100/80 dark:bg-gray-800 hover:bg-ieee-blue hover:text-white flex items-center justify-center text-warm-500 dark:text-gray-400 transition-all duration-200 p-1.5"
+                className="w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 rounded-md bg-warm-100/80 dark:bg-gray-800 hover:bg-ieee-blue hover:text-white flex items-center justify-center text-warm-500 dark:text-gray-400 transition-all duration-200 p-1"
                 aria-label={`Email ${name}`}
                 title="Email"
               >
-                <FiMail className="w-3 h-3" />
+                <FiMail className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               </a>
             )}
           </div>

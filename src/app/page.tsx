@@ -11,7 +11,7 @@ import { StatMetric } from '@/components/content/StatMetric';
 import { EventPreview } from '@/components/content/EventPreview';
 import { ChapterPanel } from '@/components/content/ChapterPanel';
 import { AchievementRow } from '@/components/content/AchievementRow';
-import { PersonCard } from '@/components/content/PersonCard';
+import { HomeLeadershipSection } from '@/components/content/HomeLeadershipSection';
 import { BRANCH_STATS } from '@/lib/data';
 import { 
   getDynamicEvents, 
@@ -65,11 +65,12 @@ export default async function HomePage() {
   const featuredEvent = events.length > 0 ? events[0] : null;
   const remainingUpcoming = events.length > 1 ? events.slice(1, 4) : [];
 
-  // Top Leadership for Spotlight: Core Executive Officers
-  const topLeadership = (peopleList as any[])
+  // 1. Top Leadership: Core Parent Student Branch Executive Officers
+  const sbLeadership = (peopleList as any[])
     .filter((p: any) => {
       const cat = (p.category || '').toLowerCase();
       const role = (p.role || '').toLowerCase();
+      const cId = (p.chapterId || p.chapterSlug || '').toLowerCase();
       if (
         p.isFacultyAdvisor ||
         cat.includes('counsellor') ||
@@ -81,13 +82,50 @@ export default async function HomePage() {
       ) {
         return false;
       }
+      const isEds = p.id?.startsWith('p-eds') || cId === 'eds' || role.includes('eds') || cat.includes('eds');
+      const isWie = p.id?.startsWith('p-wie') || cId === 'wie' || role.includes('wie') || cat.includes('wie');
+      const isOp = p.id?.startsWith('p-op') || cat.includes('operational');
+      if (isEds || isWie || isOp) return false;
       return (
+        p.id?.startsWith('p-sec') ||
         cat.includes('senior executive') ||
         cat.includes('execom') ||
         role.includes('chair') ||
         role.includes('secretary') ||
         role.includes('treasurer') ||
         role.includes('web master')
+      );
+    })
+    .sort((a: any, b: any) => (a.hierarchy ?? 99) - (b.hierarchy ?? 99))
+    .slice(0, 4);
+
+  // 2. Top Leadership: IEEE WIE Affinity Group Executive Officers
+  const wieLeadership = (peopleList as any[])
+    .filter((p: any) => {
+      const cId = (p.chapterId || p.chapterSlug || '').toLowerCase();
+      const roleLower = (p.role || '').toLowerCase();
+      const catLower = (p.category || '').toLowerCase();
+      return (
+        p.id?.startsWith('p-wie') ||
+        cId === 'wie' ||
+        roleLower.includes('wie') ||
+        catLower.includes('wie')
+      );
+    })
+    .sort((a: any, b: any) => (a.hierarchy ?? 99) - (b.hierarchy ?? 99))
+    .slice(0, 4);
+
+  // 3. Top Leadership: IEEE EDS Technical Chapter Executive Officers
+  const edsLeadership = (peopleList as any[])
+    .filter((p: any) => {
+      const cId = (p.chapterId || p.chapterSlug || '').toLowerCase();
+      const roleLower = (p.role || '').toLowerCase();
+      const catLower = (p.category || '').toLowerCase();
+      return (
+        p.id?.startsWith('p-eds') ||
+        cId === 'eds' ||
+        roleLower.includes('eds') ||
+        catLower.includes('eds')
       );
     })
     .sort((a: any, b: any) => (a.hierarchy ?? 99) - (b.hierarchy ?? 99))
@@ -307,45 +345,14 @@ export default async function HomePage() {
           </Container>
         </section>
 
-        {/* 6. LEADERSHIP SPOTLIGHT */}
-        {topLeadership.length > 0 && (
-          <section className="py-16 sm:py-24 bg-warm-100/30 dark:bg-gray-900/40 border-b border-warm-200 dark:border-gray-800">
-            <Container size="default">
-              <SectionHeading
-                category="Leadership"
-                title="Branch Executive Leadership"
-                subtitle="The faculty counselors and student leaders steering IEEE MAIT's technical initiatives and chapter operations."
-              />
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-8">
-                {topLeadership.map((person: any) => (
-                  <PersonCard
-                    key={person.id}
-                    name={person.name}
-                    role={person.role}
-                    category={person.category}
-                    department={person.department}
-                    imageUrl={person.imageUrl}
-                    imageSrc={person.imageSrc}
-                    linkedIn={person.linkedIn || person.linkedin}
-                    github={person.github}
-                    email={person.email}
-                    bio={person.bio}
-                    hierarchy={person.hierarchy}
-                    size="standard"
-                  />
-                ))}
-              </div>
-
-              <div className="pt-8 flex justify-between items-center border-t border-warm-200 dark:border-gray-800 mt-8">
-                <Link href="/people" className="text-xs font-mono text-ieee-blue dark:text-sky-400 font-semibold hover:underline flex items-center gap-1.5">
-                  <span>View Full Leadership Directory & Archive</span>
-                  <FiArrowRight className="w-3.5 h-3.5" />
-                </Link>
-                <span className="font-mono text-xs text-warm-400 dark:text-gray-400">{BRANCH_STATS.activeMembers} Active Members</span>
-              </div>
-            </Container>
-          </section>
+        {/* 6. LEADERSHIP SPOTLIGHT (Parent SB, WIE AG & EDS Chapter) */}
+        {(sbLeadership.length > 0 || wieLeadership.length > 0 || edsLeadership.length > 0) && (
+          <HomeLeadershipSection
+            sbLeadership={sbLeadership}
+            wieLeadership={wieLeadership}
+            edsLeadership={edsLeadership}
+            totalMembers={BRANCH_STATS.activeMembers}
+          />
         )}
 
         {/* 7. REAL MOMENTS — Documentary Photography Band */}
