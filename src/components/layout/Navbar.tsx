@@ -20,6 +20,7 @@ import Link from '@/components/ui/AppLink';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { Container } from './Container';
+import { ThemeToggle } from './ThemeToggle';
 import { FiChevronDown, FiSearch, FiMenu, FiX, FiArrowRight } from 'react-icons/fi';
 
 export const Navbar: React.FC = () => {
@@ -352,8 +353,11 @@ export const Navbar: React.FC = () => {
             </Link>
           </nav>
 
-          {/* Right Action Area (Search Capsule + Modern JOIN CTA) */}
-          <div className="hidden xl:flex items-center gap-3 shrink-0">
+          {/* Right Action Area (Theme Toggle + Search Capsule + Modern JOIN CTA) */}
+          <div className="hidden xl:flex items-center gap-2.5 shrink-0">
+            {/* Minimalist Theme Toggle Button */}
+            <ThemeToggle variant="nav" />
+
             {/* Command-K Search Capsule */}
             <Link 
               href="/search" 
@@ -377,14 +381,15 @@ export const Navbar: React.FC = () => {
             </Link>
           </div>
 
-          {/* Mobile Menu Toggle Button */}
-          <div className="xl:hidden flex items-center gap-2">
+          {/* Mobile Action Area (Theme Toggle + Search + Menu Toggle) */}
+          <div className="xl:hidden flex items-center gap-1 sm:gap-1.5">
+            <ThemeToggle variant="nav" />
             <Link 
               href="/search"
               aria-label="Quick Search"
               className="p-2 text-ink dark:text-gray-200 hover:text-ieee-blue dark:hover:text-sky-400 rounded-full hover:bg-warm-100 dark:hover:bg-gray-900"
             >
-              <FiSearch className="w-5 h-5" />
+              <FiSearch className="w-4.5 h-4.5" />
             </Link>
             <button
               type="button"
@@ -580,8 +585,13 @@ export const Navbar: React.FC = () => {
             Digital Library & Resources
           </Link>
 
-          {/* Join CTA on Mobile */}
-          <div className="pt-3 px-1">
+          {/* Theme Switcher & Join CTA on Mobile */}
+          <div className="pt-3 px-1 space-y-2.5">
+            <div className="flex items-center justify-between px-3.5 py-2.5 bg-warm-50 dark:bg-gray-900 border border-warm-200/80 dark:border-gray-800 rounded-xl">
+              <span className="text-xs font-medium text-warm-700 dark:text-gray-300">Appearance Theme</span>
+              <ThemeToggle variant="default" showLabel />
+            </div>
+
             <Link
               href="/join"
               onClick={() => setMobileMenuOpen(false)}
